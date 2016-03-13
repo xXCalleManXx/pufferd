@@ -1,0 +1,2 @@
+# pufferd
+The PufferPanel daemon
