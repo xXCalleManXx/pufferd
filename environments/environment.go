@@ -14,13 +14,10 @@
  limitations under the License.
 */
 
-package docker
+package environments
 
-type Docker struct {
-}
+type Environment interface {
+	StartServer()
 
-func (d Docker) StartServer() {
-}
-
-func (d Docker) CreateServer() {
+	CreateServer()
 }

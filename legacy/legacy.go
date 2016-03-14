@@ -18,7 +18,6 @@
 package legacy
 
 import (
-	"github.com/PufferPanel/pufferd/environments/system"
 	"github.com/gin-gonic/gin"
 )
 
@@ -35,7 +34,6 @@ func DeleteServer(c *gin.Context) {
 }
 
 func ServerPower(c *gin.Context) {
-	system.StartServer(c)
 }
 
 func ServerConsole(c *gin.Context) {

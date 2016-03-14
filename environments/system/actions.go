@@ -16,12 +16,12 @@
 
 package system
 
-import (
-	"github.com/gin-gonic/gin"
-)
-
-func StartServer(c *gin.Context) {
+type System struct {
+	Name string
 }
 
-func CreateServer(c *gin.Context) {
+func (s System) StartServer() {
+}
+
+func (s System) CreateServer() {
 }
