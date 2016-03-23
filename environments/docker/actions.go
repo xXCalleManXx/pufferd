@@ -19,8 +19,34 @@ package docker
 type Docker struct {
 }
 
-func (d Docker) StartServer() {
+func (d Docker) Start() (err error) {
+	return;
 }
 
-func (d Docker) CreateServer() {
+func (d Docker) Stop() (err error) {
+	return;
+}
+
+func (d Docker) Execute(cmd string, args ...string) (err error) {
+	return;
+}
+
+func (d Docker) Kill() (err error) {
+	return;
+}
+
+func (d Docker) Create() (err error) {
+	return;
+}
+
+func (d Docker) Delete() (err error) {
+	return;
+}
+
+func (d Docker) IsRunning() (isRunning bool, err error) {
+	return;
+}
+
+func (d Docker) Update() (err error) {
+	return;
 }

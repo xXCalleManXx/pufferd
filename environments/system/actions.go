@@ -17,11 +17,36 @@
 package system
 
 type System struct {
-	Name string
 }
 
-func (s System) StartServer() {
+func (s System) Start() (err error) {
+	return;
 }
 
-func (s System) CreateServer() {
+func (s System) Stop() (err error) {
+	return;
+}
+
+func (s System) Execute(cmd string, args ...string) (err error) {
+	return;
+}
+
+func (s System) Kill() (err error) {
+	return;
+}
+
+func (s System) Create() (err error) {
+	return;
+}
+
+func (s System) Delete() (err error) {
+	return;
+}
+
+func (s System) IsRunning() (isRunning bool, err error) {
+	return;
+}
+
+func (s System) Update() (err error) {
+	return;
 }

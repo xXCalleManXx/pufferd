@@ -17,7 +17,32 @@
 package environments
 
 type Environment interface {
-	StartServer()
+	//Starts the environment.
+	//This will not start the actual program.
+	Start() (err error);
 
-	CreateServer()
+	//Stop the environment.
+	//This will stop the program since the environment is stopped.
+	Stop() (err error);
+
+	//Executes a command within the environment.
+	Execute(cmd string, args ...string) (exitCode int, stdout []string, stderr []string, err error);
+
+	//Executes a command within the environment and immediately return
+	ExecuteAsync(cmd string, args ...string) (err error);
+
+	//Kills the environment.
+	Kill() (err error);
+
+	//Creates the environment setting needed to run programs.
+	Create() (err error);
+
+	//Deletes the environment.
+	Delete() (err error);
+
+	//Updates the environment settings.
+	//This is similar to recreating the environment without losing data.
+	Update() (err error);
+
+	IsRunning() (isRunning bool, err error);
 }
