@@ -17,7 +17,7 @@
 package programs
 
 import (
-	"github.com/PufferPanel/pufferd/environments"
+	"github.com/pufferpanel/pufferd/environments"
 )
 
 type Program interface {

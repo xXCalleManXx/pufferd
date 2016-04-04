@@ -17,7 +17,7 @@
 package main
 
 import (
-	"github.com/PufferPanel/pufferd/legacy"
+	"github.com/pufferpanel/pufferd/legacy"
 	"github.com/gin-gonic/gin"
 )
 
