@@ -16,37 +16,80 @@
 
 package system
 
+import (
+	"os/exec"
+	"io"
+	"errors"
+)
+
 type System struct {
+	mainProcess *exec.Cmd;
 }
 
-func (s System) Start() (err error) {
+func (s *System) Start() (err error) {
+	//main system does not need to have any startup
 	return;
 }
 
-func (s System) Stop() (err error) {
+func (s *System) Stop() (err error) {
+	s.Kill();
 	return;
 }
 
-func (s System) Execute(cmd string, args ...string) (err error) {
+func (s *System) Execute(cmd string, args ...string) (exitCode int, stdOut []byte, err error) {
+	var process = exec.Command(cmd, args...);
+	stdOut, err = process.Output();
 	return;
 }
 
-func (s System) Kill() (err error) {
+func (s *System) ExecuteAsync(cmd string, args ...string) (process *exec.Cmd, err error) {
+	process = exec.Command(cmd, args...);
+	process.Start();
 	return;
 }
 
-func (s System) Create() (err error) {
+func (s *System) ExecuteMainProcess(cmd string, args ...string) (err error) {
+	s.mainProcess, err = s.ExecuteAsync(cmd, args...);
 	return;
 }
 
-func (s System) Delete() (err error) {
+func (s *System) ExecuteInMainProcess(cmd string) (err error) {
+	if (s.mainProcess == nil) {
+		err = errors.New("Main process has not been started");
+		return;
+	}
+	var stdIn, processErr = s.mainProcess.StdinPipe();
+	if (processErr != nil) {
+		err = processErr;
+		return;
+	}
+	io.WriteString(stdIn, cmd);
 	return;
 }
 
-func (s System) IsRunning() (isRunning bool, err error) {
+func (s *System) Kill() (err error) {
+	if (s.mainProcess == nil) {
+		return;
+	}
+	err = s.mainProcess.Process.Kill();
+	s.mainProcess.Process.Release();
+	s.mainProcess = nil;
 	return;
 }
 
-func (s System) Update() (err error) {
+func (s *System) Create() (err error) {
+	return;
+}
+
+func (s *System) Delete() (err error) {
+	return;
+}
+
+func (s *System) IsRunning() (isRunning bool, err error) {
+	isRunning = s.mainProcess.Process != nil;
+	return;
+}
+
+func (s *System) Update() (err error) {
 	return;
 }

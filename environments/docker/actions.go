@@ -16,34 +16,48 @@
 
 package docker
 
+import "os/exec"
+
 type Docker struct {
 }
 
-func (d Docker) Start() (err error) {
+func (d *Docker) Start() (err error) {
 	return;
 }
 
-func (d Docker) Stop() (err error) {
+func (d *Docker) Stop() (err error) {
 	return;
 }
 
-func (d Docker) Execute(cmd string, args ...string) (err error) {
+func (d *Docker) Execute(cmd string, args ...string) (exitCode int, stdOut []byte, err error) {
 	return;
 }
 
-func (d Docker) Kill() (err error) {
+func (d *Docker) ExecuteAsync(cmd string, args ...string) (process exec.Cmd, err error) {
 	return;
 }
 
-func (d Docker) Create() (err error) {
+func (d *Docker) ExecuteMainProcess(cmd string, args ...string) (err error) {
 	return;
 }
 
-func (d Docker) Delete() (err error) {
+func (d *Docker) ExecuteInMainProcess(cmd string) (err error) {
 	return;
 }
 
-func (d Docker) IsRunning() (isRunning bool, err error) {
+func (d *Docker) Kill() (err error) {
+	return;
+}
+
+func (d *Docker) Create() (err error) {
+	return;
+}
+
+func (d *Docker) Delete() (err error) {
+	return;
+}
+
+func (d *Docker) IsRunning() (isRunning bool, err error) {
 	return;
 }
 
