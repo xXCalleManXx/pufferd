@@ -16,26 +16,13 @@
 
 package environments
 
-import "os/exec"
-
 type Environment interface {
-	//Starts the environment.
-	//This will not start the actual program.
-	Start() (err error);
-
-	//Stop the environment.
-	//This will not gracefully stop the program.
-	//ExecuteInMainProcess should be used before calling this
-	Stop() (err error);
 
 	//Executes a command within the environment.
-	Execute(cmd string, args ...string) (exitCode int, stdOut []byte, err error);
+	Execute(cmd string, args ...string) (stdOut []byte, err error);
 
 	//Executes a command within the environment and immediately return
-	ExecuteAsync(cmd string, args ...string) (process exec.Cmd, err error);
-
-	//Starts what is considered the main process
-	ExecuteMainProcess(cmd string, args ...string) (err error);
+	ExecuteAsync(cmd string, args ...string) (err error);
 
 	//Sends a string to the StdIn of the main program process
 	ExecuteInMainProcess(cmd string) (err error);
@@ -49,9 +36,9 @@ type Environment interface {
 	//Deletes the environment.
 	Delete() (err error);
 
-	//Updates the environment settings.
-	//This is similar to recreating the environment without losing data.
-	Update() (err error);
+	IsRunning() (isRunning bool);
 
-	IsRunning() (isRunning bool, err error);
+	WaitForMainProcess() (err error);
+
+	WaitForMainProcessFor(timeout int) (err error);
 }

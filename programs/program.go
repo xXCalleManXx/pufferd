@@ -41,6 +41,10 @@ type Program interface {
 	//This will delete the server, environment, and any files related to it.
 	Destroy() (err error);
 
+	Update() (err error);
+
+	Install() (err error);
+
 	//Determines if the server is running.
 	IsRunning() (isRunning bool, err error);
 
@@ -55,6 +59,10 @@ type Program interface {
 	GetEnvironment() (environment environments.Environment, err error);
 
 	SetEnvironment(environment environments.Environment) (err error);
+}
 
-	Update() (err error);
+type Install struct {
+	Pre []string
+	Files []string
+	Post []string
 }

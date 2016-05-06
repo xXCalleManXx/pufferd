@@ -20,41 +20,37 @@ import (
 	"os/exec"
 	"io"
 	"errors"
+	"time"
+	"os"
+	"strconv"
 )
 
 type System struct {
 	mainProcess *exec.Cmd;
 }
 
-func (s *System) Start() (err error) {
-	//main system does not need to have any startup
+func (s *System) Execute(cmd string, args ...string) (stdOut []byte, err error) {
+	if (s.IsRunning()) {
+		err = errors.New("A process is already running (" + strconv.Itoa(s.mainProcess.Process.Pid) + ")");
+		return;
+	}
+	s.mainProcess = exec.Command(cmd, args...);
+	stdOut, err = s.mainProcess.Output();
 	return;
 }
 
-func (s *System) Stop() (err error) {
-	s.Kill();
-	return;
-}
-
-func (s *System) Execute(cmd string, args ...string) (exitCode int, stdOut []byte, err error) {
-	var process = exec.Command(cmd, args...);
-	stdOut, err = process.Output();
-	return;
-}
-
-func (s *System) ExecuteAsync(cmd string, args ...string) (process *exec.Cmd, err error) {
-	process = exec.Command(cmd, args...);
-	process.Start();
-	return;
-}
-
-func (s *System) ExecuteMainProcess(cmd string, args ...string) (err error) {
-	s.mainProcess, err = s.ExecuteAsync(cmd, args...);
+func (s *System) ExecuteAsync(cmd string, args ...string) (err error) {
+	if (s.IsRunning()) {
+		err = errors.New("A process is already running (" + strconv.Itoa(s.mainProcess.Process.Pid) + ")");
+		return;
+	}
+	s.mainProcess = exec.Command(cmd, args...);
+	err = s.mainProcess.Start();
 	return;
 }
 
 func (s *System) ExecuteInMainProcess(cmd string) (err error) {
-	if (s.mainProcess == nil) {
+	if (!s.IsRunning()) {
 		err = errors.New("Main process has not been started");
 		return;
 	}
@@ -68,7 +64,7 @@ func (s *System) ExecuteInMainProcess(cmd string) (err error) {
 }
 
 func (s *System) Kill() (err error) {
-	if (s.mainProcess == nil) {
+	if (!s.IsRunning()) {
 		return;
 	}
 	err = s.mainProcess.Process.Kill();
@@ -85,11 +81,32 @@ func (s *System) Delete() (err error) {
 	return;
 }
 
-func (s *System) IsRunning() (isRunning bool, err error) {
+func (s *System) IsRunning() (isRunning bool) {
 	isRunning = s.mainProcess.Process != nil;
+	if (isRunning) {
+		process, pErr := os.FindProcess(s.mainProcess.Process.Pid);
+		if (process == nil || pErr != nil) {
+			isRunning = false;
+		}
+	}
 	return;
 }
 
-func (s *System) Update() (err error) {
+func (s *System) WaitForMainProcess() (err error) {
+	return s.WaitForMainProcessFor(0);
+}
+
+func (s *System) WaitForMainProcessFor(timeout int) (err error) {
+	if (s.IsRunning()) {
+		if (timeout > 0) {
+			var timer = time.AfterFunc(time.Duration(timeout) * time.Millisecond, func() {
+				err = s.Kill();
+			});
+			err = s.mainProcess.Wait();
+			timer.Stop();
+		} else {
+			err = s.mainProcess.Wait();
+		}
+	}
 	return;
 }
