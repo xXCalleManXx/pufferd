@@ -24,13 +24,13 @@ import (
 func main() {
 	r := gin.Default()
 
+	r.GET("/", func(c *gin.Context) {
+		c.String(200, "pufferd is running")
+	})
+
 	// Legacy API for almost drop in compatibility with PufferPanel
 	l := r.Group("/legacy")
 	{
-		l.GET("/", func(c *gin.Context) {
-			c.String(200, "pufferd is running")
-		})
-
 		l.GET("/server", legacy.GetServerInfo)
 		l.POST("/server", legacy.CreateServer)
 		l.PUT("/server", legacy.UpdateServerInfo)
