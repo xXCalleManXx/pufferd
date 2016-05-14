@@ -50,7 +50,6 @@ func main() {
 
 		l.PUT("/server/reinstall", legacy.ReinstallServer)
 		l.GET("/server/reset-password", legacy.ResetPassword)
-
 	}
 
 	var port string = ":5656"
