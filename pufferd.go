@@ -19,9 +19,20 @@ package main
 import (
 	"github.com/pufferpanel/pufferd/legacy"
 	"github.com/gin-gonic/gin"
+	"flag"
+	"github.com/pufferpanel/pufferd/logging"
+	"strconv"
 )
 
 func main() {
+	var loggingLevel string
+	var port int
+	flag.StringVar(&loggingLevel, "logging", "INFO", "Lowest logging level to display")
+	flag.IntVar(&port, "port", 5656, "Port to run service on")
+	flag.Parse()
+
+	logging.SetLevelByString(loggingLevel)
+
 	r := gin.Default()
 
 	r.GET("/", func(c *gin.Context) {
@@ -52,6 +63,5 @@ func main() {
 		l.GET("/server/reset-password", legacy.ResetPassword)
 	}
 
-	var port string = ":5656"
-	r.Run(port)
+	r.Run(":" + strconv.FormatInt(int64(port), 10))
 }

@@ -16,7 +16,10 @@
 
 package logging
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type level struct {
 	scale byte;
@@ -74,6 +77,21 @@ func Criticalf(msg string, data ...interface{}) {
 
 func SetLevel(lvl level) {
 	loggingLevel = lvl;
+}
+
+func SetLevelByString(lvl string) {
+	switch (strings.ToUpper(lvl)) {
+	case "DEBUG":
+		SetLevel(DEBUG);
+	case "INFO":
+		SetLevel(INFO);
+	case "WARN":
+		SetLevel(WARN);
+	case "ERROR":
+		SetLevel(ERROR);
+	case "CRITICAL":
+		SetLevel(CRITICAL);
+	}
 }
 
 func log(lvl level, msg string, data ...interface{}) {
