@@ -34,7 +34,7 @@ func main() {
 
 	logging.SetLevelByString(loggingLevel)
 
-	programs.LoadFromFolder();
+	programs.LoadFromFolder()
 
 	r := gin.Default()
 

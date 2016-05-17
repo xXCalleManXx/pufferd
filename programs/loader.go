@@ -22,7 +22,6 @@ import (
 	"io/ioutil"
 	"strings"
 	"path/filepath"
-	"strconv"
 	"github.com/pufferpanel/pufferd/logging"
 	"fmt"
 	"os"
@@ -45,16 +44,18 @@ func LoadFromFolder() {
 	var data []byte;
 	var program Program;
 	for _, element := range programFiles {
+		id := strings.TrimSuffix(element.Name(), filepath.Ext(element.Name()));
 		data, err = ioutil.ReadFile(joinPath(serverFolder, element.Name()));
 		if (err != nil) {
 			logging.Error(fmt.Sprintf("Error loading server details (%s)", element.Name()), err);
 			continue;
 		}
-		program, err = LoadProgramFromData(data);
+		program, err = LoadProgramFromData(id, data);
 		if (err != nil) {
 			logging.Error(fmt.Sprintf("Error loading server details (%s)", element.Name()), err);
 			continue;
 		}
+		logging.Infof("Loaded server %s as %s", program.Id(), program.Name());
 		programs = append(programs, program);
 	}
 }
@@ -70,18 +71,18 @@ func GetProgram(id string) (program Program, err error) {
 func LoadProgram(id string) (program Program, err error) {
 	var data []byte;
 	data, err = ioutil.ReadFile(joinPath(serverFolder, id + ".json"));
-	program, err = LoadProgramFromData(data);
+	program, err = LoadProgramFromData(id, data);
 	return;
 }
 
-func LoadProgramFromData(source []byte) (program Program, err error) {
+func LoadProgramFromData(id string, source []byte) (program Program, err error) {
 	var data map[string]interface{};
 	err = json.Unmarshal(source, &data);
 	if (err != nil) {
 		return;
 	}
 	var pufferdData = GetMapOrNull(data, "pufferd");
-	var t = GetStringOrNull(pufferdData, "type");
+	var t = GetStringOrDefault(pufferdData, "type", nil);
 	var install = GetInstallSection(GetMapOrNull(pufferdData, "install"));
 	switch(t) {
 	case "java":
@@ -90,14 +91,15 @@ func LoadProgramFromData(source []byte) (program Program, err error) {
 			runBlock = types.JavaRun{};
 		} else {
 			var runSection = GetMapOrNull(pufferdData, "run");
-			var stop = GetStringOrNull(runSection, "stop");
+			var stop = GetStringOrDefault(runSection, "stop", nil);
 			var pre = GetStringArrayOrNull(runSection, "pre");
 			var post = GetStringArrayOrNull(runSection, "post");
-			var arguments = GetStringOrNull(runSection, "arguments");
+			var arguments = GetStringOrDefault(runSection, "arguments", nil);
+			var enabled = GetBooleanOrDefault(runSection, "enabled", true);
 
-			runBlock = types.JavaRun{Stop: stop, Pre: pre, Post: post, Arguments: arguments};
+			runBlock = types.JavaRun{Stop: stop, Pre: pre, Post: post, Arguments: arguments, Enabled: enabled};
 		}
-		program = &types.Java{InstallData: install, RunData: runBlock};
+		program = types.NewJavaProgram(id, runBlock, install);
 	}
 	return;
 }
@@ -110,15 +112,27 @@ func GetInstallSection(data map[string]interface{}) types.JavaInstall {
 	return install;
 }
 
-func GetStringOrNull(data map[string]interface{}, key string) string {
+func GetStringOrDefault(data map[string]interface{}, key string, def *string) string {
 	if (data == nil) {
-		return "";
+		return *def;
 	}
 	var section = data[key];
 	if (section == nil) {
-		return "";
+		return *def;
 	} else {
 		return section.(string);
+	}
+}
+
+func GetBooleanOrDefault(data map[string]interface{}, key string, def bool) bool {
+	if (data == nil) {
+		return def;
+	}
+	var section = data[key];
+	if (section == nil) {
+		return def;
+	} else {
+		return section.(bool);
 	}
 }
 
@@ -152,7 +166,7 @@ func GetStringArrayOrNull(data map[string]interface{}, key string) []string {
 }
 
 func joinPath(paths ...string) string {
-	return strings.Join(paths, strconv.QuoteRune(filepath.Separator));
+	return strings.Join(paths, string(filepath.Separator));
 }
 
 func getFromCache(id string) (Program) {

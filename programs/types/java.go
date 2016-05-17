@@ -24,7 +24,6 @@ type Java struct {
 	RunData     JavaRun
 	InstallData JavaInstall
 	environment environments.Environment
-	enabled     bool
 	id          string
 }
 
@@ -86,12 +85,12 @@ func (p *Java) Execute(command string) (err error) {
 }
 
 func (p *Java) SetEnabled(isEnabled bool) (err error) {
-	p.enabled = isEnabled;
+	p.RunData.Enabled = isEnabled;
 	return;
 }
 
 func (p *Java) IsEnabled() (isEnabled bool) {
-	isEnabled = p.enabled;
+	isEnabled = p.RunData.Enabled;
 	return;
 }
 
@@ -104,15 +103,25 @@ func (p *Java) Id() (string) {
 	return p.id;
 }
 
+func (p *Java) Name() (string) {
+	return "java";
+}
+
 type JavaRun struct {
 	Stop      string
 	Pre       []string
 	Post      []string
 	Arguments string
+	Enabled   bool
 }
 
 type JavaInstall struct {
 	Pre   []string
 	Files []string
 	Post  []string
+}
+
+func NewJavaProgram(id string, run JavaRun, install JavaInstall) (program *Java) {
+	program = &Java{id: id, RunData: run, InstallData: install};
+	return;
 }

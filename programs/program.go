@@ -58,5 +58,7 @@ type Program interface {
 
 	SetEnvironment(environment environments.Environment) (err error);
 
-	Id() (id string);
+	Id() (string);
+
+	Name() (string);
 }
