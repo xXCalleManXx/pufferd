@@ -18,26 +18,26 @@ package environments
 
 type Environment interface {
 	//Executes a command within the environment.
-	Execute(cmd string, args ...string) (stdOut []byte, err error);
+	Execute(cmd string, args ...string) (stdOut []byte, err error)
 
 	//Executes a command within the environment and immediately return
-	ExecuteAsync(cmd string, args ...string) (err error);
+	ExecuteAsync(cmd string, args ...string) (err error)
 
 	//Sends a string to the StdIn of the main program process
-	ExecuteInMainProcess(cmd string) (err error);
+	ExecuteInMainProcess(cmd string) (err error)
 
 	//Kills the main process, but leaves the environment running.
-	Kill() (err error);
+	Kill() (err error)
 
 	//Creates the environment setting needed to run programs.
-	Create() (err error);
+	Create() (err error)
 
 	//Deletes the environment.
-	Delete() (err error);
+	Delete() (err error)
 
-	IsRunning() (isRunning bool);
+	IsRunning() (isRunning bool)
 
-	WaitForMainProcess() (err error);
+	WaitForMainProcess() (err error)
 
-	WaitForMainProcessFor(timeout int) (err error);
+	WaitForMainProcessFor(timeout int) (err error)
 }

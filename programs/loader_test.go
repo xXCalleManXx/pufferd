@@ -17,30 +17,30 @@
 package programs_test
 
 import (
-	"testing"
 	"github.com/pufferpanel/pufferd/programs"
+	"testing"
 )
 
 func TestLoadProgram_Java(t *testing.T) {
-	data := []byte("{\"pufferd\":{\"type\":\"java\",\"install\":{\"files\":[\"https://hub.spigotmc.org/BuildTools.jar\"],\"pre\":[],\"post\":[\"java -jar buildtools --rev ${version}\",\"mv spigot*.jar server.jar\"]},\"run\":{\"stop\":\"/stop\",\"pre\":[],\"post\":[],\"arguments\":\"-Xmx${maxmem} -jar server.jar\"}}}");
-	var program, err = programs.LoadProgramFromData(data);
-	if (err != nil || program == nil) {
-		if (err != nil) {
-			t.Error(err);
+	data := []byte("{\"pufferd\":{\"type\":\"java\",\"install\":{\"files\":[\"https://hub.spigotmc.org/BuildTools.jar\"],\"pre\":[],\"post\":[\"java -jar buildtools --rev ${version}\",\"mv spigot*.jar server.jar\"]},\"run\":{\"stop\":\"/stop\",\"pre\":[],\"post\":[],\"arguments\":\"-Xmx${maxmem} -jar server.jar\"}}}")
+	var program, err = programs.LoadProgramFromData(data)
+	if err != nil || program == nil {
+		if err != nil {
+			t.Error(err)
 		} else {
-			t.Error("Program return was nil instead of java");
+			t.Error("Program return was nil instead of java")
 		}
 	}
 }
 
 func TestLoadProgram_Unknown(t *testing.T) {
-	data := []byte("{\"pufferd\": {\"type\": \"badserver\"}}");
-	var program, err = programs.LoadProgramFromData(data);
-	if (err != nil || program != nil) {
-		if (err != nil) {
-			t.Error(err);
+	data := []byte("{\"pufferd\": {\"type\": \"badserver\"}}")
+	var program, err = programs.LoadProgramFromData(data)
+	if err != nil || program != nil {
+		if err != nil {
+			t.Error(err)
 		} else {
-			t.Error("Program return was not nil");
+			t.Error("Program return was not nil")
 		}
 	}
 }

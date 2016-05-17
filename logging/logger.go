@@ -18,142 +18,142 @@ package logging
 
 import (
 	"fmt"
-	"strings"
 	"os"
-	"time"
 	"path"
+	"strings"
+	"time"
 )
 
 type level struct {
-	scale   byte;
-	display string;
+	scale   byte
+	display string
 }
 
 var (
-	DEBUG level = level{scale: 7, display: "DEBUG"};
-	INFO level = level{scale: 31, display: "INFO"};
-	WARN level = level{scale: 63, display: "WARN"};
-	ERROR level = level{scale: 127, display: "ERROR"};
-	CRITICAL level = level{scale: 255, display: "CRITICAL"};
-	loggingLevel = INFO;
-	logFile *os.File
+	DEBUG        level = level{scale: 7, display: "DEBUG"}
+	INFO         level = level{scale: 31, display: "INFO"}
+	WARN         level = level{scale: 63, display: "WARN"}
+	ERROR        level = level{scale: 127, display: "ERROR"}
+	CRITICAL     level = level{scale: 255, display: "CRITICAL"}
+	loggingLevel       = INFO
+	logFile      *os.File
 )
 
 const (
-	logFileFolder = "logs"
-	logFileName = "2006-01-02T15-04-05.log"
-	formatNoData = "[%s] [%s] %s\n"
+	logFileFolder  = "logs"
+	logFileName    = "2006-01-02T15-04-05.log"
+	formatNoData   = "[%s] [%s] %s\n"
 	formatWithData = "[%s] [%s] %s\n%v\n"
 )
 
 func init() {
-	var err error;
-	os.Mkdir(logFileFolder, os.ModeDir);
-	logFile, err = os.OpenFile(path.Join(logFileFolder, time.Now().Format(logFileName)), os.O_WRONLY | os.O_CREATE, os.ModeType)
-	if (err != nil) {
-		Critical("Could not create log file", err);
+	var err error
+	os.Mkdir(logFileFolder, os.ModeDir)
+	logFile, err = os.OpenFile(path.Join(logFileFolder, time.Now().Format(logFileName)), os.O_WRONLY|os.O_CREATE, os.ModeType)
+	if err != nil {
+		Critical("Could not create log file", err)
 	}
 }
 
 func Info(msg string, data ...interface{}) {
-	log(INFO, msg, data);
+	log(INFO, msg, data)
 }
 
 func Warn(msg string, data ...interface{}) {
-	log(WARN, msg, data);
+	log(WARN, msg, data)
 }
 
 func Debug(msg string, data ...interface{}) {
-	log(DEBUG, msg, data);
+	log(DEBUG, msg, data)
 }
 
 func Error(msg string, data ...interface{}) {
-	log(ERROR, msg, data);
+	log(ERROR, msg, data)
 }
 
 func Critical(msg string, data ...interface{}) {
-	log(CRITICAL, msg, data);
+	log(CRITICAL, msg, data)
 }
 
 func Infof(msg string, data ...interface{}) {
-	logf(INFO, msg, data);
+	logf(INFO, msg, data)
 }
 
 func Warnf(msg string, data ...interface{}) {
-	logf(WARN, msg, data);
+	logf(WARN, msg, data)
 }
 
 func Debugf(msg string, data ...interface{}) {
-	logf(DEBUG, msg, data);
+	logf(DEBUG, msg, data)
 }
 
 func Errorf(msg string, data ...interface{}) {
-	logf(ERROR, msg, data);
+	logf(ERROR, msg, data)
 }
 
 func Criticalf(msg string, data ...interface{}) {
-	logf(CRITICAL, msg, data);
+	logf(CRITICAL, msg, data)
 }
 
 func SetLevel(lvl level) {
-	loggingLevel = lvl;
+	loggingLevel = lvl
 }
 
 func SetLevelByString(lvl string) {
-	switch (strings.ToUpper(lvl)) {
+	switch strings.ToUpper(lvl) {
 	case "DEBUG":
-		SetLevel(DEBUG);
+		SetLevel(DEBUG)
 	case "INFO":
-		SetLevel(INFO);
+		SetLevel(INFO)
 	case "WARN":
-		SetLevel(WARN);
+		SetLevel(WARN)
 	case "ERROR":
-		SetLevel(ERROR);
+		SetLevel(ERROR)
 	case "CRITICAL":
-		SetLevel(CRITICAL);
+		SetLevel(CRITICAL)
 	}
 }
 
 func log(lvl level, msg string, data ...interface{}) {
-	if (lvl.scale < loggingLevel.scale) {
-		return;
+	if lvl.scale < loggingLevel.scale {
+		return
 	}
-	var dataLength = len(data[0].([]interface{}));
-	if (data == nil || dataLength == 0) {
-		var output = fmt.Sprintf(formatNoData, getTimestamp(), lvl.display, msg);
-		fmt.Print(output);
-		logFile.WriteString(output);
+	var dataLength = len(data[0].([]interface{}))
+	if data == nil || dataLength == 0 {
+		var output = fmt.Sprintf(formatNoData, getTimestamp(), lvl.display, msg)
+		fmt.Print(output)
+		logFile.WriteString(output)
 	} else {
-		cast := make([]interface{}, 4);
-		cast[0] = getTimestamp();
-		cast[1] = lvl.display;
-		cast[2] = msg;
-		if (dataLength == 1) {
-			cast[3] = data[0].([]interface{})[0];
+		cast := make([]interface{}, 4)
+		cast[0] = getTimestamp()
+		cast[1] = lvl.display
+		cast[2] = msg
+		if dataLength == 1 {
+			cast[3] = data[0].([]interface{})[0]
 		} else {
-			cast[3] = data[0].([]interface{});
+			cast[3] = data[0].([]interface{})
 		}
-		var output = fmt.Sprintf(formatWithData, cast...);
-		fmt.Print(output);
-		logFile.WriteString(output);
+		var output = fmt.Sprintf(formatWithData, cast...)
+		fmt.Print(output)
+		logFile.WriteString(output)
 	}
 }
 
 func logf(lvl level, msg string, data ...interface{}) {
-	if (lvl.scale < loggingLevel.scale) {
-		return;
+	if lvl.scale < loggingLevel.scale {
+		return
 	}
-	if (data == nil || len(data[0].([]interface{})) == 0) {
-		var output = fmt.Sprintf(formatNoData, getTimestamp(), lvl.display, msg);
-		fmt.Print(output);
-		logFile.WriteString(output);
+	if data == nil || len(data[0].([]interface{})) == 0 {
+		var output = fmt.Sprintf(formatNoData, getTimestamp(), lvl.display, msg)
+		fmt.Print(output)
+		logFile.WriteString(output)
 	} else {
-		var output = fmt.Sprintf(formatNoData, getTimestamp(), lvl.display, fmt.Sprintf(msg, data[0].([]interface{})...));
-		fmt.Print(output);
-		logFile.WriteString(output);
+		var output = fmt.Sprintf(formatNoData, getTimestamp(), lvl.display, fmt.Sprintf(msg, data[0].([]interface{})...))
+		fmt.Print(output)
+		logFile.WriteString(output)
 	}
 }
 
 func getTimestamp() string {
-	return time.Now().Format("15:04:05");
+	return time.Now().Format("15:04:05")
 }

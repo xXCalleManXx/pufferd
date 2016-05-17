@@ -23,42 +23,42 @@ import (
 type Program interface {
 	//Starts the program.
 	//This includes starting the environment if it is not running.
-	Start() (err error);
+	Start() (err error)
 
 	//Stops the program.
 	//This will also stop the environment it is ran in.
-	Stop() (err error);
+	Stop() (err error)
 
 	//Kills the program.
 	//This will also stop the environment it is ran in.
-	Kill() (err error);
+	Kill() (err error)
 
 	//Creates any files needed for the program.
 	//This includes creating the environment.
-	Create() (err error);
+	Create() (err error)
 
 	//Destroys the server.
 	//This will delete the server, environment, and any files related to it.
-	Destroy() (err error);
+	Destroy() (err error)
 
-	Update() (err error);
+	Update() (err error)
 
-	Install() (err error);
+	Install() (err error)
 
 	//Determines if the server is running.
-	IsRunning() (isRunning bool, err error);
+	IsRunning() (isRunning bool, err error)
 
 	//Sends a command to the process
 	//If the program supports input, this will send the arguments to that.
-	Execute(command string) (err error);
+	Execute(command string) (err error)
 
-	SetEnabled(isEnabled bool) (err error);
+	SetEnabled(isEnabled bool) (err error)
 
-	IsEnabled() (isEnabled bool);
+	IsEnabled() (isEnabled bool)
 
-	SetEnvironment(environment environments.Environment) (err error);
+	SetEnvironment(environment environments.Environment) (err error)
 
-	Id() (string);
+	Id() string
 
-	Name() (string);
+	Name() string
 }

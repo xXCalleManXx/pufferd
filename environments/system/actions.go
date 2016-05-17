@@ -17,96 +17,96 @@
 package system
 
 import (
-	"os/exec"
-	"io"
 	"errors"
-	"time"
+	"io"
 	"os"
+	"os/exec"
 	"strconv"
+	"time"
 )
 
 type System struct {
-	mainProcess *exec.Cmd;
+	mainProcess *exec.Cmd
 }
 
 func (s *System) Execute(cmd string, args ...string) (stdOut []byte, err error) {
-	if (s.IsRunning()) {
-		err = errors.New("A process is already running (" + strconv.Itoa(s.mainProcess.Process.Pid) + ")");
-		return;
+	if s.IsRunning() {
+		err = errors.New("A process is already running (" + strconv.Itoa(s.mainProcess.Process.Pid) + ")")
+		return
 	}
-	s.mainProcess = exec.Command(cmd, args...);
-	stdOut, err = s.mainProcess.Output();
-	return;
+	s.mainProcess = exec.Command(cmd, args...)
+	stdOut, err = s.mainProcess.Output()
+	return
 }
 
 func (s *System) ExecuteAsync(cmd string, args ...string) (err error) {
-	if (s.IsRunning()) {
-		err = errors.New("A process is already running (" + strconv.Itoa(s.mainProcess.Process.Pid) + ")");
-		return;
+	if s.IsRunning() {
+		err = errors.New("A process is already running (" + strconv.Itoa(s.mainProcess.Process.Pid) + ")")
+		return
 	}
-	s.mainProcess = exec.Command(cmd, args...);
-	err = s.mainProcess.Start();
-	return;
+	s.mainProcess = exec.Command(cmd, args...)
+	err = s.mainProcess.Start()
+	return
 }
 
 func (s *System) ExecuteInMainProcess(cmd string) (err error) {
-	if (!s.IsRunning()) {
-		err = errors.New("Main process has not been started");
-		return;
+	if !s.IsRunning() {
+		err = errors.New("Main process has not been started")
+		return
 	}
-	var stdIn, processErr = s.mainProcess.StdinPipe();
-	if (processErr != nil) {
-		err = processErr;
-		return;
+	var stdIn, processErr = s.mainProcess.StdinPipe()
+	if processErr != nil {
+		err = processErr
+		return
 	}
-	io.WriteString(stdIn, cmd);
-	return;
+	io.WriteString(stdIn, cmd)
+	return
 }
 
 func (s *System) Kill() (err error) {
-	if (!s.IsRunning()) {
-		return;
+	if !s.IsRunning() {
+		return
 	}
-	err = s.mainProcess.Process.Kill();
-	s.mainProcess.Process.Release();
-	s.mainProcess = nil;
-	return;
+	err = s.mainProcess.Process.Kill()
+	s.mainProcess.Process.Release()
+	s.mainProcess = nil
+	return
 }
 
 func (s *System) Create() (err error) {
-	return;
+	return
 }
 
 func (s *System) Delete() (err error) {
-	return;
+	return
 }
 
 func (s *System) IsRunning() (isRunning bool) {
-	isRunning = s.mainProcess.Process != nil;
-	if (isRunning) {
-		process, pErr := os.FindProcess(s.mainProcess.Process.Pid);
-		if (process == nil || pErr != nil) {
-			isRunning = false;
+	isRunning = s.mainProcess.Process != nil
+	if isRunning {
+		process, pErr := os.FindProcess(s.mainProcess.Process.Pid)
+		if process == nil || pErr != nil {
+			isRunning = false
 		}
 	}
-	return;
+	return
 }
 
 func (s *System) WaitForMainProcess() (err error) {
-	return s.WaitForMainProcessFor(0);
+	return s.WaitForMainProcessFor(0)
 }
 
 func (s *System) WaitForMainProcessFor(timeout int) (err error) {
-	if (s.IsRunning()) {
-		if (timeout > 0) {
-			var timer = time.AfterFunc(time.Duration(timeout) * time.Millisecond, func() {
-				err = s.Kill();
-			});
-			err = s.mainProcess.Wait();
-			timer.Stop();
+	if s.IsRunning() {
+		if timeout > 0 {
+			var timer = time.AfterFunc(time.Duration(timeout)*time.Millisecond, func() {
+				err = s.Kill()
+			})
+			err = s.mainProcess.Wait()
+			timer.Stop()
 		} else {
-			err = s.mainProcess.Wait();
+			err = s.mainProcess.Wait()
 		}
 	}
-	return;
+	return
 }
