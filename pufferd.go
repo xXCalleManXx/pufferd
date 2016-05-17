@@ -22,6 +22,7 @@ import (
 	"flag"
 	"github.com/pufferpanel/pufferd/logging"
 	"strconv"
+	"github.com/pufferpanel/pufferd/programs"
 )
 
 func main() {
@@ -32,6 +33,8 @@ func main() {
 	flag.Parse()
 
 	logging.SetLevelByString(loggingLevel)
+
+	programs.LoadFromFolder();
 
 	r := gin.Default()
 

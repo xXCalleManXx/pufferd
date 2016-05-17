@@ -56,13 +56,7 @@ type Program interface {
 
 	IsEnabled() (isEnabled bool);
 
-	GetEnvironment() (environment environments.Environment, err error);
-
 	SetEnvironment(environment environments.Environment) (err error);
-}
 
-type Install struct {
-	Pre []string
-	Files []string
-	Post []string
+	Id() (id string);
 }

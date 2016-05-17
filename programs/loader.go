@@ -19,14 +19,62 @@ package programs
 import (
 	"encoding/json"
 	"github.com/pufferpanel/pufferd/programs/types"
+	"io/ioutil"
+	"strings"
+	"path/filepath"
+	"strconv"
+	"github.com/pufferpanel/pufferd/logging"
+	"fmt"
+	"os"
 )
 
-func LoadServer(id string) (program Program, err error) {
+const (
+	serverFolder = "servers";
+)
+
+var (
+	programs []Program = make([]Program, 5);
+)
+
+func LoadFromFolder() {
+	os.Mkdir(serverFolder, os.ModeDir);
+	var programFiles, err = ioutil.ReadDir(serverFolder);
+	if (err != nil) {
+		logging.Critical("Error reading from server data folder", err);
+	}
 	var data []byte;
-	return LoadServerFromData(data);
+	var program Program;
+	for _, element := range programFiles {
+		data, err = ioutil.ReadFile(joinPath(serverFolder, element.Name()));
+		if (err != nil) {
+			logging.Error(fmt.Sprintf("Error loading server details (%s)", element.Name()), err);
+			continue;
+		}
+		program, err = LoadProgramFromData(data);
+		if (err != nil) {
+			logging.Error(fmt.Sprintf("Error loading server details (%s)", element.Name()), err);
+			continue;
+		}
+		programs = append(programs, program);
+	}
 }
 
-func LoadServerFromData(source []byte) (program Program, err error) {
+func GetProgram(id string) (program Program, err error) {
+	program = getFromCache(id);
+	if (program == nil) {
+		program, err = LoadProgram(id);
+	}
+	return;
+}
+
+func LoadProgram(id string) (program Program, err error) {
+	var data []byte;
+	data, err = ioutil.ReadFile(joinPath(serverFolder, id + ".json"));
+	program, err = LoadProgramFromData(data);
+	return;
+}
+
+func LoadProgramFromData(source []byte) (program Program, err error) {
 	var data map[string]interface{};
 	err = json.Unmarshal(source, &data);
 	if (err != nil) {
@@ -34,6 +82,7 @@ func LoadServerFromData(source []byte) (program Program, err error) {
 	}
 	var pufferdData = GetMapOrNull(data, "pufferd");
 	var t = GetStringOrNull(pufferdData, "type");
+	var install = GetInstallSection(GetMapOrNull(pufferdData, "install"));
 	switch(t) {
 	case "java":
 		var runBlock types.JavaRun;
@@ -48,9 +97,17 @@ func LoadServerFromData(source []byte) (program Program, err error) {
 
 			runBlock = types.JavaRun{Stop: stop, Pre: pre, Post: post, Arguments: arguments};
 		}
-		program = &types.Java{Run: runBlock};
+		program = &types.Java{InstallData: install, RunData: runBlock};
 	}
 	return;
+}
+
+func GetInstallSection(data map[string]interface{}) types.JavaInstall {
+	var install = types.JavaInstall{};
+	install.Files = GetStringArrayOrNull(data, "files");
+	install.Pre = GetStringArrayOrNull(data, "pre");
+	install.Post = GetStringArrayOrNull(data, "post");
+	return install;
 }
 
 func GetStringOrNull(data map[string]interface{}, key string) string {
@@ -92,4 +149,17 @@ func GetStringArrayOrNull(data map[string]interface{}, key string) []string {
 		}
 		return newArr;
 	}
+}
+
+func joinPath(paths ...string) string {
+	return strings.Join(paths, strconv.QuoteRune(filepath.Separator));
+}
+
+func getFromCache(id string) (Program) {
+	for _, element := range programs {
+		if (element.Id() == id) {
+			return element;
+		}
+	}
+	return nil;
 }
