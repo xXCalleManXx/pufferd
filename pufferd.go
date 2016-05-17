@@ -26,45 +26,45 @@ import (
 )
 
 func main() {
-	var loggingLevel string
-	var port int
-	flag.StringVar(&loggingLevel, "logging", "INFO", "Lowest logging level to display")
-	flag.IntVar(&port, "port", 5656, "Port to run service on")
-	flag.Parse()
+	var loggingLevel string;
+	var port int;
+	flag.StringVar(&loggingLevel, "logging", "INFO", "Lowest logging level to display");
+	flag.IntVar(&port, "port", 5656, "Port to run service on");
+	flag.Parse();
 
-	logging.SetLevelByString(loggingLevel)
+	logging.SetLevelByString(loggingLevel);
 
-	programs.LoadFromFolder()
+	programs.LoadFromFolder();
 
-	r := gin.Default()
+	r := gin.Default();
 
 	r.GET("/", func(c *gin.Context) {
 		c.String(200, "pufferd is running")
-	})
+	});
 
 	// Legacy API for almost drop in compatibility with PufferPanel
 	l := r.Group("/legacy")
 	{
-		l.GET("/server", legacy.GetServerInfo)
-		l.POST("/server", legacy.CreateServer)
-		l.PUT("/server", legacy.UpdateServerInfo)
-		l.DELETE("/server", legacy.DeleteServer)
+		l.GET("/server", legacy.GetServerInfo);
+		l.POST("/server", legacy.CreateServer);
+		l.PUT("/server", legacy.UpdateServerInfo);
+		l.DELETE("/server", legacy.DeleteServer);
 
-		l.GET("/server/power/:action", legacy.ServerPower)
-		l.POST("/server/console", legacy.ServerConsole)
-		l.GET("/server/log/:lines", legacy.GetServerLog)
+		l.GET("/server/power/:action", legacy.ServerPower);
+		l.POST("/server/console", legacy.ServerConsole);
+		l.GET("/server/log/:lines", legacy.GetServerLog);
 
-		l.GET("/server/file/:file", legacy.GetFile)
-		l.PUT("/server/file/:file", legacy.UpdateFile)
-		l.DELETE("/server/file/:file", legacy.DeleteFile)
+		l.GET("/server/file/:file", legacy.GetFile);
+		l.PUT("/server/file/:file", legacy.UpdateFile);
+		l.DELETE("/server/file/:file", legacy.DeleteFile);
 
-		l.GET("/server/download/:hash", legacy.DownloadFile)
+		l.GET("/server/download/:hash", legacy.DownloadFile);
 
-		l.GET("/server/directory/:directory", legacy.GetDirectory)
+		l.GET("/server/directory/:directory", legacy.GetDirectory);
 
-		l.PUT("/server/reinstall", legacy.ReinstallServer)
-		l.GET("/server/reset-password", legacy.ResetPassword)
-	}
+		l.PUT("/server/reinstall", legacy.ReinstallServer);
+		l.GET("/server/reset-password", legacy.ResetPassword);
+	};
 
-	r.Run(":" + strconv.FormatInt(int64(port), 10))
+	r.Run(":" + strconv.FormatInt(int64(port), 10));
 }

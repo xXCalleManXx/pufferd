@@ -17,7 +17,6 @@
 package environments
 
 type Environment interface {
-
 	//Executes a command within the environment.
 	Execute(cmd string, args ...string) (stdOut []byte, err error);
 
