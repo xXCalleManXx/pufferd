@@ -25,6 +25,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"github.com/pufferpanel/pufferd/environments"
+	"github.com/pufferpanel/pufferd/environments/system"
 )
 
 const (
@@ -32,7 +34,7 @@ const (
 )
 
 var (
-	programs []Program = make([]Program, 5)
+	programs []Program = make([]Program, 0)
 )
 
 func LoadFromFolder() {
@@ -44,6 +46,9 @@ func LoadFromFolder() {
 	var data []byte
 	var program Program
 	for _, element := range programFiles {
+		if element.IsDir() {
+			continue;
+		}
 		id := strings.TrimSuffix(element.Name(), filepath.Ext(element.Name()))
 		data, err = ioutil.ReadFile(joinPath(serverFolder, element.Name()))
 		if err != nil {
@@ -68,9 +73,13 @@ func GetProgram(id string) (program Program, err error) {
 	return
 }
 
+func GetAll() ([]Program) {
+	return programs;
+}
+
 func LoadProgram(id string) (program Program, err error) {
 	var data []byte
-	data, err = ioutil.ReadFile(joinPath(serverFolder, id+".json"))
+	data, err = ioutil.ReadFile(joinPath(serverFolder, id + ".json"))
 	program, err = LoadProgramFromData(id, data)
 	return
 }
@@ -83,23 +92,35 @@ func LoadProgramFromData(id string, source []byte) (program Program, err error) 
 	}
 	var pufferdData = GetMapOrNull(data, "pufferd")
 	var t = GetStringOrDefault(pufferdData, "type", nil)
-	var install = GetInstallSection(GetMapOrNull(pufferdData, "install"))
+	var installSection = GetInstallSection(GetMapOrNull(pufferdData, "install"))
+	var runSection = GetMapOrNull(pufferdData, "run")
+	var environmentSection = GetMapOrNull(runSection, "environment");
+	var environment environments.Environment;
+	var defaultEnvType = "system";
+	var environmentType = GetStringOrDefault(environmentSection, "type", &defaultEnvType);
+
+	switch  environmentType {
+	case "system":
+		serverRoot := joinPath(serverFolder, id)
+		environment = &system.System{RootDirectory: GetStringOrDefault(environmentSection, "root", &serverRoot)}
+	}
+
 	switch t {
 	case "java":
 		var runBlock types.JavaRun
 		if pufferdData["run"] == nil {
 			runBlock = types.JavaRun{}
 		} else {
-			var runSection = GetMapOrNull(pufferdData, "run")
+
 			var stop = GetStringOrDefault(runSection, "stop", nil)
 			var pre = GetStringArrayOrNull(runSection, "pre")
 			var post = GetStringArrayOrNull(runSection, "post")
-			var arguments = GetStringOrDefault(runSection, "arguments", nil)
+			var arguments = strings.Split(GetStringOrDefault(runSection, "arguments", nil), " ")
 			var enabled = GetBooleanOrDefault(runSection, "enabled", true)
 
 			runBlock = types.JavaRun{Stop: stop, Pre: pre, Post: post, Arguments: arguments, Enabled: enabled}
 		}
-		program = types.NewJavaProgram(id, runBlock, install)
+		program = types.NewJavaProgram(id, runBlock, installSection, environment)
 	}
 	return
 }

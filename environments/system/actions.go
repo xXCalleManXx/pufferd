@@ -26,26 +26,29 @@ import (
 )
 
 type System struct {
-	mainProcess *exec.Cmd
+	mainProcess   *exec.Cmd
+	RootDirectory string;
 }
 
-func (s *System) Execute(cmd string, args ...string) (stdOut []byte, err error) {
+func (s *System) Execute(cmd string, args []string) (stdOut []byte, err error) {
 	if s.IsRunning() {
 		err = errors.New("A process is already running (" + strconv.Itoa(s.mainProcess.Process.Pid) + ")")
 		return
 	}
 	s.mainProcess = exec.Command(cmd, args...)
+	s.mainProcess.Dir = s.RootDirectory;
 	stdOut, err = s.mainProcess.Output()
 	return
 }
 
-func (s *System) ExecuteAsync(cmd string, args ...string) (err error) {
+func (s *System) ExecuteAsync(cmd string, args []string) (err error) {
 	if s.IsRunning() {
 		err = errors.New("A process is already running (" + strconv.Itoa(s.mainProcess.Process.Pid) + ")")
 		return
 	}
 	s.mainProcess = exec.Command(cmd, args...)
-	err = s.mainProcess.Start()
+	s.mainProcess.Dir = s.RootDirectory;
+	err = s.mainProcess.Start();
 	return
 }
 
@@ -82,7 +85,7 @@ func (s *System) Delete() (err error) {
 }
 
 func (s *System) IsRunning() (isRunning bool) {
-	isRunning = s.mainProcess.Process != nil
+	isRunning = s.mainProcess != nil && s.mainProcess.Process != nil
 	if isRunning {
 		process, pErr := os.FindProcess(s.mainProcess.Process.Pid)
 		if process == nil || pErr != nil {
@@ -99,7 +102,7 @@ func (s *System) WaitForMainProcess() (err error) {
 func (s *System) WaitForMainProcessFor(timeout int) (err error) {
 	if s.IsRunning() {
 		if timeout > 0 {
-			var timer = time.AfterFunc(time.Duration(timeout)*time.Millisecond, func() {
+			var timer = time.AfterFunc(time.Duration(timeout) * time.Millisecond, func() {
 				err = s.Kill()
 			})
 			err = s.mainProcess.Wait()

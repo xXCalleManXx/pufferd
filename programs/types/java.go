@@ -30,7 +30,7 @@ type Java struct {
 //Starts the program.
 //This includes starting the environment if it is not running.
 func (p *Java) Start() (err error) {
-	p.environment.ExecuteAsync("java", p.RunData.Arguments, " ")
+	p.environment.ExecuteAsync("java", p.RunData.Arguments)
 	return
 }
 
@@ -111,7 +111,7 @@ type JavaRun struct {
 	Stop      string
 	Pre       []string
 	Post      []string
-	Arguments string
+	Arguments []string
 	Enabled   bool
 }
 
@@ -121,7 +121,7 @@ type JavaInstall struct {
 	Post  []string
 }
 
-func NewJavaProgram(id string, run JavaRun, install JavaInstall) (program *Java) {
-	program = &Java{id: id, RunData: run, InstallData: install}
+func NewJavaProgram(id string, run JavaRun, install JavaInstall, environment environments.Environment) (program *Java) {
+	program = &Java{id: id, RunData: run, InstallData: install, environment: environment}
 	return
 }

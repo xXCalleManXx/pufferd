@@ -18,10 +18,10 @@ package environments
 
 type Environment interface {
 	//Executes a command within the environment.
-	Execute(cmd string, args ...string) (stdOut []byte, err error)
+	Execute(cmd string, args []string) (stdOut []byte, err error)
 
 	//Executes a command within the environment and immediately return
-	ExecuteAsync(cmd string, args ...string) (err error)
+	ExecuteAsync(cmd string, args []string) (err error)
 
 	//Sends a string to the StdIn of the main program process
 	ExecuteInMainProcess(cmd string) (err error)

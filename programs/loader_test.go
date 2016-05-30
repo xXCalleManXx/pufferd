@@ -23,7 +23,7 @@ import (
 
 func TestLoadProgram_Java(t *testing.T) {
 	data := []byte("{\"pufferd\":{\"type\":\"java\",\"install\":{\"files\":[\"https://hub.spigotmc.org/BuildTools.jar\"],\"pre\":[],\"post\":[\"java -jar buildtools --rev ${version}\",\"mv spigot*.jar server.jar\"]},\"run\":{\"stop\":\"/stop\",\"pre\":[],\"post\":[],\"arguments\":\"-Xmx${maxmem} -jar server.jar\"}}}")
-	var program, err = programs.LoadProgramFromData(data)
+	var program, err = programs.LoadProgramFromData("asdfasdf", data)
 	if err != nil || program == nil {
 		if err != nil {
 			t.Error(err)
@@ -35,7 +35,7 @@ func TestLoadProgram_Java(t *testing.T) {
 
 func TestLoadProgram_Unknown(t *testing.T) {
 	data := []byte("{\"pufferd\": {\"type\": \"badserver\"}}")
-	var program, err = programs.LoadProgramFromData(data)
+	var program, err = programs.LoadProgramFromData("asdfasdf", data)
 	if err != nil || program != nil {
 		if err != nil {
 			t.Error(err)

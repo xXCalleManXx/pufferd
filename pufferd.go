@@ -36,6 +36,13 @@ func main() {
 
 	programs.LoadFromFolder()
 
+	for _, element := range programs.GetAll() {
+		if element.IsEnabled() {
+			logging.Info("Starting server " + element.Id());
+			element.Start()
+		}
+	}
+
 	r := gin.Default()
 
 	r.GET("/", func(c *gin.Context) {
