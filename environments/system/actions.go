@@ -27,7 +27,7 @@ import (
 
 type System struct {
 	mainProcess   *exec.Cmd
-	RootDirectory string;
+	RootDirectory string
 }
 
 func (s *System) Execute(cmd string, args []string) (stdOut []byte, err error) {
@@ -36,7 +36,7 @@ func (s *System) Execute(cmd string, args []string) (stdOut []byte, err error) {
 		return
 	}
 	s.mainProcess = exec.Command(cmd, args...)
-	s.mainProcess.Dir = s.RootDirectory;
+	s.mainProcess.Dir = s.RootDirectory
 	stdOut, err = s.mainProcess.Output()
 	return
 }
@@ -47,8 +47,8 @@ func (s *System) ExecuteAsync(cmd string, args []string) (err error) {
 		return
 	}
 	s.mainProcess = exec.Command(cmd, args...)
-	s.mainProcess.Dir = s.RootDirectory;
-	err = s.mainProcess.Start();
+	s.mainProcess.Dir = s.RootDirectory
+	err = s.mainProcess.Start()
 	return
 }
 
@@ -102,7 +102,7 @@ func (s *System) WaitForMainProcess() (err error) {
 func (s *System) WaitForMainProcessFor(timeout int) (err error) {
 	if s.IsRunning() {
 		if timeout > 0 {
-			var timer = time.AfterFunc(time.Duration(timeout) * time.Millisecond, func() {
+			var timer = time.AfterFunc(time.Duration(timeout)*time.Millisecond, func() {
 				err = s.Kill()
 			})
 			err = s.mainProcess.Wait()

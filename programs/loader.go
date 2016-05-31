@@ -19,14 +19,14 @@ package programs
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/pufferpanel/pufferd/environments"
+	"github.com/pufferpanel/pufferd/environments/system"
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/programs/types"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
-	"github.com/pufferpanel/pufferd/environments"
-	"github.com/pufferpanel/pufferd/environments/system"
 )
 
 const (
@@ -47,7 +47,7 @@ func LoadFromFolder() {
 	var program Program
 	for _, element := range programFiles {
 		if element.IsDir() {
-			continue;
+			continue
 		}
 		id := strings.TrimSuffix(element.Name(), filepath.Ext(element.Name()))
 		data, err = ioutil.ReadFile(joinPath(serverFolder, element.Name()))
@@ -73,13 +73,13 @@ func GetProgram(id string) (program Program, err error) {
 	return
 }
 
-func GetAll() ([]Program) {
-	return programs;
+func GetAll() []Program {
+	return programs
 }
 
 func LoadProgram(id string) (program Program, err error) {
 	var data []byte
-	data, err = ioutil.ReadFile(joinPath(serverFolder, id + ".json"))
+	data, err = ioutil.ReadFile(joinPath(serverFolder, id+".json"))
 	program, err = LoadProgramFromData(id, data)
 	return
 }
@@ -94,12 +94,12 @@ func LoadProgramFromData(id string, source []byte) (program Program, err error) 
 	var t = GetStringOrDefault(pufferdData, "type", nil)
 	var installSection = GetInstallSection(GetMapOrNull(pufferdData, "install"))
 	var runSection = GetMapOrNull(pufferdData, "run")
-	var environmentSection = GetMapOrNull(runSection, "environment");
-	var environment environments.Environment;
-	var defaultEnvType = "system";
-	var environmentType = GetStringOrDefault(environmentSection, "type", &defaultEnvType);
+	var environmentSection = GetMapOrNull(runSection, "environment")
+	var environment environments.Environment
+	var defaultEnvType = "system"
+	var environmentType = GetStringOrDefault(environmentSection, "type", &defaultEnvType)
 
-	switch  environmentType {
+	switch environmentType {
 	case "system":
 		serverRoot := joinPath(serverFolder, id)
 		environment = &system.System{RootDirectory: GetStringOrDefault(environmentSection, "root", &serverRoot)}

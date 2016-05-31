@@ -15,11 +15,36 @@
 */
 
 // Package legacy implements the legacy API for compatibility with PufferPanel v0.8.x
-package legacy
+package routing
 
 import (
 	"github.com/gin-gonic/gin"
 )
+
+func RegisterLegacyRoute(engine *gin.Engine) {
+	l := engine.Group("/legacy")
+	{
+		l.GET("/server", GetServerInfo)
+		l.POST("/server", CreateServer)
+		l.PUT("/server", UpdateServerInfo)
+		l.DELETE("/server", DeleteServer)
+
+		l.GET("/server/power/:action", ServerPower)
+		l.POST("/server/console", ServerConsole)
+		l.GET("/server/log/:lines", GetServerLog)
+
+		l.GET("/server/file/:file", GetFile)
+		l.PUT("/server/file/:file", UpdateFile)
+		l.DELETE("/server/file/:file", DeleteFile)
+
+		l.GET("/server/download/:hash", DownloadFile)
+
+		l.GET("/server/directory/:directory", GetDirectory)
+
+		l.PUT("/server/reinstall", ReinstallServer)
+		l.GET("/server/reset-password", ResetPassword)
+	}
+}
 
 func GetServerInfo(c *gin.Context) {
 }

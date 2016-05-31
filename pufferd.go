@@ -18,10 +18,11 @@ package main
 
 import (
 	"flag"
+	"github.com/braintree/manners"
 	"github.com/gin-gonic/gin"
-	"github.com/pufferpanel/pufferd/legacy"
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/programs"
+	"github.com/pufferpanel/pufferd/routing"
 	"strconv"
 )
 
@@ -38,40 +39,14 @@ func main() {
 
 	for _, element := range programs.GetAll() {
 		if element.IsEnabled() {
-			logging.Info("Starting server " + element.Id());
+			logging.Info("Starting server " + element.Id())
 			element.Start()
 		}
 	}
 
 	r := gin.Default()
+	routing.RegisterRootRoute(r)
+	routing.RegisterLegacyRoute(r)
 
-	r.GET("/", func(c *gin.Context) {
-		c.String(200, "pufferd is running")
-	})
-
-	// Legacy API for almost drop in compatibility with PufferPanel
-	l := r.Group("/legacy")
-	{
-		l.GET("/server", legacy.GetServerInfo)
-		l.POST("/server", legacy.CreateServer)
-		l.PUT("/server", legacy.UpdateServerInfo)
-		l.DELETE("/server", legacy.DeleteServer)
-
-		l.GET("/server/power/:action", legacy.ServerPower)
-		l.POST("/server/console", legacy.ServerConsole)
-		l.GET("/server/log/:lines", legacy.GetServerLog)
-
-		l.GET("/server/file/:file", legacy.GetFile)
-		l.PUT("/server/file/:file", legacy.UpdateFile)
-		l.DELETE("/server/file/:file", legacy.DeleteFile)
-
-		l.GET("/server/download/:hash", legacy.DownloadFile)
-
-		l.GET("/server/directory/:directory", legacy.GetDirectory)
-
-		l.PUT("/server/reinstall", legacy.ReinstallServer)
-		l.GET("/server/reset-password", legacy.ResetPassword)
-	}
-
-	r.Run(":" + strconv.FormatInt(int64(port), 10))
+	manners.ListenAndServe(":"+strconv.FormatInt(int64(port), 10), r)
 }
