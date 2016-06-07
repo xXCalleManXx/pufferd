@@ -23,6 +23,7 @@ import (
 	"github.com/pufferpanel/pufferd/environments/system"
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/programs/types"
+	"github.com/pufferpanel/pufferd/programs/types/data"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -125,11 +126,13 @@ func LoadProgramFromData(id string, source []byte) (program Program, err error) 
 	return
 }
 
-func GetInstallSection(data map[string]interface{}) types.JavaInstall {
-	var install = types.JavaInstall{}
-	install.Files = GetStringArrayOrNull(data, "files")
-	install.Pre = GetStringArrayOrNull(data, "pre")
-	install.Post = GetStringArrayOrNull(data, "post")
+func GetInstallSection(mapping map[string]interface{}) data.InstallSection {
+	var install = data.InstallSection{
+		Global:  GetObjectArrayOrNull(mapping, "commands"),
+		Linux:   GetObjectArrayOrNull(mapping, "linux"),
+		Mac:     GetObjectArrayOrNull(mapping, "mac"),
+		Windows: GetObjectArrayOrNull(mapping, "windows"),
+	}
 	return install
 }
 
@@ -166,6 +169,18 @@ func GetMapOrNull(data map[string]interface{}, key string) map[string]interface{
 		return (map[string]interface{})(nil)
 	} else {
 		return section.(map[string]interface{})
+	}
+}
+
+func GetObjectArrayOrNull(data map[string]interface{}, key string) []interface{} {
+	if data == nil {
+		return ([]interface{})(nil)
+	}
+	var section = data[key]
+	if section == nil {
+		return ([]interface{})(nil)
+	} else {
+		return section.([]interface{})
 	}
 }
 

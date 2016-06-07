@@ -18,11 +18,12 @@ package types
 
 import (
 	"github.com/pufferpanel/pufferd/environments"
+	"github.com/pufferpanel/pufferd/programs/types/data"
 )
 
 type Java struct {
 	RunData     JavaRun
-	InstallData JavaInstall
+	InstallData data.InstallSection
 	environment environments.Environment
 	id          string
 }
@@ -68,6 +69,10 @@ func (p *Java) Update() (err error) {
 }
 
 func (p *Java) Install() (err error) {
+	process := data.GenerateInstallProcess(&p.InstallData)
+	for process.HasNext() {
+		process.RunNext()
+	}
 	return
 }
 
@@ -115,13 +120,7 @@ type JavaRun struct {
 	Enabled   bool
 }
 
-type JavaInstall struct {
-	Pre   []string
-	Files []string
-	Post  []string
-}
-
-func NewJavaProgram(id string, run JavaRun, install JavaInstall, environment environments.Environment) (program *Java) {
+func NewJavaProgram(id string, run JavaRun, install data.InstallSection, environment environments.Environment) (program *Java) {
 	program = &Java{id: id, RunData: run, InstallData: install, environment: environment}
 	return
 }
