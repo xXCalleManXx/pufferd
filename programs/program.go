@@ -18,6 +18,7 @@ package programs
 
 import (
 	"github.com/pufferpanel/pufferd/environments"
+	"github.com/pufferpanel/pufferd/permissions"
 )
 
 type Program interface {
@@ -61,4 +62,6 @@ type Program interface {
 	Id() string
 
 	Name() string
+
+	GetPermissionManager() permissions.PermissionTracker
 }

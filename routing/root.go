@@ -7,17 +7,14 @@ import (
 	"github.com/pufferpanel/pufferd/programs"
 )
 
-var engine *gin.Engine
-
-func RegisterRootRoute(e *gin.Engine) {
-	engine = e
-	engine.GET("/", func(c *gin.Context) {
+func RegisterRoutes(e *gin.Engine) {
+	e.GET("/", func(c *gin.Context) {
 		c.String(200, "pufferd is running")
 	})
-	engine.GET("_shutdown", Shutdown)
+	e.GET("_shutdown", Shutdown)
 }
 
-func Shutdown(context *gin.Context) {
+func Shutdown(c *gin.Context) {
 	for _, element := range programs.GetAll() {
 		running, _ := element.IsRunning()
 		if running {

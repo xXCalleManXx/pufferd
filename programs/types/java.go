@@ -18,6 +18,7 @@ package types
 
 import (
 	"github.com/pufferpanel/pufferd/environments"
+	"github.com/pufferpanel/pufferd/permissions"
 	"github.com/pufferpanel/pufferd/programs/types/data"
 )
 
@@ -26,6 +27,7 @@ type Java struct {
 	InstallData data.InstallSection
 	environment environments.Environment
 	id          string
+	permissions permissions.PermissionTracker
 }
 
 //Starts the program.
@@ -112,6 +114,10 @@ func (p *Java) Name() string {
 	return "java"
 }
 
+func (p *Java) GetPermissionManager() permissions.PermissionTracker {
+	return p.permissions
+}
+
 type JavaRun struct {
 	Stop      string
 	Pre       []string
@@ -120,7 +126,7 @@ type JavaRun struct {
 	Enabled   bool
 }
 
-func NewJavaProgram(id string, run JavaRun, install data.InstallSection, environment environments.Environment) (program *Java) {
-	program = &Java{id: id, RunData: run, InstallData: install, environment: environment}
+func NewJavaProgram(id string, run JavaRun, install data.InstallSection, environment environments.Environment, permissions permissions.PermissionTracker) (program *Java) {
+	program = &Java{id: id, RunData: run, InstallData: install, environment: environment, permissions: permissions}
 	return
 }

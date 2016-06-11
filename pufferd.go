@@ -23,6 +23,8 @@ import (
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/programs"
 	"github.com/pufferpanel/pufferd/routing"
+	"github.com/pufferpanel/pufferd/routing/legacy"
+	"github.com/pufferpanel/pufferd/routing/server"
 	"strconv"
 )
 
@@ -45,8 +47,11 @@ func main() {
 	}
 
 	r := gin.Default()
-	routing.RegisterRootRoute(r)
-	routing.RegisterLegacyRoute(r)
+	{
+		routing.RegisterRoutes(r)
+		legacy.RegisterRoutes(r)
+		server.RegisterRoutes(r)
+	}
 
 	manners.ListenAndServe(":"+strconv.FormatInt(int64(port), 10), r)
 }

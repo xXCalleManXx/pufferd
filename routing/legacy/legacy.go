@@ -14,15 +14,14 @@
  limitations under the License.
 */
 
-// Package legacy implements the legacy API for compatibility with PufferPanel v0.8.x
-package routing
+package legacy
 
 import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterLegacyRoute(engine *gin.Engine) {
-	l := engine.Group("/legacy")
+func RegisterRoutes(e *gin.Engine) {
+	l := e.Group("/legacy")
 	{
 		l.GET("/server", GetServerInfo)
 		l.POST("/server", CreateServer)

@@ -22,8 +22,10 @@ import (
 	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/pufferd/environments/system"
 	"github.com/pufferpanel/pufferd/logging"
+	"github.com/pufferpanel/pufferd/permissions"
 	"github.com/pufferpanel/pufferd/programs/types"
 	"github.com/pufferpanel/pufferd/programs/types/data"
+	"github.com/pufferpanel/pufferd/utils"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -51,7 +53,7 @@ func LoadFromFolder() {
 			continue
 		}
 		id := strings.TrimSuffix(element.Name(), filepath.Ext(element.Name()))
-		data, err = ioutil.ReadFile(joinPath(serverFolder, element.Name()))
+		data, err = ioutil.ReadFile(utils.JoinPath(serverFolder, element.Name()))
 		if err != nil {
 			logging.Error(fmt.Sprintf("Error loading server details (%s)", element.Name()), err)
 			continue
@@ -80,7 +82,7 @@ func GetAll() []Program {
 
 func LoadProgram(id string) (program Program, err error) {
 	var data []byte
-	data, err = ioutil.ReadFile(joinPath(serverFolder, id+".json"))
+	data, err = ioutil.ReadFile(utils.JoinPath(serverFolder, id+".json"))
 	program, err = LoadProgramFromData(id, data)
 	return
 }
@@ -91,19 +93,20 @@ func LoadProgramFromData(id string, source []byte) (program Program, err error) 
 	if err != nil {
 		return
 	}
-	var pufferdData = GetMapOrNull(data, "pufferd")
-	var t = GetStringOrDefault(pufferdData, "type", nil)
-	var installSection = GetInstallSection(GetMapOrNull(pufferdData, "install"))
-	var runSection = GetMapOrNull(pufferdData, "run")
-	var environmentSection = GetMapOrNull(runSection, "environment")
+	var pufferdData = utils.GetMapOrNull(data, "pufferd")
+	var t = utils.GetStringOrDefault(pufferdData, "type", nil)
+	var installSection = getInstallSection(utils.GetMapOrNull(pufferdData, "install"))
+	var runSection = utils.GetMapOrNull(pufferdData, "run")
+	var environmentSection = utils.GetMapOrNull(runSection, "environment")
 	var environment environments.Environment
 	var defaultEnvType = "system"
-	var environmentType = GetStringOrDefault(environmentSection, "type", &defaultEnvType)
+	var environmentType = utils.GetStringOrDefault(environmentSection, "type", &defaultEnvType)
+	var permissions = permissions.Create(utils.GetMapOrNull(pufferdData, "permissions"))
 
 	switch environmentType {
 	case "system":
-		serverRoot := joinPath(serverFolder, id)
-		environment = &system.System{RootDirectory: GetStringOrDefault(environmentSection, "root", &serverRoot)}
+		serverRoot := utils.JoinPath(serverFolder, id)
+		environment = &system.System{RootDirectory: utils.GetStringOrDefault(environmentSection, "root", &serverRoot)}
 	}
 
 	switch t {
@@ -112,97 +115,27 @@ func LoadProgramFromData(id string, source []byte) (program Program, err error) 
 		if pufferdData["run"] == nil {
 			runBlock = types.JavaRun{}
 		} else {
-
-			var stop = GetStringOrDefault(runSection, "stop", nil)
-			var pre = GetStringArrayOrNull(runSection, "pre")
-			var post = GetStringArrayOrNull(runSection, "post")
-			var arguments = strings.Split(GetStringOrDefault(runSection, "arguments", nil), " ")
-			var enabled = GetBooleanOrDefault(runSection, "enabled", true)
+			var stop = utils.GetStringOrDefault(runSection, "stop", nil)
+			var pre = utils.GetStringArrayOrNull(runSection, "pre")
+			var post = utils.GetStringArrayOrNull(runSection, "post")
+			var arguments = strings.Split(utils.GetStringOrDefault(runSection, "arguments", nil), " ")
+			var enabled = utils.GetBooleanOrDefault(runSection, "enabled", true)
 
 			runBlock = types.JavaRun{Stop: stop, Pre: pre, Post: post, Arguments: arguments, Enabled: enabled}
 		}
-		program = types.NewJavaProgram(id, runBlock, installSection, environment)
+		program = types.NewJavaProgram(id, runBlock, installSection, environment, permissions)
 	}
 	return
 }
 
-func GetInstallSection(mapping map[string]interface{}) data.InstallSection {
+func getInstallSection(mapping map[string]interface{}) data.InstallSection {
 	var install = data.InstallSection{
-		Global:  GetObjectArrayOrNull(mapping, "commands"),
-		Linux:   GetObjectArrayOrNull(mapping, "linux"),
-		Mac:     GetObjectArrayOrNull(mapping, "mac"),
-		Windows: GetObjectArrayOrNull(mapping, "windows"),
+		Global:  utils.GetObjectArrayOrNull(mapping, "commands"),
+		Linux:   utils.GetObjectArrayOrNull(mapping, "linux"),
+		Mac:     utils.GetObjectArrayOrNull(mapping, "mac"),
+		Windows: utils.GetObjectArrayOrNull(mapping, "windows"),
 	}
 	return install
-}
-
-func GetStringOrDefault(data map[string]interface{}, key string, def *string) string {
-	if data == nil {
-		return *def
-	}
-	var section = data[key]
-	if section == nil {
-		return *def
-	} else {
-		return section.(string)
-	}
-}
-
-func GetBooleanOrDefault(data map[string]interface{}, key string, def bool) bool {
-	if data == nil {
-		return def
-	}
-	var section = data[key]
-	if section == nil {
-		return def
-	} else {
-		return section.(bool)
-	}
-}
-
-func GetMapOrNull(data map[string]interface{}, key string) map[string]interface{} {
-	if data == nil {
-		return (map[string]interface{})(nil)
-	}
-	var section = data[key]
-	if section == nil {
-		return (map[string]interface{})(nil)
-	} else {
-		return section.(map[string]interface{})
-	}
-}
-
-func GetObjectArrayOrNull(data map[string]interface{}, key string) []interface{} {
-	if data == nil {
-		return ([]interface{})(nil)
-	}
-	var section = data[key]
-	if section == nil {
-		return ([]interface{})(nil)
-	} else {
-		return section.([]interface{})
-	}
-}
-
-func GetStringArrayOrNull(data map[string]interface{}, key string) []string {
-	if data == nil {
-		return ([]string)(nil)
-	}
-	var section = data[key]
-	if section == nil {
-		return ([]string)(nil)
-	} else {
-		var sec = section.([]interface{})
-		var newArr = make([]string, len(sec))
-		for i := 0; i < len(sec); i++ {
-			newArr[i] = sec[i].(string)
-		}
-		return newArr
-	}
-}
-
-func joinPath(paths ...string) string {
-	return strings.Join(paths, string(filepath.Separator))
 }
 
 func getFromCache(id string) Program {
