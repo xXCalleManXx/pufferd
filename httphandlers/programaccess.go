@@ -33,4 +33,9 @@ func ProgramAccessHandler(c *gin.Context) {
 		c.AbortWithStatus(403)
 		return
 	}
+
+	if !program.GetPermissionManager().Exists(privKey) {
+		c.AbortWithStatus(403)
+		return
+	}
 }

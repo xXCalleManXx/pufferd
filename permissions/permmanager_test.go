@@ -25,7 +25,21 @@ func TestPermTracker_HasPermission_UserExistAndHasPerm(t *testing.T) {
 func TestPermTracker_HasPermission_UserDoesNotExist(t *testing.T) {
 	permTracker := createTestPermTracker()
 	if permTracker.HasPermission("userB", "permissionC") {
-		t.Error("userA should not have permissionC")
+		t.Error("userB should not have permissionC")
+	}
+}
+
+func TestPermTracker_Exists_UserExistAndHasPerm(t *testing.T) {
+	permTracker := createTestPermTracker()
+	if !permTracker.Exists("userA") {
+		t.Error("userA should exist")
+	}
+}
+
+func TestPermTracker_Exists_UserDoesNotExist(t *testing.T) {
+	permTracker := createTestPermTracker()
+	if permTracker.Exists("userB") {
+		t.Error("userB should not exist")
 	}
 }
 

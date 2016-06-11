@@ -8,6 +8,8 @@ type PermissionTracker interface {
 	HasPermission(id string, perm string) bool
 
 	Change(id string, perm string, grant bool)
+
+	Exists(id string) bool
 }
 
 type PermTracker struct {
@@ -32,4 +34,8 @@ func (pm *PermTracker) HasPermission(id string, perm string) bool {
 }
 
 func (pm *PermTracker) Change(id string, perm string, grant bool) {
+}
+
+func (pm *PermTracker) Exists(id string) bool {
+	return utils.GetStringArrayOrNull(pm.mapping, id) != nil
 }
