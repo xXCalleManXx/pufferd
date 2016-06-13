@@ -83,6 +83,10 @@ func GetAll() []Program {
 func LoadProgram(id string) (program Program, err error) {
 	var data []byte
 	data, err = ioutil.ReadFile(utils.JoinPath(serverFolder, id+".json"))
+	if len(data) == 0 || err != nil {
+		return
+	}
+
 	program, err = LoadProgramFromData(id, data)
 	return
 }

@@ -21,6 +21,7 @@ import (
 	"github.com/braintree/manners"
 	"github.com/gin-gonic/gin"
 	"github.com/pufferpanel/pufferd/logging"
+	"github.com/pufferpanel/pufferd/permissions"
 	"github.com/pufferpanel/pufferd/programs"
 	"github.com/pufferpanel/pufferd/routing"
 	"github.com/pufferpanel/pufferd/routing/legacy"
@@ -52,6 +53,8 @@ func main() {
 		legacy.RegisterRoutes(r)
 		server.RegisterRoutes(r)
 	}
+
+	permissions.GetGlobal()
 
 	manners.ListenAndServe(":"+strconv.FormatInt(int64(port), 10), r)
 }

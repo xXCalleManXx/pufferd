@@ -6,9 +6,9 @@ import (
 	"github.com/pufferpanel/pufferd/programs"
 )
 
-func ProgramAccessHandler(c *gin.Context) {
+func UserServerAccessHandler(c *gin.Context) {
 	privKey := c.Query("privkey")
-	serverId := c.Param("server")
+	serverId := c.Param("id")
 
 	if serverId == "" {
 		c.AbortWithStatus(400)
