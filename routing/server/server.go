@@ -18,13 +18,28 @@ func RegisterRoutes(e *gin.Engine) {
 	{
 		l1.GET("/:id/start", StartServer)
 		l1.GET("/:id/stop", StopServer)
+		l1.GET("/:id/install", InstallServer)
 	}
 }
 
 func StartServer(c *gin.Context) {
+	valid, existing := handleInitialCallServer(c, "server.start")
+
+	if !valid {
+		return
+	}
+
+	existing.Start()
 }
 
 func StopServer(c *gin.Context) {
+	valid, existing := handleInitialCallServer(c, "server.stop")
+
+	if !valid {
+		return
+	}
+
+	existing.Stop()
 }
 
 func CreateServer(c *gin.Context) {
@@ -45,24 +60,48 @@ func CreateServer(c *gin.Context) {
 		c.AbortWithStatus(409)
 		return
 	}
+
 	programs.Create(serverId, serverType, data)
 }
 
 func DeleteServer(c *gin.Context) {
+	valid, existing := handleInitialCallServer(c, "server.delete")
+
+	if !valid {
+		return
+	}
+
+	programs.Delete(existing.Id())
+}
+
+func InstallServer(c *gin.Context) {
+	valid, existing := handleInitialCallServer(c, "server.install")
+
+	if !valid {
+		return
+	}
+
+	existing.Install()
+}
+
+func handleInitialCallServer(c *gin.Context, perm string) (valid bool, program programs.Program) {
 	serverId := c.Param("id")
 	privKey := c.Query("privkey")
 
 	if !permissions.GetGlobal().HasPermission(privKey, "server.delete") {
 		c.AbortWithStatus(403)
+		valid = false
 		return
 	}
 
-	existing, _ := programs.Get(serverId)
+	program, _ = programs.Get(serverId)
 
-	if existing == nil {
+	if program == nil {
 		c.AbortWithStatus(404)
+		valid = false
 		return
 	}
 
-	programs.Delete(existing.Id())
+	valid = true
+	return;
 }
