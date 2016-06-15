@@ -21,7 +21,7 @@ func UserServerAccessHandler(c *gin.Context) {
 		return
 	}
 
-	program, err := programs.GetProgram(serverId)
+	program, err := programs.Get(serverId)
 
 	if err != nil {
 		logging.Error("Error testing permissions", err)

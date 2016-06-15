@@ -32,12 +32,10 @@ import (
 	"strings"
 )
 
-const (
-	serverFolder = "servers"
-)
-
 var (
-	programs []Program = make([]Program, 0)
+	programs       []Program = make([]Program, 0)
+	serverFolder   string    = utils.JoinPath("data", "servers")
+	templateFolder string    = utils.JoinPath("data", "templates")
 )
 
 func LoadFromFolder() {
@@ -58,7 +56,7 @@ func LoadFromFolder() {
 			logging.Error(fmt.Sprintf("Error loading server details (%s)", element.Name()), err)
 			continue
 		}
-		program, err = LoadProgramFromData(id, data)
+		program, err = LoadFromData(id, data)
 		if err != nil {
 			logging.Error(fmt.Sprintf("Error loading server details (%s)", element.Name()), err)
 			continue
@@ -68,10 +66,10 @@ func LoadFromFolder() {
 	}
 }
 
-func GetProgram(id string) (program Program, err error) {
-	program = getFromCache(id)
+func Get(id string) (program Program, err error) {
+	program = GetFromCache(id)
 	if program == nil {
-		program, err = LoadProgram(id)
+		program, err = Load(id)
 	}
 	return
 }
@@ -80,18 +78,18 @@ func GetAll() []Program {
 	return programs
 }
 
-func LoadProgram(id string) (program Program, err error) {
+func Load(id string) (program Program, err error) {
 	var data []byte
 	data, err = ioutil.ReadFile(utils.JoinPath(serverFolder, id+".json"))
 	if len(data) == 0 || err != nil {
 		return
 	}
 
-	program, err = LoadProgramFromData(id, data)
+	program, err = LoadFromData(id, data)
 	return
 }
 
-func LoadProgramFromData(id string, source []byte) (program Program, err error) {
+func LoadFromData(id string, source []byte) (program Program, err error) {
 	var data map[string]interface{}
 	err = json.Unmarshal(source, &data)
 	if err != nil {
@@ -132,6 +130,60 @@ func LoadProgramFromData(id string, source []byte) (program Program, err error) 
 	return
 }
 
+func Create(id string, serverType string, data map[string]interface{}) {
+	if GetFromCache(id) != nil {
+		return
+	}
+
+	templateData, err := ioutil.ReadFile(utils.JoinPath(templateFolder, serverType+".json"))
+
+	var templateJson map[string]interface{}
+	err = json.Unmarshal(templateData, &templateJson)
+
+	if err != nil {
+		logging.Error("Error reading template file for type "+serverType, err)
+		return
+	}
+	if data != nil {
+		segment := utils.GetMapOrNull(templateJson, "pufferd")
+		segment["data"] = data
+	}
+	err = ioutil.WriteFile(utils.JoinPath(serverFolder, id+".json"), templateData, 0644)
+	if err != nil {
+		logging.Error("Error writing server file", err)
+		return
+	}
+}
+
+func Delete(id string) (err error) {
+	var index int
+	var program Program
+	for i, element := range programs {
+		if element.Id() == id {
+			program = element
+			index = i
+			break
+		}
+	}
+	if program == nil {
+		return
+	}
+
+	err = program.Destroy()
+	os.Remove(utils.JoinPath(serverFolder, program.Id() + ".json"))
+	programs = append(programs[:index], programs[index+1:]...)
+	return
+}
+
+func GetFromCache(id string) Program {
+	for _, element := range programs {
+		if element.Id() == id {
+			return element
+		}
+	}
+	return nil
+}
+
 func getInstallSection(mapping map[string]interface{}) data.InstallSection {
 	var install = data.InstallSection{
 		Global:  utils.GetObjectArrayOrNull(mapping, "commands"),
@@ -140,13 +192,4 @@ func getInstallSection(mapping map[string]interface{}) data.InstallSection {
 		Windows: utils.GetObjectArrayOrNull(mapping, "windows"),
 	}
 	return install
-}
-
-func getFromCache(id string) Program {
-	for _, element := range programs {
-		if element.Id() == id {
-			return element
-		}
-	}
-	return nil
 }
