@@ -19,8 +19,8 @@ package programs
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/pufferpanel/pufferd/data/templates"
 	"github.com/pufferpanel/pufferd/environments"
-	"github.com/pufferpanel/pufferd/environments/system"
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/permissions"
 	"github.com/pufferpanel/pufferd/programs/types"
@@ -33,14 +33,13 @@ import (
 )
 
 var (
-	programs       []Program = make([]Program, 0)
-	serverFolder   string    = utils.JoinPath("data", "servers")
-	templateFolder string    = utils.JoinPath("data", "templates")
+	programs     []Program = make([]Program, 0)
+	ServerFolder string    = utils.JoinPath("data", "servers")
 )
 
 func LoadFromFolder() {
-	os.Mkdir(serverFolder, os.ModeDir)
-	var programFiles, err = ioutil.ReadDir(serverFolder)
+	os.Mkdir(ServerFolder, os.ModeDir)
+	var programFiles, err = ioutil.ReadDir(ServerFolder)
 	if err != nil {
 		logging.Critical("Error reading from server data folder", err)
 	}
@@ -51,7 +50,7 @@ func LoadFromFolder() {
 			continue
 		}
 		id := strings.TrimSuffix(element.Name(), filepath.Ext(element.Name()))
-		data, err = ioutil.ReadFile(utils.JoinPath(serverFolder, element.Name()))
+		data, err = ioutil.ReadFile(utils.JoinPath(ServerFolder, element.Name()))
 		if err != nil {
 			logging.Error(fmt.Sprintf("Error loading server details (%s)", element.Name()), err)
 			continue
@@ -80,7 +79,7 @@ func GetAll() []Program {
 
 func Load(id string) (program Program, err error) {
 	var data []byte
-	data, err = ioutil.ReadFile(utils.JoinPath(serverFolder, id+".json"))
+	data, err = ioutil.ReadFile(utils.JoinPath(ServerFolder, id+".json"))
 	if len(data) == 0 || err != nil {
 		return
 	}
@@ -95,7 +94,12 @@ func LoadFromData(id string, source []byte) (program Program, err error) {
 	if err != nil {
 		return
 	}
-	var pufferdData = utils.GetMapOrNull(data, "pufferd")
+	program, err = LoadFromMapping(id, data)
+	return
+}
+
+func LoadFromMapping(id string, source map[string]interface{}) (program Program, err error) {
+	var pufferdData = utils.GetMapOrNull(source, "pufferd")
 	var t = utils.GetStringOrDefault(pufferdData, "type", nil)
 	var installSection = getInstallSection(utils.GetMapOrNull(pufferdData, "install"))
 	var runSection = utils.GetMapOrNull(pufferdData, "run")
@@ -107,8 +111,8 @@ func LoadFromData(id string, source []byte) (program Program, err error) {
 
 	switch environmentType {
 	case "system":
-		serverRoot := utils.JoinPath(serverFolder, id)
-		environment = &system.System{RootDirectory: utils.GetStringOrDefault(environmentSection, "root", &serverRoot)}
+		serverRoot := utils.JoinPath(ServerFolder, id)
+		environment = &environments.System{RootDirectory: utils.GetStringOrDefault(environmentSection, "root", &serverRoot)}
 	}
 
 	switch t {
@@ -135,7 +139,7 @@ func Create(id string, serverType string, data map[string]interface{}) {
 		return
 	}
 
-	templateData, err := ioutil.ReadFile(utils.JoinPath(templateFolder, serverType+".json"))
+	templateData, err := ioutil.ReadFile(utils.JoinPath(templates.Folder, serverType+".json"))
 
 	var templateJson map[string]interface{}
 	err = json.Unmarshal(templateData, &templateJson)
@@ -148,11 +152,14 @@ func Create(id string, serverType string, data map[string]interface{}) {
 		segment := utils.GetMapOrNull(templateJson, "pufferd")
 		segment["data"] = data
 	}
-	err = ioutil.WriteFile(utils.JoinPath(serverFolder, id+".json"), templateData, 0644)
+	templateData, _ = json.Marshal(templateJson)
+	err = ioutil.WriteFile(utils.JoinPath(ServerFolder, id+".json"), templateData, 0644)
 	if err != nil {
 		logging.Error("Error writing server file", err)
 		return
 	}
+	program, _ := LoadFromMapping(id, templateJson)
+	programs = append(programs, program)
 }
 
 func Delete(id string) (err error) {
@@ -170,7 +177,7 @@ func Delete(id string) (err error) {
 	}
 
 	err = program.Destroy()
-	os.Remove(utils.JoinPath(serverFolder, program.Id() + ".json"))
+	os.Remove(utils.JoinPath(ServerFolder, program.Id()+".json"))
 	programs = append(programs[:index], programs[index+1:]...)
 	return
 }

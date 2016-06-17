@@ -20,12 +20,14 @@ import (
 	"flag"
 	"github.com/braintree/manners"
 	"github.com/gin-gonic/gin"
+	"github.com/pufferpanel/pufferd/data/templates"
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/permissions"
 	"github.com/pufferpanel/pufferd/programs"
 	"github.com/pufferpanel/pufferd/routing"
 	"github.com/pufferpanel/pufferd/routing/legacy"
 	"github.com/pufferpanel/pufferd/routing/server"
+	"os"
 	"strconv"
 )
 
@@ -37,6 +39,13 @@ func main() {
 	flag.Parse()
 
 	logging.SetLevelByString(loggingLevel)
+
+	if _, err := os.Stat(templates.Folder); os.IsNotExist(err) {
+		templates.CopyTemplates()
+	}
+	if _, err := os.Stat(programs.ServerFolder); os.IsNotExist(err) {
+		os.MkdirAll(programs.ServerFolder, os.ModeDir)
+	}
 
 	programs.LoadFromFolder()
 

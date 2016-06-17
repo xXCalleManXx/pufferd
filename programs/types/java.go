@@ -20,6 +20,7 @@ import (
 	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/pufferd/permissions"
 	"github.com/pufferpanel/pufferd/programs/types/data"
+	"github.com/pufferpanel/pufferd/utils"
 )
 
 type Java struct {
@@ -33,7 +34,7 @@ type Java struct {
 //Starts the program.
 //This includes starting the environment if it is not running.
 func (p *Java) Start() (err error) {
-	p.environment.ExecuteAsync("java", p.RunData.Arguments)
+	p.environment.ExecuteAsync("java", utils.ReplaceTokensInArr(p.RunData.Arguments, p.RunData.Data))
 	return
 }
 
@@ -123,6 +124,7 @@ type JavaRun struct {
 	Pre       []string
 	Post      []string
 	Arguments []string
+	Data      map[string]string
 	Enabled   bool
 }
 

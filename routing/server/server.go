@@ -103,5 +103,5 @@ func handleInitialCallServer(c *gin.Context, perm string) (valid bool, program p
 	}
 
 	valid = true
-	return;
+	return
 }

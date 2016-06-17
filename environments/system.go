@@ -14,7 +14,7 @@
  limitations under the License.
 */
 
-package system
+package environments
 
 import (
 	"errors"

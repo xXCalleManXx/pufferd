@@ -5,13 +5,18 @@ import (
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/utils"
 	"io/ioutil"
+	"os"
 )
 
 var globalTracker PermissionTracker
 
 func GetGlobal() PermissionTracker {
 	if globalTracker == nil {
-		data, err := ioutil.ReadFile(utils.JoinPath("data", "permissions.json"))
+		file := utils.JoinPath("data", "permissions.json")
+		if _, err := os.Stat(file); os.IsNotExist(err) {
+			ioutil.WriteFile(file, []byte("{}"), 0664)
+		}
+		data, err := ioutil.ReadFile(file)
 		if err != nil {
 			logging.Error("Error loading global permissions", err)
 		}
