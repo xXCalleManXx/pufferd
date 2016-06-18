@@ -18,10 +18,12 @@ package environments
 
 import (
 	"errors"
+	"github.com/pufferpanel/pufferd/logging"
 	"io"
 	"os"
 	"os/exec"
 	"strconv"
+	"syscall"
 	"time"
 )
 
@@ -37,7 +39,12 @@ func (s *System) Execute(cmd string, args []string) (stdOut []byte, err error) {
 	}
 	s.mainProcess = exec.Command(cmd, args...)
 	s.mainProcess.Dir = s.RootDirectory
-	stdOut, err = s.mainProcess.Output()
+	s.mainProcess.Stdout = os.Stdout
+	s.mainProcess.Stderr = os.Stderr
+	err = s.mainProcess.Run()
+	if err != nil && err.Error() != "exit status 1" {
+		logging.Error("Error starting process", err)
+	}
 	return
 }
 
@@ -48,6 +55,8 @@ func (s *System) ExecuteAsync(cmd string, args []string) (err error) {
 	}
 	s.mainProcess = exec.Command(cmd, args...)
 	s.mainProcess.Dir = s.RootDirectory
+	s.mainProcess.Stdout = os.Stdout
+	s.mainProcess.Stderr = os.Stderr
 	err = s.mainProcess.Start()
 	return
 }
@@ -90,7 +99,10 @@ func (s *System) IsRunning() (isRunning bool) {
 		process, pErr := os.FindProcess(s.mainProcess.Process.Pid)
 		if process == nil || pErr != nil {
 			isRunning = false
+		} else if process.Signal(syscall.Signal(0)) != nil {
+			isRunning = false
 		}
+
 	}
 	return
 }

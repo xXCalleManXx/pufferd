@@ -16,12 +16,23 @@
 
 package operations
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/pufferpanel/pufferd/environments"
+	"github.com/pufferpanel/pufferd/logging"
+	"os"
+	"path/filepath"
+)
 
 type Download struct {
-	File string
+	File        string
+	Environment environments.Environment
 }
 
 func (d *Download) Run() {
 	fmt.Println("Downloading file: " + d.File)
+	_, fileName := filepath.Split(d.File)
+	logging.Debug(os.Getenv("path"))
+	logging.Debug(os.Getenv("PATH"))
+	d.Environment.Execute("curl", []string{"-o", fileName, d.File})
 }

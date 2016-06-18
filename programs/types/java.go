@@ -72,7 +72,11 @@ func (p *Java) Update() (err error) {
 }
 
 func (p *Java) Install() (err error) {
-	process := data.GenerateInstallProcess(&p.InstallData)
+	if p.IsRunning() {
+		p.Stop()
+	}
+
+	process := data.GenerateInstallProcess(&p.InstallData, p.environment, p.RunData.Data)
 	for process.HasNext() {
 		process.RunNext()
 	}
@@ -80,7 +84,7 @@ func (p *Java) Install() (err error) {
 }
 
 //Determines if the server is running.
-func (p *Java) IsRunning() (isRunning bool, err error) {
+func (p *Java) IsRunning() (isRunning bool) {
 	isRunning = p.environment.IsRunning()
 	return
 }

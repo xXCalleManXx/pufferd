@@ -17,11 +17,13 @@
 package data
 
 import (
+	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/pufferd/programs/types/data/operations"
+	"github.com/pufferpanel/pufferd/utils"
 	"runtime"
 )
 
-func GenerateInstallProcess(data *InstallSection) InstallProcess {
+func GenerateInstallProcess(data *InstallSection, environment environments.Environment, datamap map[string]string) InstallProcess {
 	var directions []interface{}
 	switch runtime.GOOS {
 	case "windows":
@@ -39,12 +41,12 @@ func GenerateInstallProcess(data *InstallSection) InstallProcess {
 		var mapping = element.(map[string]interface{})
 		switch mapping["type"] {
 		case "command":
-			for _, element := range toStringArray(mapping["commands"]) {
-				ops = append(ops, &operations.Command{Command: element})
+			for _, element := range utils.ToStringArray(mapping["commands"]) {
+				ops = append(ops, &operations.Command{Command: utils.ReplaceTokens(element, datamap), Environment: environment})
 			}
 		case "download":
-			for _, element := range toStringArray(mapping["files"]) {
-				ops = append(ops, &operations.Download{File: element})
+			for _, element := range utils.ToStringArray(mapping["files"]) {
+				ops = append(ops, &operations.Download{File: utils.ReplaceTokens(element, datamap), Environment: environment})
 			}
 		}
 	}
@@ -64,19 +66,4 @@ func (p *InstallProcess) RunNext() error {
 
 func (p *InstallProcess) HasNext() bool {
 	return len(p.processInstructions) != 0 && p.processInstructions[0] != nil
-}
-
-func toStringArray(element interface{}) []string {
-	switch element.(type) {
-	case string:
-		return []string{element.(string)}
-	case []interface{}:
-		var arr = make([]string, 0)
-		for _, element := range element.([]interface{}) {
-			arr = append(arr, element.(string))
-		}
-		return arr
-	default:
-		return []string{}
-	}
 }

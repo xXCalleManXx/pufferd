@@ -34,7 +34,7 @@ func RegisterRoutes(e *gin.Engine) {
 	{
 		l1.GET("/:id/start", StartServer)
 		l1.GET("/:id/stop", StopServer)
-		l1.GET("/:id/install", InstallServer)
+		l1.POST("/:id/install", InstallServer)
 	}
 }
 

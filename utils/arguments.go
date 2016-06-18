@@ -16,7 +16,9 @@
 
 package utils
 
-import "strings"
+import (
+	"strings"
+)
 
 func ReplaceTokens(msg string, mapping map[string]string) string {
 	newmsg := msg

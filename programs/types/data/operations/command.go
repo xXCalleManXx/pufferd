@@ -16,12 +16,25 @@
 
 package operations
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/pufferpanel/pufferd/environments"
+	"github.com/pufferpanel/pufferd/logging"
+	"strings"
+)
 
 type Command struct {
-	Command string
+	Command     string
+	Environment environments.Environment
 }
 
 func (c *Command) Run() {
 	fmt.Println("Running command: " + c.Command)
+	parts := strings.Split(c.Command, " ")
+	cmd := parts[0]
+	args := parts[1:]
+	_, err := c.Environment.Execute(cmd, args)
+	if err != nil {
+		logging.Error("Error running command", err)
+	}
 }

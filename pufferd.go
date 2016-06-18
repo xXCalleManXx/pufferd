@@ -34,7 +34,7 @@ import (
 func main() {
 	var loggingLevel string
 	var port int
-	flag.StringVar(&loggingLevel, "logging", "INFO", "Lowest logging level to display")
+	flag.StringVar(&loggingLevel, "logging", "DEBUG", "Lowest logging level to display")
 	flag.IntVar(&port, "port", 5656, "Port to run service on")
 	flag.Parse()
 

@@ -108,6 +108,11 @@ func LoadFromMapping(id string, source map[string]interface{}) (program Program,
 	var defaultEnvType = "system"
 	var environmentType = utils.GetStringOrDefault(environmentSection, "type", &defaultEnvType)
 	var permissions = permissions.Create(utils.GetMapOrNull(pufferdData, "permissions"))
+	var dataSection = utils.GetMapOrNull(pufferdData, "data")
+	dataCasted := make(map[string]string, len(dataSection))
+	for key, value := range dataSection {
+		dataCasted[key] = value.(string)
+	}
 
 	switch environmentType {
 	case "system":
@@ -127,7 +132,7 @@ func LoadFromMapping(id string, source map[string]interface{}) (program Program,
 			var arguments = strings.Split(utils.GetStringOrDefault(runSection, "arguments", nil), " ")
 			var enabled = utils.GetBooleanOrDefault(runSection, "enabled", true)
 
-			runBlock = types.JavaRun{Stop: stop, Pre: pre, Post: post, Arguments: arguments, Enabled: enabled}
+			runBlock = types.JavaRun{Stop: stop, Pre: pre, Post: post, Arguments: arguments, Enabled: enabled, Data: dataCasted}
 		}
 		program = types.NewJavaProgram(id, runBlock, installSection, environment, permissions)
 	}

@@ -41,7 +41,7 @@ func Shutdown(c *gin.Context) {
 	}
 
 	for _, element := range programs.GetAll() {
-		running, _ := element.IsRunning()
+		running := element.IsRunning()
 		if running {
 			logging.Info("Stopping program " + element.Id())
 			element.Stop()

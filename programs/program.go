@@ -47,7 +47,7 @@ type Program interface {
 	Install() (err error)
 
 	//Determines if the server is running.
-	IsRunning() (isRunning bool, err error)
+	IsRunning() (isRunning bool)
 
 	//Sends a command to the process
 	//If the program supports input, this will send the arguments to that.
