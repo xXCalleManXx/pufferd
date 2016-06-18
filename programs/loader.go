@@ -160,6 +160,7 @@ func Create(id string, serverType string, data map[string]interface{}) {
 	}
 	program, _ := LoadFromMapping(id, templateJson)
 	programs = append(programs, program)
+	program.Create()
 }
 
 func Delete(id string) (err error) {
