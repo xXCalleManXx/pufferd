@@ -21,10 +21,10 @@ import (
 	"fmt"
 	"github.com/pufferpanel/pufferd/data/templates"
 	"github.com/pufferpanel/pufferd/environments"
+	"github.com/pufferpanel/pufferd/install"
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/permissions"
 	"github.com/pufferpanel/pufferd/programs/types"
-	"github.com/pufferpanel/pufferd/programs/types/data"
 	"github.com/pufferpanel/pufferd/utils"
 	"io/ioutil"
 	"os"
@@ -197,8 +197,8 @@ func GetFromCache(id string) Program {
 	return nil
 }
 
-func getInstallSection(mapping map[string]interface{}) data.InstallSection {
-	var install = data.InstallSection{
+func getInstallSection(mapping map[string]interface{}) install.InstallSection {
+	var install = install.InstallSection{
 		Global:  utils.GetObjectArrayOrNull(mapping, "commands"),
 		Linux:   utils.GetObjectArrayOrNull(mapping, "linux"),
 		Mac:     utils.GetObjectArrayOrNull(mapping, "mac"),

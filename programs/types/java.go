@@ -18,14 +18,15 @@ package types
 
 import (
 	"github.com/pufferpanel/pufferd/environments"
+	"github.com/pufferpanel/pufferd/install"
 	"github.com/pufferpanel/pufferd/permissions"
-	"github.com/pufferpanel/pufferd/programs/types/data"
 	"github.com/pufferpanel/pufferd/utils"
+	"github.com/pufferpanel/pufferd/logging"
 )
 
 type Java struct {
 	RunData     JavaRun
-	InstallData data.InstallSection
+	InstallData install.InstallSection
 	environment environments.Environment
 	id          string
 	permissions permissions.PermissionTracker
@@ -76,9 +77,13 @@ func (p *Java) Install() (err error) {
 		p.Stop()
 	}
 
-	process := data.GenerateInstallProcess(&p.InstallData, p.environment, p.RunData.Data)
+	process := install.GenerateInstallProcess(&p.InstallData, p.environment, p.RunData.Data)
 	for process.HasNext() {
-		process.RunNext()
+		err := process.RunNext()
+		if err != nil {
+			logging.Error("Error running installer: ", err)
+			break
+		}
 	}
 	return
 }
@@ -132,7 +137,7 @@ type JavaRun struct {
 	Enabled   bool
 }
 
-func NewJavaProgram(id string, run JavaRun, install data.InstallSection, environment environments.Environment, permissions permissions.PermissionTracker) (program *Java) {
+func NewJavaProgram(id string, run JavaRun, install install.InstallSection, environment environments.Environment, permissions permissions.PermissionTracker) (program *Java) {
 	program = &Java{id: id, RunData: run, InstallData: install, environment: environment, permissions: permissions}
 	return
 }

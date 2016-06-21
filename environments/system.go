@@ -42,6 +42,9 @@ func (s *System) Execute(cmd string, args []string) (stdOut []byte, err error) {
 	s.mainProcess.Stdout = os.Stdout
 	s.mainProcess.Stderr = os.Stderr
 	err = s.mainProcess.Run()
+	go func() {
+		s.mainProcess.Wait()
+	}()
 	if err != nil && err.Error() != "exit status 1" {
 		logging.Error("Error starting process", err)
 	}
@@ -58,6 +61,9 @@ func (s *System) ExecuteAsync(cmd string, args []string) (err error) {
 	s.mainProcess.Stdout = os.Stdout
 	s.mainProcess.Stderr = os.Stderr
 	err = s.mainProcess.Start()
+	go func() {
+		s.mainProcess.Wait()
+	}()
 	return
 }
 
@@ -102,7 +108,6 @@ func (s *System) IsRunning() (isRunning bool) {
 		} else if process.Signal(syscall.Signal(0)) != nil {
 			isRunning = false
 		}
-
 	}
 	return
 }
@@ -114,7 +119,7 @@ func (s *System) WaitForMainProcess() (err error) {
 func (s *System) WaitForMainProcessFor(timeout int) (err error) {
 	if s.IsRunning() {
 		if timeout > 0 {
-			var timer = time.AfterFunc(time.Duration(timeout)*time.Millisecond, func() {
+			var timer = time.AfterFunc(time.Duration(timeout) * time.Millisecond, func() {
 				err = s.Kill()
 			})
 			err = s.mainProcess.Wait()
@@ -124,4 +129,8 @@ func (s *System) WaitForMainProcessFor(timeout int) (err error) {
 		}
 	}
 	return
+}
+
+func (s *System) GetRootDirectory() string {
+	return s.RootDirectory
 }

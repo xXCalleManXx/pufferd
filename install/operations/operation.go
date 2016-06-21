@@ -14,11 +14,8 @@
  limitations under the License.
 */
 
-package data
+package operations
 
-type InstallSection struct {
-	Global  []interface{}
-	Linux   []interface{}
-	Mac     []interface{}
-	Windows []interface{}
+type Operation interface {
+	Run() error
 }

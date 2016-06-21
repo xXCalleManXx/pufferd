@@ -29,6 +29,7 @@ import (
 	"github.com/pufferpanel/pufferd/routing/server"
 	"os"
 	"strconv"
+	"io/ioutil"
 )
 
 func main() {
@@ -39,10 +40,15 @@ func main() {
 	flag.Parse()
 
 	logging.SetLevelByString(loggingLevel)
+	gin.SetMode(gin.ReleaseMode)
 
 	if _, err := os.Stat(templates.Folder); os.IsNotExist(err) {
 		templates.CopyTemplates()
 	}
+	if files, _ := ioutil.ReadDir(templates.Folder); len(files) == 0 {
+		templates.CopyTemplates()
+	}
+
 	if _, err := os.Stat(programs.ServerFolder); os.IsNotExist(err) {
 		os.MkdirAll(programs.ServerFolder, os.ModeDir)
 	}

@@ -39,7 +39,7 @@ func RegisterRoutes(e *gin.Engine) {
 }
 
 func StartServer(c *gin.Context) {
-	valid, existing := handleInitialCallServer(c, "server.start")
+	valid, existing := handleInitialCallServer(c, "server.start", false)
 
 	if !valid {
 		return
@@ -49,7 +49,7 @@ func StartServer(c *gin.Context) {
 }
 
 func StopServer(c *gin.Context) {
-	valid, existing := handleInitialCallServer(c, "server.stop")
+	valid, existing := handleInitialCallServer(c, "server.stop", false)
 
 	if !valid {
 		return
@@ -64,6 +64,7 @@ func CreateServer(c *gin.Context) {
 	serverType := c.Query("type")
 	data := make(map[string]interface{}, 0)
 	data["memory"] = "1024M"
+	data["version"] = "1.10"
 
 	if !permissions.GetGlobal().HasPermission(privKey, "server.create") {
 		c.AbortWithStatus(403)
@@ -81,7 +82,7 @@ func CreateServer(c *gin.Context) {
 }
 
 func DeleteServer(c *gin.Context) {
-	valid, existing := handleInitialCallServer(c, "server.delete")
+	valid, existing := handleInitialCallServer(c, "server.delete", true)
 
 	if !valid {
 		return
@@ -91,7 +92,7 @@ func DeleteServer(c *gin.Context) {
 }
 
 func InstallServer(c *gin.Context) {
-	valid, existing := handleInitialCallServer(c, "server.install")
+	valid, existing := handleInitialCallServer(c, "server.install", false)
 
 	if !valid {
 		return
@@ -100,11 +101,11 @@ func InstallServer(c *gin.Context) {
 	existing.Install()
 }
 
-func handleInitialCallServer(c *gin.Context, perm string) (valid bool, program programs.Program) {
+func handleInitialCallServer(c *gin.Context, perm string, requireGlobal bool) (valid bool, program programs.Program) {
 	serverId := c.Param("id")
 	privKey := c.Query("privkey")
 
-	if !permissions.GetGlobal().HasPermission(privKey, "server.delete") {
+	if requireGlobal && !permissions.GetGlobal().HasPermission(privKey, perm) {
 		c.AbortWithStatus(403)
 		valid = false
 		return
@@ -114,6 +115,12 @@ func handleInitialCallServer(c *gin.Context, perm string) (valid bool, program p
 
 	if program == nil {
 		c.AbortWithStatus(404)
+		valid = false
+		return
+	}
+
+	if !requireGlobal && !program.GetPermissionManager().HasPermission(privKey, perm) {
+		c.AbortWithStatus(403)
 		valid = false
 		return
 	}

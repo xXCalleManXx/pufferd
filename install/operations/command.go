@@ -19,20 +19,19 @@ package operations
 import (
 	"fmt"
 	"github.com/pufferpanel/pufferd/environments"
-	"github.com/pufferpanel/pufferd/logging"
-	"os"
-	"path/filepath"
+	"strings"
 )
 
-type Download struct {
-	File        string
+type Command struct {
+	Command     string
 	Environment environments.Environment
 }
 
-func (d *Download) Run() {
-	fmt.Println("Downloading file: " + d.File)
-	_, fileName := filepath.Split(d.File)
-	logging.Debug(os.Getenv("path"))
-	logging.Debug(os.Getenv("PATH"))
-	d.Environment.Execute("curl", []string{"-o", fileName, d.File})
+func (c *Command) Run() error{
+	fmt.Println("Running command: " + c.Command)
+	parts := strings.Split(c.Command, " ")
+	cmd := parts[0]
+	args := parts[1:]
+	_, err := c.Environment.Execute(cmd, args)
+	return err
 }

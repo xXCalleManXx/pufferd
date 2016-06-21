@@ -14,11 +14,11 @@
  limitations under the License.
 */
 
-package data
+package install
 
 import (
 	"github.com/pufferpanel/pufferd/environments"
-	"github.com/pufferpanel/pufferd/programs/types/data/operations"
+	"github.com/pufferpanel/pufferd/install/operations"
 	"github.com/pufferpanel/pufferd/utils"
 	"runtime"
 )
@@ -60,8 +60,8 @@ type InstallProcess struct {
 func (p *InstallProcess) RunNext() error {
 	var op operations.Operation
 	op, p.processInstructions = p.processInstructions[0], p.processInstructions[1:]
-	op.Run()
-	return nil
+	err := op.Run()
+	return err
 }
 
 func (p *InstallProcess) HasNext() bool {

@@ -18,23 +18,17 @@ package operations
 
 import (
 	"fmt"
+	"github.com/cavaliercoder/grab"
 	"github.com/pufferpanel/pufferd/environments"
-	"github.com/pufferpanel/pufferd/logging"
-	"strings"
 )
 
-type Command struct {
-	Command     string
+type Download struct {
+	File        string
 	Environment environments.Environment
 }
 
-func (c *Command) Run() {
-	fmt.Println("Running command: " + c.Command)
-	parts := strings.Split(c.Command, " ")
-	cmd := parts[0]
-	args := parts[1:]
-	_, err := c.Environment.Execute(cmd, args)
-	if err != nil {
-		logging.Error("Error running command", err)
-	}
+func (d *Download) Run() error {
+	fmt.Println("Downloading file: " + d.File)
+	_, err := grab.Get(d.Environment.GetRootDirectory(), d.File)
+	return err
 }

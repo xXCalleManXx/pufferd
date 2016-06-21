@@ -23,13 +23,19 @@ import (
 	"os"
 )
 
-const Folder = "data"
+var Folder = utils.JoinPath("data", "templates")
 
 func CopyTemplates() {
 	os.MkdirAll(Folder, os.ModeDir)
 
-	data := Minecraft
-	writeFile("minecraft", data)
+	data := Spigot
+	writeFile("spigot", data)
+
+	data = CraftbukkitBySpigot
+	writeFile("fakecraftbukkit", data)
+
+	data = Vanilla
+	writeFile("vanilla", data)
 }
 
 func writeFile(name string, data string) {

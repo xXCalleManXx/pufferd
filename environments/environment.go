@@ -40,4 +40,6 @@ type Environment interface {
 	WaitForMainProcess() (err error)
 
 	WaitForMainProcessFor(timeout int) (err error)
+
+	GetRootDirectory() string
 }
