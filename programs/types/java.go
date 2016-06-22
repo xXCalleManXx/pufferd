@@ -22,6 +22,7 @@ import (
 	"github.com/pufferpanel/pufferd/permissions"
 	"github.com/pufferpanel/pufferd/utils"
 	"github.com/pufferpanel/pufferd/logging"
+	"os"
 )
 
 type Java struct {
@@ -76,6 +77,8 @@ func (p *Java) Install() (err error) {
 	if p.IsRunning() {
 		p.Stop()
 	}
+
+	os.MkdirAll(p.environment.GetRootDirectory(), os.ModeDir)
 
 	process := install.GenerateInstallProcess(&p.InstallData, p.environment, p.RunData.Data)
 	for process.HasNext() {

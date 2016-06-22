@@ -17,9 +17,9 @@
 package operations
 
 import (
-	"fmt"
 	"github.com/cavaliercoder/grab"
 	"github.com/pufferpanel/pufferd/environments"
+	"github.com/pufferpanel/pufferd/logging"
 )
 
 type Download struct {
@@ -28,7 +28,7 @@ type Download struct {
 }
 
 func (d *Download) Run() error {
-	fmt.Println("Downloading file: " + d.File)
+	logging.Debugf("Download file from %s to %s", d.File, d.Environment.GetRootDirectory())
 	_, err := grab.Get(d.Environment.GetRootDirectory(), d.File)
 	return err
 }

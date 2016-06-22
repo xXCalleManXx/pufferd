@@ -52,12 +52,12 @@ func LoadFromFolder() {
 		id := strings.TrimSuffix(element.Name(), filepath.Ext(element.Name()))
 		data, err = ioutil.ReadFile(utils.JoinPath(ServerFolder, element.Name()))
 		if err != nil {
-			logging.Error(fmt.Sprintf("Error loading server details (%s)", element.Name()), err)
+			logging.Error(fmt.Sprintf("Error loading server details from file (%s)", element.Name()), err)
 			continue
 		}
 		program, err = LoadFromData(id, data)
 		if err != nil {
-			logging.Error(fmt.Sprintf("Error loading server details (%s)", element.Name()), err)
+			logging.Error(fmt.Sprintf("Error loading server details from json (%s)", element.Name()), err)
 			continue
 		}
 		logging.Infof("Loaded server %s as %s", program.Id(), program.Name())
