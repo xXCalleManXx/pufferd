@@ -131,6 +131,10 @@ func (p *Java) GetPermissionManager() permissions.PermissionTracker {
 	return p.permissions
 }
 
+func (p *Java) GetEnvironment() environments.Environment {
+	return p.environment
+}
+
 type JavaRun struct {
 	Stop      string
 	Pre       []string

@@ -64,4 +64,6 @@ type Program interface {
 	Name() string
 
 	GetPermissionManager() permissions.PermissionTracker
+
+	GetEnvironment() environments.Environment
 }

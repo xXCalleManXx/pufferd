@@ -21,6 +21,10 @@ import (
 	"github.com/pufferpanel/pufferd/httphandlers"
 	"github.com/pufferpanel/pufferd/permissions"
 	"github.com/pufferpanel/pufferd/programs"
+	"os"
+	"io"
+	"github.com/pufferpanel/pufferd/logging"
+	"github.com/pufferpanel/pufferd/utils"
 )
 
 func RegisterRoutes(e *gin.Engine) {
@@ -35,6 +39,8 @@ func RegisterRoutes(e *gin.Engine) {
 		l1.GET("/:id/start", StartServer)
 		l1.GET("/:id/stop", StopServer)
 		l1.POST("/:id/install", InstallServer)
+		l1.GET("/:id/file/:filename", GetFile);
+		l1.PUT("/:id/file/:filename", PutFile);
 	}
 }
 
@@ -99,6 +105,54 @@ func InstallServer(c *gin.Context) {
 	}
 
 	existing.Install()
+}
+
+func GetFile(c *gin.Context) {
+
+	valid, server := handleInitialCallServer(c, "server.file.put", false)
+
+	if !valid {
+		return
+	}
+
+	//TODO: We cannot allow system access, we need to protect things here
+	targetPath := c.Param("filename")
+	if targetPath == "" {
+		c.Status(404)
+		return
+	}
+
+	c.File(utils.JoinPath(server.GetEnvironment().GetRootDirectory(), targetPath))
+}
+
+func PutFile(c *gin.Context) {
+	valid, server := handleInitialCallServer(c, "server.file.put", false)
+
+	if !valid {
+		return
+	}
+
+	//TODO: We cannot allow system access, we need to protect things here
+
+	targetPath := c.Param("filename")
+
+	if targetPath == "" {
+		c.Status(404)
+		return
+	}
+
+	file, err := os.Create(utils.JoinPath(server.GetEnvironment().GetRootDirectory(), targetPath))
+
+	if err != nil {
+		logging.Error("Error writing file", err)
+		return
+	}
+
+	_, err = io.Copy(file, c.Request.Body)
+
+	if err != nil {
+		logging.Error("Error writing file", err)
+	}
 }
 
 func handleInitialCallServer(c *gin.Context, perm string, requireGlobal bool) (valid bool, program programs.Program) {
