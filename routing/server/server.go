@@ -109,7 +109,7 @@ func InstallServer(c *gin.Context) {
 
 func GetFile(c *gin.Context) {
 
-	valid, server := handleInitialCallServer(c, "server.file.put", false)
+	valid, server := handleInitialCallServer(c, "server.file.get", false)
 
 	if !valid {
 		return
