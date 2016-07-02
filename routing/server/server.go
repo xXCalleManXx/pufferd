@@ -17,6 +17,8 @@
 package server
 
 import (
+	"encoding/json"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/pufferpanel/pufferd/httphandlers"
 	"github.com/pufferpanel/pufferd/logging"
@@ -25,8 +27,6 @@ import (
 	"github.com/pufferpanel/pufferd/utils"
 	"io"
 	"os"
-	"encoding/json"
-	"errors"
 )
 
 func RegisterRoutes(e *gin.Engine) {

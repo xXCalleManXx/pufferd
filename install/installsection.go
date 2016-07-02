@@ -16,13 +16,18 @@
 
 package install
 
+import (
+	"encoding/json"
+)
+
 type InstallSection struct {
-	global  []interface{}
-	linux   []interface{}
-	mac     []interface{}
-	windows []interface{}
+	Global  []interface{} `json:"commands,omitempty"`
+	Linux   []interface{} `json:"linux,omitempty"`
+	Mac     []interface{} `json:"mac,omitempty"`
+	Windows []interface{} `json:"windows,omitempty"`
 }
 
-func Generate(global []interface{}, linux []interface{}, mac []interface{}, windows []interface{}) InstallSection {
-	return InstallSection{global: global, linux: linux, mac: mac, windows: windows}
+func (i *InstallSection) SaveToString() string {
+	str, _ := json.Marshal(i)
+	return string(str)
 }

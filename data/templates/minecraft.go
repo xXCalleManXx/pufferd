@@ -52,9 +52,11 @@ const Spigot = `{
       "stop": "/stop",
       "pre": [],
       "post": [],
-      "arguments": "-Xmx${memory} -jar server.jar"
-    },
-    "permissions": {
+      "arguments": [
+      	"-Xmx${memory}",
+      	"-jar",
+      	"server.jar"
+      ]
     },
     "data": {
       "version": "1.10"
@@ -98,9 +100,11 @@ const CraftbukkitBySpigot = `{
       "stop": "/stop",
       "pre": [],
       "post": [],
-      "arguments": "-Xmx${memory} -jar server.jar"
-    },
-    "permissions": {
+      "arguments": [
+      	"-Xmx${memory}",
+      	"-jar",
+      	"server.jar"
+      ]
     },
     "data": {
       "version": "1.10"
@@ -123,9 +127,11 @@ const Vanilla = `{
       "stop": "/stop",
       "pre": [],
       "post": [],
-      "arguments": "-Xmx${memory} -jar minecraft_server.${version}.jar"
-    },
-    "permissions": {
+      "arguments": [
+      	"-Xmx${memory}",
+      	"-jar",
+      	"minecraft_server.${version}.jar"
+      ]
     },
     "data": {
       "version": "1.10"

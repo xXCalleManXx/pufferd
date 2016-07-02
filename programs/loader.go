@@ -44,19 +44,13 @@ func LoadFromFolder() {
 	if err != nil {
 		logging.Critical("Error reading from server data folder", err)
 	}
-	var data []byte
 	var program Program
 	for _, element := range programFiles {
 		if element.IsDir() {
 			continue
 		}
 		id := strings.TrimSuffix(element.Name(), filepath.Ext(element.Name()))
-		data, err = ioutil.ReadFile(utils.JoinPath(ServerFolder, element.Name()))
-		if err != nil {
-			logging.Error(fmt.Sprintf("Error loading server details from file (%s)", element.Name()), err)
-			continue
-		}
-		program, err = LoadFromData(id, data)
+		program, err = Load(id)
 		if err != nil {
 			logging.Error(fmt.Sprintf("Error loading server details from json (%s)", element.Name()), err)
 			continue
@@ -130,13 +124,12 @@ func LoadFromMapping(id string, source map[string]interface{}) (program Program,
 			var stop = utils.GetStringOrDefault(runSection, "stop", "")
 			var pre = utils.GetStringArrayOrNull(runSection, "pre")
 			var post = utils.GetStringArrayOrNull(runSection, "post")
-			var arguments = strings.Split(utils.GetStringOrDefault(runSection, "arguments", ""), " ")
+			var arguments = utils.GetStringArrayOrNull(runSection, "arguments")
 			var enabled = utils.GetBooleanOrDefault(runSection, "enabled", true)
 			var autostart = utils.GetBooleanOrDefault(runSection, "autostart", true)
-
-			runBlock = types.NewJavaRun(stop, pre, post, arguments, dataCasted, enabled, autostart)
+			runBlock = types.JavaRun{Stop: stop, Pre: pre, Post: post, Arguments: arguments, Enabled: enabled, AutoStart: autostart}
 		}
-		program = types.NewJavaProgram(id, runBlock, installSection, environment, permissions)
+		program = &types.Java{Data: dataCasted, Identifier: id, RunData: runBlock, InstallData: installSection, Environment: environment, Permissions: permissions}
 	}
 	return
 }
@@ -163,7 +156,7 @@ func Create(id string, serverType string, user string, data map[string]interface
 
 	userPerms := make(map[string]interface{}, 0)
 	userPerms[user] = append(make([]string, 0), ".*")
-	segment["permissions"] = userPerms;
+	segment["permissions"] = userPerms
 
 	templateData, _ = json.Marshal(templateJson)
 	err = ioutil.WriteFile(utils.JoinPath(ServerFolder, id+".json"), templateData, 0644)
@@ -218,9 +211,10 @@ func Save(id string) (err error) {
 }
 
 func getInstallSection(mapping map[string]interface{}) install.InstallSection {
-	return install.Generate(
-		utils.GetObjectArrayOrNull(mapping, "global"),
-		utils.GetObjectArrayOrNull(mapping, "linux"),
-		utils.GetObjectArrayOrNull(mapping, "mac"),
-		utils.GetObjectArrayOrNull(mapping, "windows"))
+	return install.InstallSection{
+		Global:  utils.GetObjectArrayOrNull(mapping, "commands"),
+		Linux:   utils.GetObjectArrayOrNull(mapping, "linux"),
+		Mac:     utils.GetObjectArrayOrNull(mapping, "mac"),
+		Windows: utils.GetObjectArrayOrNull(mapping, "windows"),
+	}
 }

@@ -30,43 +30,44 @@ import (
 type Java struct {
 	RunData     JavaRun
 	InstallData install.InstallSection
-	environment environments.Environment
-	id          string
-	permissions permissions.PermissionTracker
+	Environment environments.Environment
+	Identifier  string
+	Permissions permissions.PermissionTracker
+	Data        map[string]string
 }
 
 //Starts the program.
 //This includes starting the environment if it is not running.
 func (p *Java) Start() (err error) {
-	p.environment.ExecuteAsync("java", utils.ReplaceTokensInArr(p.RunData.arguments, p.RunData.data))
+	p.Environment.ExecuteAsync("java", utils.ReplaceTokensInArr(p.RunData.Arguments, p.Data))
 	return
 }
 
 //Stops the program.
 //This will also stop the environment it is ran in.
 func (p *Java) Stop() (err error) {
-	err = p.environment.ExecuteInMainProcess(p.RunData.stop)
+	err = p.Environment.ExecuteInMainProcess(p.RunData.Stop)
 	return
 }
 
 //Kills the program.
 //This will also stop the environment it is ran in.
 func (p *Java) Kill() (err error) {
-	err = p.environment.Kill()
+	err = p.Environment.Kill()
 	return
 }
 
 //Creates any files needed for the program.
 //This includes creating the environment.
 func (p *Java) Create() (err error) {
-	err = p.environment.Create()
+	err = p.Environment.Create()
 	return
 }
 
 //Destroys the server.
 //This will delete the server, environment, and any files related to it.
 func (p *Java) Destroy() (err error) {
-	err = p.environment.Delete()
+	err = p.Environment.Delete()
 	return
 }
 
@@ -80,9 +81,9 @@ func (p *Java) Install() (err error) {
 		p.Stop()
 	}
 
-	os.MkdirAll(p.environment.GetRootDirectory(), os.ModeDir)
+	os.MkdirAll(p.Environment.GetRootDirectory(), os.ModeDir)
 
-	process := install.GenerateInstallProcess(&p.InstallData, p.environment, p.RunData.data)
+	process := install.GenerateInstallProcess(&p.InstallData, p.Environment, p.Data)
 	for process.HasNext() {
 		err := process.RunNext()
 		if err != nil {
@@ -95,34 +96,34 @@ func (p *Java) Install() (err error) {
 
 //Determines if the server is running.
 func (p *Java) IsRunning() (isRunning bool) {
-	isRunning = p.environment.IsRunning()
+	isRunning = p.Environment.IsRunning()
 	return
 }
 
 //Sends a command to the process
 //If the program supports input, this will send the arguments to that.
 func (p *Java) Execute(command string) (err error) {
-	err = p.environment.ExecuteInMainProcess(command)
+	err = p.Environment.ExecuteInMainProcess(command)
 	return
 }
 
 func (p *Java) SetEnabled(isEnabled bool) (err error) {
-	p.RunData.enabled = isEnabled
+	p.RunData.Enabled = isEnabled
 	return
 }
 
 func (p *Java) IsEnabled() (isEnabled bool) {
-	isEnabled = p.RunData.enabled
+	isEnabled = p.RunData.Enabled
 	return
 }
 
 func (p *Java) SetEnvironment(environment environments.Environment) (err error) {
-	p.environment = environment
+	p.Environment = environment
 	return
 }
 
 func (p *Java) Id() string {
-	return p.id
+	return p.Identifier
 }
 
 func (p *Java) Name() string {
@@ -130,27 +131,27 @@ func (p *Java) Name() string {
 }
 
 func (p *Java) GetPermissionManager() permissions.PermissionTracker {
-	return p.permissions
+	return p.Permissions
 }
 
 func (p *Java) GetEnvironment() environments.Environment {
-	return p.environment
+	return p.Environment
 }
 
 func (p *Java) SetAutoStart(isAutoStart bool) (err error) {
-	p.RunData.autostart = isAutoStart
+	p.RunData.AutoStart = isAutoStart
 	return
 }
 
 func (p *Java) IsAutoStart() (isAutoStart bool) {
-	return p.RunData.autostart
+	return p.RunData.AutoStart
 }
 
 func (p *Java) Save(file string) (err error) {
 	result := make(map[string]interface{})
-	result["data"] = p.RunData.data
+	result["data"] = p.Data
 	result["install"] = p.InstallData
-	result["permissions"] = p.permissions.GetMap()
+	result["permissions"] = p.Permissions.GetMap()
 	result["run"] = p.RunData
 	result["type"] = "java"
 
@@ -167,20 +168,10 @@ func (p *Java) Save(file string) (err error) {
 }
 
 type JavaRun struct {
-	stop      string
-	pre       []string
-	post      []string
-	arguments []string
-	data      map[string]string
-	enabled   bool
-	autostart bool
-}
-
-func NewJavaProgram(id string, run JavaRun, install install.InstallSection, environment environments.Environment, permissions permissions.PermissionTracker) (program *Java) {
-	program = &Java{id: id, RunData: run, InstallData: install, environment: environment, permissions: permissions}
-	return
-}
-
-func NewJavaRun(stop string, pre []string, post []string, arguments []string, data map[string]string, enabled bool, autostart bool) JavaRun {
-	return JavaRun{stop: stop, pre: pre, post: post, arguments: arguments, data: data, autostart: autostart, enabled: enabled}
+	Stop      string   `json:"stop"`
+	Pre       []string `json:"pre,omitempty"`
+	Post      []string `json:"post,omitempty"`
+	Arguments []string `json:"arguments"`
+	Enabled   bool     `json:"enabled"`
+	AutoStart bool     `json:"autostart"`
 }
