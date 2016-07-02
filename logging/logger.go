@@ -115,14 +115,10 @@ func SetLevelByString(lvl string) {
 }
 
 func log(lvl level, msg string, data ...interface{}) {
-	if lvl.scale < loggingLevel.scale {
-		return
-	}
 	var dataLength = len(data[0].([]interface{}))
 	if data == nil || dataLength == 0 {
 		var output = fmt.Sprintf(formatNoData, getTimestamp(), lvl.display, msg)
-		fmt.Print(output)
-		logFile.WriteString(output)
+		logString(lvl, output)
 	} else {
 		cast := make([]interface{}, 4)
 		cast[0] = getTimestamp()
@@ -134,24 +130,26 @@ func log(lvl level, msg string, data ...interface{}) {
 			cast[3] = data[0].([]interface{})
 		}
 		var output = fmt.Sprintf(formatWithData, cast...)
-		fmt.Print(output)
-		logFile.WriteString(output)
+		logString(lvl, output)
 	}
 }
 
 func logf(lvl level, msg string, data ...interface{}) {
-	if lvl.scale < loggingLevel.scale {
-		return
-	}
 	if data == nil || len(data[0].([]interface{})) == 0 {
 		var output = fmt.Sprintf(formatNoData, getTimestamp(), lvl.display, msg)
-		fmt.Print(output)
-		logFile.WriteString(output)
+		logString(lvl, output)
 	} else {
 		var output = fmt.Sprintf(formatNoData, getTimestamp(), lvl.display, fmt.Sprintf(msg, data[0].([]interface{})...))
-		fmt.Print(output)
-		logFile.WriteString(output)
+		logString(lvl, output)
 	}
+}
+
+func logString(lvl level, output string) {
+	if lvl.scale >= loggingLevel.scale {
+		fmt.Print(output)
+	}
+	logFile.WriteString(output)
+	logFile.Sync()
 }
 
 func getTimestamp() string {

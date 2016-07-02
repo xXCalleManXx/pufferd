@@ -119,7 +119,7 @@ func (s *System) WaitForMainProcess() (err error) {
 func (s *System) WaitForMainProcessFor(timeout int) (err error) {
 	if s.IsRunning() {
 		if timeout > 0 {
-			var timer = time.AfterFunc(time.Duration(timeout) * time.Millisecond, func() {
+			var timer = time.AfterFunc(time.Duration(timeout)*time.Millisecond, func() {
 				err = s.Kill()
 			})
 			err = s.mainProcess.Wait()

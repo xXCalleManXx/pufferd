@@ -18,6 +18,7 @@ package permissions
 
 import (
 	"github.com/pufferpanel/pufferd/utils"
+	"regexp"
 )
 
 type PermissionTracker interface {
@@ -26,6 +27,8 @@ type PermissionTracker interface {
 	Change(id string, perm string, grant bool)
 
 	Exists(id string) bool
+
+	GetMap() map[string]interface{}
 }
 
 type PermTracker struct {
@@ -42,7 +45,7 @@ func (pm *PermTracker) HasPermission(id string, perm string) bool {
 		return false
 	}
 	for _, element := range perms {
-		if element == perm {
+		if match, _ := regexp.Match(element, []byte(perm)); match {
 			return true
 		}
 	}
@@ -54,4 +57,8 @@ func (pm *PermTracker) Change(id string, perm string, grant bool) {
 
 func (pm *PermTracker) Exists(id string) bool {
 	return utils.GetStringArrayOrNull(pm.mapping, id) != nil
+}
+
+func (pm *PermTracker) GetMap() map[string]interface{} {
+	return pm.mapping
 }

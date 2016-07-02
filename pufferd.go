@@ -27,9 +27,9 @@ import (
 	"github.com/pufferpanel/pufferd/routing"
 	"github.com/pufferpanel/pufferd/routing/legacy"
 	"github.com/pufferpanel/pufferd/routing/server"
+	"io/ioutil"
 	"os"
 	"strconv"
-	"io/ioutil"
 )
 
 func main() {
@@ -42,14 +42,23 @@ func main() {
 	logging.SetLevelByString(loggingLevel)
 	gin.SetMode(gin.ReleaseMode)
 
+	logging.Debug("Logging set to " + loggingLevel)
+
 	if _, err := os.Stat(templates.Folder); os.IsNotExist(err) {
-		templates.CopyTemplates()
+		logging.Debug("Error on running stat on "+templates.Folder, err)
+		err = os.Mkdir(templates.Folder, os.ModeDir)
+		if err != nil {
+			logging.Error("Error creating template folder", err)
+		}
+
 	}
 	if files, _ := ioutil.ReadDir(templates.Folder); len(files) == 0 {
+		logging.Debug("Templates being copied to " + templates.Folder)
 		templates.CopyTemplates()
 	}
 
 	if _, err := os.Stat(programs.ServerFolder); os.IsNotExist(err) {
+		logging.Debug("No server directory found, creating", err)
 		os.MkdirAll(programs.ServerFolder, os.ModeDir)
 	}
 
@@ -59,6 +68,10 @@ func main() {
 		if element.IsEnabled() {
 			logging.Info("Starting server " + element.Id())
 			element.Start()
+			err := programs.Save(element.Id())
+			if err != nil {
+				logging.Error("Error saving server file", err)
+			}
 		}
 	}
 

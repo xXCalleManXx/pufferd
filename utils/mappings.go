@@ -16,13 +16,13 @@
 
 package utils
 
-func GetStringOrDefault(data map[string]interface{}, key string, def *string) string {
+func GetStringOrDefault(data map[string]interface{}, key string, def string) string {
 	if data == nil {
-		return *def
+		return def
 	}
 	var section = data[key]
 	if section == nil {
-		return *def
+		return def
 	} else {
 		return section.(string)
 	}

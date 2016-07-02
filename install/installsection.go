@@ -17,8 +17,12 @@
 package install
 
 type InstallSection struct {
-	Global  []interface{}
-	Linux   []interface{}
-	Mac     []interface{}
-	Windows []interface{}
+	global  []interface{}
+	linux   []interface{}
+	mac     []interface{}
+	windows []interface{}
+}
+
+func Generate(global []interface{}, linux []interface{}, mac []interface{}, windows []interface{}) InstallSection {
+	return InstallSection{global: global, linux: linux, mac: mac, windows: windows}
 }

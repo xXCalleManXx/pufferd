@@ -17,11 +17,13 @@
 package types
 
 import (
+	"encoding/json"
 	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/pufferd/install"
+	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/permissions"
 	"github.com/pufferpanel/pufferd/utils"
-	"github.com/pufferpanel/pufferd/logging"
+	"io/ioutil"
 	"os"
 )
 
@@ -36,14 +38,14 @@ type Java struct {
 //Starts the program.
 //This includes starting the environment if it is not running.
 func (p *Java) Start() (err error) {
-	p.environment.ExecuteAsync("java", utils.ReplaceTokensInArr(p.RunData.Arguments, p.RunData.Data))
+	p.environment.ExecuteAsync("java", utils.ReplaceTokensInArr(p.RunData.arguments, p.RunData.data))
 	return
 }
 
 //Stops the program.
 //This will also stop the environment it is ran in.
 func (p *Java) Stop() (err error) {
-	err = p.environment.ExecuteInMainProcess(p.RunData.Stop)
+	err = p.environment.ExecuteInMainProcess(p.RunData.stop)
 	return
 }
 
@@ -80,7 +82,7 @@ func (p *Java) Install() (err error) {
 
 	os.MkdirAll(p.environment.GetRootDirectory(), os.ModeDir)
 
-	process := install.GenerateInstallProcess(&p.InstallData, p.environment, p.RunData.Data)
+	process := install.GenerateInstallProcess(&p.InstallData, p.environment, p.RunData.data)
 	for process.HasNext() {
 		err := process.RunNext()
 		if err != nil {
@@ -105,12 +107,12 @@ func (p *Java) Execute(command string) (err error) {
 }
 
 func (p *Java) SetEnabled(isEnabled bool) (err error) {
-	p.RunData.Enabled = isEnabled
+	p.RunData.enabled = isEnabled
 	return
 }
 
 func (p *Java) IsEnabled() (isEnabled bool) {
-	isEnabled = p.RunData.Enabled
+	isEnabled = p.RunData.enabled
 	return
 }
 
@@ -135,16 +137,50 @@ func (p *Java) GetEnvironment() environments.Environment {
 	return p.environment
 }
 
+func (p *Java) SetAutoStart(isAutoStart bool) (err error) {
+	p.RunData.autostart = isAutoStart
+	return
+}
+
+func (p *Java) IsAutoStart() (isAutoStart bool) {
+	return p.RunData.autostart
+}
+
+func (p *Java) Save(file string) (err error) {
+	result := make(map[string]interface{})
+	result["data"] = p.RunData.data
+	result["install"] = p.InstallData
+	result["permissions"] = p.permissions.GetMap()
+	result["run"] = p.RunData
+	result["type"] = "java"
+
+	endResult := make(map[string]interface{})
+	endResult["pufferd"] = result
+
+	data, err := json.Marshal(endResult)
+	if err != nil {
+		return
+	}
+
+	err = ioutil.WriteFile(file, data, 664)
+	return
+}
+
 type JavaRun struct {
-	Stop      string
-	Pre       []string
-	Post      []string
-	Arguments []string
-	Data      map[string]string
-	Enabled   bool
+	stop      string
+	pre       []string
+	post      []string
+	arguments []string
+	data      map[string]string
+	enabled   bool
+	autostart bool
 }
 
 func NewJavaProgram(id string, run JavaRun, install install.InstallSection, environment environments.Environment, permissions permissions.PermissionTracker) (program *Java) {
 	program = &Java{id: id, RunData: run, InstallData: install, environment: environment, permissions: permissions}
 	return
+}
+
+func NewJavaRun(stop string, pre []string, post []string, arguments []string, data map[string]string, enabled bool, autostart bool) JavaRun {
+	return JavaRun{stop: stop, pre: pre, post: post, arguments: arguments, data: data, autostart: autostart, enabled: enabled}
 }

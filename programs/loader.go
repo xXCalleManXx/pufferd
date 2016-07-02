@@ -18,6 +18,7 @@ package programs
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/pufferpanel/pufferd/data/templates"
 	"github.com/pufferpanel/pufferd/environments"
@@ -100,13 +101,13 @@ func LoadFromData(id string, source []byte) (program Program, err error) {
 
 func LoadFromMapping(id string, source map[string]interface{}) (program Program, err error) {
 	var pufferdData = utils.GetMapOrNull(source, "pufferd")
-	var t = utils.GetStringOrDefault(pufferdData, "type", nil)
+	var t = utils.GetStringOrDefault(pufferdData, "type", "")
 	var installSection = getInstallSection(utils.GetMapOrNull(pufferdData, "install"))
 	var runSection = utils.GetMapOrNull(pufferdData, "run")
 	var environmentSection = utils.GetMapOrNull(runSection, "environment")
 	var environment environments.Environment
 	var defaultEnvType = "system"
-	var environmentType = utils.GetStringOrDefault(environmentSection, "type", &defaultEnvType)
+	var environmentType = utils.GetStringOrDefault(environmentSection, "type", defaultEnvType)
 	var permissions = permissions.Create(utils.GetMapOrNull(pufferdData, "permissions"))
 	var dataSection = utils.GetMapOrNull(pufferdData, "data")
 	dataCasted := make(map[string]string, len(dataSection))
@@ -117,7 +118,7 @@ func LoadFromMapping(id string, source map[string]interface{}) (program Program,
 	switch environmentType {
 	case "system":
 		serverRoot := utils.JoinPath(ServerFolder, id)
-		environment = &environments.System{RootDirectory: utils.GetStringOrDefault(environmentSection, "root", &serverRoot)}
+		environment = &environments.System{RootDirectory: utils.GetStringOrDefault(environmentSection, "root", serverRoot)}
 	}
 
 	switch t {
@@ -126,20 +127,21 @@ func LoadFromMapping(id string, source map[string]interface{}) (program Program,
 		if pufferdData["run"] == nil {
 			runBlock = types.JavaRun{}
 		} else {
-			var stop = utils.GetStringOrDefault(runSection, "stop", nil)
+			var stop = utils.GetStringOrDefault(runSection, "stop", "")
 			var pre = utils.GetStringArrayOrNull(runSection, "pre")
 			var post = utils.GetStringArrayOrNull(runSection, "post")
-			var arguments = strings.Split(utils.GetStringOrDefault(runSection, "arguments", nil), " ")
+			var arguments = strings.Split(utils.GetStringOrDefault(runSection, "arguments", ""), " ")
 			var enabled = utils.GetBooleanOrDefault(runSection, "enabled", true)
+			var autostart = utils.GetBooleanOrDefault(runSection, "autostart", true)
 
-			runBlock = types.JavaRun{Stop: stop, Pre: pre, Post: post, Arguments: arguments, Enabled: enabled, Data: dataCasted}
+			runBlock = types.NewJavaRun(stop, pre, post, arguments, dataCasted, enabled, autostart)
 		}
 		program = types.NewJavaProgram(id, runBlock, installSection, environment, permissions)
 	}
 	return
 }
 
-func Create(id string, serverType string, data map[string]interface{}) {
+func Create(id string, serverType string, user string, data map[string]interface{}) {
 	if GetFromCache(id) != nil {
 		return
 	}
@@ -148,21 +150,29 @@ func Create(id string, serverType string, data map[string]interface{}) {
 
 	var templateJson map[string]interface{}
 	err = json.Unmarshal(templateData, &templateJson)
+	segment := utils.GetMapOrNull(templateJson, "pufferd")
 
 	if err != nil {
 		logging.Error("Error reading template file for type "+serverType, err)
 		return
 	}
+
 	if data != nil {
-		segment := utils.GetMapOrNull(templateJson, "pufferd")
 		segment["data"] = data
 	}
+
+	userPerms := make(map[string]interface{}, 0)
+	userPerms[user] = append(make([]string, 0), ".*")
+	segment["permissions"] = userPerms;
+
 	templateData, _ = json.Marshal(templateJson)
 	err = ioutil.WriteFile(utils.JoinPath(ServerFolder, id+".json"), templateData, 0644)
+
 	if err != nil {
 		logging.Error("Error writing server file", err)
 		return
 	}
+
 	program, _ := LoadFromMapping(id, templateJson)
 	programs = append(programs, program)
 	program.Create()
@@ -197,12 +207,20 @@ func GetFromCache(id string) Program {
 	return nil
 }
 
-func getInstallSection(mapping map[string]interface{}) install.InstallSection {
-	var install = install.InstallSection{
-		Global:  utils.GetObjectArrayOrNull(mapping, "commands"),
-		Linux:   utils.GetObjectArrayOrNull(mapping, "linux"),
-		Mac:     utils.GetObjectArrayOrNull(mapping, "mac"),
-		Windows: utils.GetObjectArrayOrNull(mapping, "windows"),
+func Save(id string) (err error) {
+	program := GetFromCache(id)
+	if program == nil {
+		err = errors.New("No server with given id")
+		return
 	}
-	return install
+	err = program.Save(utils.JoinPath(ServerFolder, id+".json"))
+	return
+}
+
+func getInstallSection(mapping map[string]interface{}) install.InstallSection {
+	return install.Generate(
+		utils.GetObjectArrayOrNull(mapping, "global"),
+		utils.GetObjectArrayOrNull(mapping, "linux"),
+		utils.GetObjectArrayOrNull(mapping, "mac"),
+		utils.GetObjectArrayOrNull(mapping, "windows"))
 }

@@ -27,7 +27,7 @@ type Command struct {
 	Environment environments.Environment
 }
 
-func (c *Command) Run() error{
+func (c *Command) Run() error {
 	fmt.Println("Running command: " + c.Command)
 	parts := strings.Split(c.Command, " ")
 	cmd := parts[0]

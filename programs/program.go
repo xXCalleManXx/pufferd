@@ -57,6 +57,10 @@ type Program interface {
 
 	IsEnabled() (isEnabled bool)
 
+	SetAutoStart(isAutoStart bool) (err error)
+
+	IsAutoStart() (isAutoStart bool)
+
 	SetEnvironment(environment environments.Environment) (err error)
 
 	Id() string
@@ -66,4 +70,6 @@ type Program interface {
 	GetPermissionManager() permissions.PermissionTracker
 
 	GetEnvironment() environments.Environment
+
+	Save(file string) (err error)
 }

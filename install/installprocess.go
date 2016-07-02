@@ -27,14 +27,14 @@ func GenerateInstallProcess(data *InstallSection, environment environments.Envir
 	var directions []interface{}
 	switch runtime.GOOS {
 	case "windows":
-		directions = data.Windows
+		directions = data.windows
 	case "mac":
-		directions = data.Mac
+		directions = data.mac
 	default:
-		directions = data.Linux
+		directions = data.linux
 	}
 	if directions == nil {
-		directions = data.Global
+		directions = data.global
 	}
 	ops := make([]operations.Operation, 0)
 	for _, element := range directions {

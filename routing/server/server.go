@@ -19,12 +19,14 @@ package server
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/pufferpanel/pufferd/httphandlers"
+	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/permissions"
 	"github.com/pufferpanel/pufferd/programs"
-	"os"
-	"io"
-	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/utils"
+	"io"
+	"os"
+	"encoding/json"
+	"errors"
 )
 
 func RegisterRoutes(e *gin.Engine) {
@@ -39,8 +41,8 @@ func RegisterRoutes(e *gin.Engine) {
 		l1.GET("/:id/start", StartServer)
 		l1.GET("/:id/stop", StopServer)
 		l1.POST("/:id/install", InstallServer)
-		l1.GET("/:id/file/*filename", GetFile);
-		l1.PUT("/:id/file/*filename", PutFile);
+		l1.GET("/:id/file/*filename", GetFile)
+		l1.PUT("/:id/file/*filename", PutFile)
 	}
 }
 
@@ -69,8 +71,29 @@ func CreateServer(c *gin.Context) {
 	privKey := c.Query("privkey")
 	serverType := c.Query("type")
 	data := make(map[string]interface{}, 0)
-	data["memory"] = "1024M"
-	data["version"] = "1.10"
+	//var postedData = json.Marshal(c.Request.Body)
+	err := json.NewDecoder(c.Request.Body).Decode(&data)
+
+	if err != nil {
+		logging.Error("Error decoding JSON body", err)
+		c.AbortWithError(400, err)
+		return
+	}
+
+	user, okay := data["user"].(string)
+
+	if user == "" {
+		logging.Error("No user provided")
+		c.AbortWithError(400, errors.New("No user provided with request"))
+		return
+	}
+
+	if !okay {
+		c.AbortWithError(400, errors.New("No user provided with request in string format"))
+		return
+	}
+
+	delete(data, "user")
 
 	if !permissions.GetGlobal().HasPermission(privKey, "server.create") {
 		c.AbortWithStatus(403)
@@ -84,7 +107,7 @@ func CreateServer(c *gin.Context) {
 		return
 	}
 
-	programs.Create(serverId, serverType, data)
+	programs.Create(serverId, serverType, user, data)
 }
 
 func DeleteServer(c *gin.Context) {
@@ -115,7 +138,6 @@ func GetFile(c *gin.Context) {
 		return
 	}
 
-	//TODO: We cannot allow system access, we need to protect things here
 	targetPath := c.Param("filename")
 	if targetPath == "" {
 		c.Status(404)
@@ -131,8 +153,6 @@ func PutFile(c *gin.Context) {
 	if !valid {
 		return
 	}
-
-	//TODO: We cannot allow system access, we need to protect things here
 
 	targetPath := c.Param("filename")
 
