@@ -72,11 +72,16 @@ func GetStringArrayOrNull(data map[string]interface{}, key string) []string {
 	if section == nil {
 		return ([]string)(nil)
 	} else {
-		var sec = section.([]interface{})
-		var newArr = make([]string, len(sec))
-		for i := 0; i < len(sec); i++ {
-			newArr[i] = sec[i].(string)
+		v, k := section.([]string)
+		if k {
+			return v
+		} else {
+			var sec = section.([]interface{})
+			var newArr = make([]string, len(sec))
+			for i := 0; i < len(sec); i++ {
+				newArr[i] = sec[i].(string)
+			}
+			return newArr
 		}
-		return newArr
 	}
 }

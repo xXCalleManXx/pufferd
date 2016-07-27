@@ -27,6 +27,9 @@ import (
 	"github.com/pufferpanel/pufferd/utils"
 	"io"
 	"os"
+	"io/ioutil"
+	"time"
+	"path/filepath"
 )
 
 func RegisterRoutes(e *gin.Engine) {
@@ -71,7 +74,6 @@ func CreateServer(c *gin.Context) {
 	privKey := c.Query("privkey")
 	serverType := c.Query("type")
 	data := make(map[string]interface{}, 0)
-	//var postedData = json.Marshal(c.Request.Body)
 	err := json.NewDecoder(c.Request.Body).Decode(&data)
 
 	if err != nil {
@@ -139,12 +141,40 @@ func GetFile(c *gin.Context) {
 	}
 
 	targetPath := c.Param("filename")
-	if targetPath == "" {
+
+	file := utils.JoinPath(server.GetEnvironment().GetRootDirectory(), targetPath)
+	info, err := os.Stat(file);
+
+	if os.IsNotExist(err) {
 		c.Status(404)
 		return
 	}
 
-	c.File(utils.JoinPath(server.GetEnvironment().GetRootDirectory(), targetPath))
+	if info.IsDir() {
+		files, _ := ioutil.ReadDir(file)
+		fileNames := make([]interface{}, 0)
+		for _, file := range files {
+			type FileDesc struct {
+				Name     string `json:"entry,omitempty"`
+				Modified time.Time `json:"date,omitempty"`
+				Size     int64 `json:"size,omitempty"`
+				File     bool `json:"-,omitempty"`
+				Directory string `json:"directory,omitempty"`
+				Extension string `json:"extension,omitempty"`
+			}
+			fileNames = append(fileNames, &FileDesc{
+				Name: file.Name(),
+				Size: file.Size(),
+				File: !file.IsDir(),
+				Modified: file.ModTime(),
+				Extension: filepath.Ext(file.Name()),
+				Directory: filepath.Dir(file.Name()),
+			})
+		}
+		c.JSON(200, fileNames)
+	} else {
+		c.File(file)
+	}
 }
 
 func PutFile(c *gin.Context) {
