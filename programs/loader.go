@@ -39,7 +39,7 @@ var (
 )
 
 func LoadFromFolder() {
-	os.Mkdir(ServerFolder, os.ModeDir)
+	os.Mkdir(ServerFolder, 755)
 	var programFiles, err = ioutil.ReadDir(ServerFolder)
 	if err != nil {
 		logging.Critical("Error reading from server data folder", err)

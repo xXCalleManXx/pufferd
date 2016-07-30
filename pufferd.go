@@ -46,7 +46,7 @@ func main() {
 
 	if _, err := os.Stat(templates.Folder); os.IsNotExist(err) {
 		logging.Debug("Error on running stat on "+templates.Folder, err)
-		err = os.Mkdir(templates.Folder, os.ModeDir)
+		err = os.Mkdir(templates.Folder, 755)
 		if err != nil {
 			logging.Error("Error creating template folder", err)
 		}
@@ -59,7 +59,7 @@ func main() {
 
 	if _, err := os.Stat(programs.ServerFolder); os.IsNotExist(err) {
 		logging.Debug("No server directory found, creating", err)
-		os.MkdirAll(programs.ServerFolder, os.ModeDir)
+		os.MkdirAll(programs.ServerFolder, 755)
 	}
 
 	programs.LoadFromFolder()
