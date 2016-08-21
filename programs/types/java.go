@@ -21,7 +21,6 @@ import (
 	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/pufferd/install"
 	"github.com/pufferpanel/pufferd/logging"
-	"github.com/pufferpanel/pufferd/permissions"
 	"github.com/pufferpanel/pufferd/utils"
 	"io/ioutil"
 	"os"
@@ -32,7 +31,6 @@ type Java struct {
 	InstallData install.InstallSection
 	Environment environments.Environment
 	Identifier  string
-	Permissions permissions.PermissionTracker
 	Data        map[string]string
 }
 
@@ -130,10 +128,6 @@ func (p *Java) Name() string {
 	return "java"
 }
 
-func (p *Java) GetPermissionManager() permissions.PermissionTracker {
-	return p.Permissions
-}
-
 func (p *Java) GetEnvironment() environments.Environment {
 	return p.Environment
 }
@@ -151,7 +145,6 @@ func (p *Java) Save(file string) (err error) {
 	result := make(map[string]interface{})
 	result["data"] = p.Data
 	result["install"] = p.InstallData
-	result["permissions"] = p.Permissions.GetMap()
 	result["run"] = p.RunData
 	result["type"] = "java"
 

@@ -22,14 +22,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pufferpanel/pufferd/httphandlers"
 	"github.com/pufferpanel/pufferd/logging"
-	"github.com/pufferpanel/pufferd/permissions"
 	"github.com/pufferpanel/pufferd/programs"
 	"github.com/pufferpanel/pufferd/utils"
 	"io"
-	"os"
 	"io/ioutil"
-	"time"
+	"os"
 	"path/filepath"
+	"time"
 )
 
 func RegisterRoutes(e *gin.Engine) {
@@ -46,6 +45,8 @@ func RegisterRoutes(e *gin.Engine) {
 		l1.POST("/:id/install", InstallServer)
 		l1.GET("/:id/file/*filename", GetFile)
 		l1.PUT("/:id/file/*filename", PutFile)
+		l1.POST("/:id/console", PostConsole)
+		l1.GET("/:id/console", GetConsole)
 	}
 }
 
@@ -71,7 +72,6 @@ func StopServer(c *gin.Context) {
 
 func CreateServer(c *gin.Context) {
 	serverId := c.Param("id")
-	privKey := c.Query("privkey")
 	serverType := c.Query("type")
 	data := make(map[string]interface{}, 0)
 	err := json.NewDecoder(c.Request.Body).Decode(&data)
@@ -97,10 +97,10 @@ func CreateServer(c *gin.Context) {
 
 	delete(data, "user")
 
-	if !permissions.GetGlobal().HasPermission(privKey, "server.create") {
+	/*if !permissions.GetGlobal().HasPermission(privKey, "server.create") {
 		c.AbortWithStatus(403)
 		return
-	}
+	}*/
 
 	existing := programs.GetFromCache(serverId)
 
@@ -143,7 +143,7 @@ func GetFile(c *gin.Context) {
 	targetPath := c.Param("filename")
 
 	file := utils.JoinPath(server.GetEnvironment().GetRootDirectory(), targetPath)
-	info, err := os.Stat(file);
+	info, err := os.Stat(file)
 
 	if os.IsNotExist(err) {
 		c.Status(404)
@@ -155,18 +155,18 @@ func GetFile(c *gin.Context) {
 		fileNames := make([]interface{}, 0)
 		for _, file := range files {
 			type FileDesc struct {
-				Name     string `json:"entry,omitempty"`
-				Modified time.Time `json:"date,omitempty"`
-				Size     int64 `json:"size,omitempty"`
-				File     bool `json:"-,omitempty"`
-				Directory string `json:"directory,omitempty"`
-				Extension string `json:"extension,omitempty"`
+				Name      string    `json:"entry,omitempty"`
+				Modified  time.Time `json:"date,omitempty"`
+				Size      int64     `json:"size,omitempty"`
+				File      bool      `json:"-,omitempty"`
+				Directory string    `json:"directory,omitempty"`
+				Extension string    `json:"extension,omitempty"`
 			}
 			fileNames = append(fileNames, &FileDesc{
-				Name: file.Name(),
-				Size: file.Size(),
-				File: !file.IsDir(),
-				Modified: file.ModTime(),
+				Name:      file.Name(),
+				Size:      file.Size(),
+				File:      !file.IsDir(),
+				Modified:  file.ModTime(),
 				Extension: filepath.Ext(file.Name()),
 				Directory: filepath.Dir(file.Name()),
 			})
@@ -205,15 +205,22 @@ func PutFile(c *gin.Context) {
 	}
 }
 
+func PostConsole(c *gin.Context) {
+
+}
+
+func GetConsole(c *gin.Context) {
+
+}
+
 func handleInitialCallServer(c *gin.Context, perm string, requireGlobal bool) (valid bool, program programs.Program) {
 	serverId := c.Param("id")
-	privKey := c.Query("privkey")
 
-	if requireGlobal && !permissions.GetGlobal().HasPermission(privKey, perm) {
+	/*if requireGlobal && !permissions.GetGlobal().HasPermission(privKey, perm) {
 		c.AbortWithStatus(403)
 		valid = false
 		return
-	}
+	}*/
 
 	program, _ = programs.Get(serverId)
 
@@ -223,11 +230,11 @@ func handleInitialCallServer(c *gin.Context, perm string, requireGlobal bool) (v
 		return
 	}
 
-	if !requireGlobal && !program.GetPermissionManager().HasPermission(privKey, perm) {
+	/*if !requireGlobal && !program.GetPermissionManager().HasPermission(privKey, perm) {
 		c.AbortWithStatus(403)
 		valid = false
 		return
-	}
+	}*/
 
 	valid = true
 	return

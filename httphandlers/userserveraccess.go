@@ -50,8 +50,8 @@ func UserServerAccessHandler(c *gin.Context) {
 		return
 	}
 
-	if !program.GetPermissionManager().Exists(privKey) {
+	/*if !program.GetPermissionManager().Exists(privKey) {
 		c.AbortWithStatus(403)
 		return
-	}
+	}*/
 }

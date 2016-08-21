@@ -21,7 +21,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pufferpanel/pufferd/httphandlers"
 	"github.com/pufferpanel/pufferd/logging"
-	"github.com/pufferpanel/pufferd/permissions"
 	"github.com/pufferpanel/pufferd/programs"
 )
 
@@ -33,13 +32,6 @@ func RegisterRoutes(e *gin.Engine) {
 }
 
 func Shutdown(c *gin.Context) {
-	privKey := c.Query("privkey")
-
-	if !permissions.GetGlobal().HasPermission(privKey, "service.stop") {
-		c.AbortWithStatus(403)
-		return
-	}
-
 	for _, element := range programs.GetAll() {
 		running := element.IsRunning()
 		if running {

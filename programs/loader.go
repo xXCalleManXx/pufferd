@@ -24,7 +24,6 @@ import (
 	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/pufferd/install"
 	"github.com/pufferpanel/pufferd/logging"
-	"github.com/pufferpanel/pufferd/permissions"
 	"github.com/pufferpanel/pufferd/programs/types"
 	"github.com/pufferpanel/pufferd/utils"
 	"io/ioutil"
@@ -102,7 +101,6 @@ func LoadFromMapping(id string, source map[string]interface{}) (program Program,
 	var environment environments.Environment
 	var defaultEnvType = "system"
 	var environmentType = utils.GetStringOrDefault(environmentSection, "type", defaultEnvType)
-	var permissions = permissions.Create(utils.GetMapOrNull(pufferdData, "permissions"))
 	var dataSection = utils.GetMapOrNull(pufferdData, "data")
 	dataCasted := make(map[string]string, len(dataSection))
 	for key, value := range dataSection {
@@ -129,7 +127,7 @@ func LoadFromMapping(id string, source map[string]interface{}) (program Program,
 			var autostart = utils.GetBooleanOrDefault(runSection, "autostart", true)
 			runBlock = types.JavaRun{Stop: stop, Pre: pre, Post: post, Arguments: arguments, Enabled: enabled, AutoStart: autostart}
 		}
-		program = &types.Java{Data: dataCasted, Identifier: id, RunData: runBlock, InstallData: installSection, Environment: environment, Permissions: permissions}
+		program = &types.Java{Data: dataCasted, Identifier: id, RunData: runBlock, InstallData: installSection, Environment: environment}
 	}
 	return
 }
@@ -151,12 +149,13 @@ func Create(id string, serverType string, user string, data map[string]interface
 	}
 
 	if data != nil {
-		segment["data"] = data
+		var mapper map[string]interface{}
+		mapper = segment["data"].(map[string]interface{})
+		for k, v := range data {
+			mapper[k] = v
+		}
+		segment["data"] = mapper
 	}
-
-	userPerms := make(map[string]interface{}, 0)
-	userPerms[user] = append(make([]string, 0), ".*")
-	segment["permissions"] = userPerms
 
 	templateData, _ = json.Marshal(templateJson)
 	err = ioutil.WriteFile(utils.JoinPath(ServerFolder, id+".json"), templateData, 0644)

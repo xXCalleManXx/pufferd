@@ -18,7 +18,6 @@ package httphandlers
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/pufferpanel/pufferd/permissions"
 )
 
 func AdminServerAccessHandler(c *gin.Context) {
@@ -30,9 +29,9 @@ func AdminServerAccessHandler(c *gin.Context) {
 		return
 	}
 
-	if !permissions.GetGlobal().Exists(privKey) {
+	/*if !permissions.GetGlobal().Exists(privKey) {
 		c.AbortWithStatus(403)
 		return
-	}
+	}*/
 
 }
