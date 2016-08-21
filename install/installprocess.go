@@ -23,7 +23,7 @@ import (
 	"runtime"
 )
 
-func GenerateInstallProcess(data *InstallSection, environment environments.Environment, datamap map[string]string) InstallProcess {
+func GenerateInstallProcess(data *InstallSection, environment environments.Environment, datamap map[string]interface{}) InstallProcess {
 	var directions []interface{}
 	switch runtime.GOOS {
 	case "windows":

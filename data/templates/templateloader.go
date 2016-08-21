@@ -30,6 +30,7 @@ func CopyTemplates() {
 
 	data := Spigot
 	writeFile("spigot", data)
+	writeFile("minecraft", data)
 
 	data = CraftbukkitBySpigot
 	writeFile("fakecraftbukkit", data)

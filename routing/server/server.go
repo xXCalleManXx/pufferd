@@ -18,7 +18,6 @@ package server
 
 import (
 	"encoding/json"
-	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/pufferpanel/pufferd/httphandlers"
 	"github.com/pufferpanel/pufferd/logging"
@@ -72,30 +71,15 @@ func StopServer(c *gin.Context) {
 
 func CreateServer(c *gin.Context) {
 	serverId := c.Param("id")
-	serverType := c.Query("type")
 	data := make(map[string]interface{}, 0)
 	err := json.NewDecoder(c.Request.Body).Decode(&data)
+	serverType := data["type"].(string)
 
 	if err != nil {
 		logging.Error("Error decoding JSON body", err)
 		c.AbortWithError(400, err)
 		return
 	}
-
-	user, okay := data["user"].(string)
-
-	if user == "" {
-		logging.Error("No user provided")
-		c.AbortWithError(400, errors.New("No user provided with request"))
-		return
-	}
-
-	if !okay {
-		c.AbortWithError(400, errors.New("No user provided with request in string format"))
-		return
-	}
-
-	delete(data, "user")
 
 	/*if !permissions.GetGlobal().HasPermission(privKey, "server.create") {
 		c.AbortWithStatus(403)
@@ -109,7 +93,9 @@ func CreateServer(c *gin.Context) {
 		return
 	}
 
-	programs.Create(serverId, serverType, user, data)
+	if !programs.Create(serverId, serverType, data) {
+		c.AbortWithStatus(500)
+	}
 }
 
 func DeleteServer(c *gin.Context) {

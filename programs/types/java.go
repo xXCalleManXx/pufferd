@@ -31,7 +31,7 @@ type Java struct {
 	InstallData install.InstallSection
 	Environment environments.Environment
 	Identifier  string
-	Data        map[string]string
+	Data        map[string]interface{}
 }
 
 //Starts the program.

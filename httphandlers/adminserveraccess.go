@@ -21,13 +21,13 @@ import (
 )
 
 func AdminServerAccessHandler(c *gin.Context) {
-	privKey := c.Query("privkey")
+	//privKey := c.Query("privkey")
 
-	if privKey == "" {
+	/*if privKey == "" {
 		c.Header("WWW-Authentication", "Basic realm=\"pufferd\"")
 		c.AbortWithStatus(401)
 		return
-	}
+	}*/
 
 	/*if !permissions.GetGlobal().Exists(privKey) {
 		c.AbortWithStatus(403)

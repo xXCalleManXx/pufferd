@@ -23,7 +23,7 @@ import (
 )
 
 func UserServerAccessHandler(c *gin.Context) {
-	privKey := c.Query("privkey")
+	//privKey := c.Query("privkey")
 	serverId := c.Param("id")
 
 	if serverId == "" {
@@ -31,11 +31,11 @@ func UserServerAccessHandler(c *gin.Context) {
 		return
 	}
 
-	if privKey == "" {
+	/*if privKey == "" {
 		c.Header("WWW-Authentication", "Basic realm=\"pufferd\"")
 		c.AbortWithStatus(401)
 		return
-	}
+	}*/
 
 	program, err := programs.Get(serverId)
 

@@ -102,9 +102,9 @@ func LoadFromMapping(id string, source map[string]interface{}) (program Program,
 	var defaultEnvType = "system"
 	var environmentType = utils.GetStringOrDefault(environmentSection, "type", defaultEnvType)
 	var dataSection = utils.GetMapOrNull(pufferdData, "data")
-	dataCasted := make(map[string]string, len(dataSection))
+	dataCasted := make(map[string]interface{}, len(dataSection))
 	for key, value := range dataSection {
-		dataCasted[key] = value.(string)
+		dataCasted[key] = value
 	}
 
 	switch environmentType {
@@ -132,9 +132,9 @@ func LoadFromMapping(id string, source map[string]interface{}) (program Program,
 	return
 }
 
-func Create(id string, serverType string, user string, data map[string]interface{}) {
+func Create(id string, serverType string, data map[string]interface{}) bool{
 	if GetFromCache(id) != nil {
-		return
+		return false
 	}
 
 	templateData, err := ioutil.ReadFile(utils.JoinPath(templates.Folder, serverType+".json"))
@@ -145,7 +145,7 @@ func Create(id string, serverType string, user string, data map[string]interface
 
 	if err != nil {
 		logging.Error("Error reading template file for type "+serverType, err)
-		return
+		return false
 	}
 
 	if data != nil {
@@ -162,12 +162,13 @@ func Create(id string, serverType string, user string, data map[string]interface
 
 	if err != nil {
 		logging.Error("Error writing server file", err)
-		return
+		return false
 	}
 
 	program, _ := LoadFromMapping(id, templateJson)
 	programs = append(programs, program)
 	program.Create()
+	return true
 }
 
 func Delete(id string) (err error) {

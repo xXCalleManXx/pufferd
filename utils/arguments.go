@@ -18,17 +18,18 @@ package utils
 
 import (
 	"strings"
+	"fmt"
 )
 
-func ReplaceTokens(msg string, mapping map[string]string) string {
+func ReplaceTokens(msg string, mapping map[string]interface{}) string {
 	newmsg := msg
 	for key, value := range mapping {
-		newmsg = strings.Replace(newmsg, "${"+key+"}", value, -1)
+		newmsg = strings.Replace(newmsg, "${"+key+"}", fmt.Sprint(value), -1)
 	}
 	return newmsg
 }
 
-func ReplaceTokensInArr(msg []string, mapping map[string]string) []string {
+func ReplaceTokensInArr(msg []string, mapping map[string]interface{}) []string {
 	newarr := make([]string, len(msg))
 	for index, element := range msg {
 		newarr[index] = ReplaceTokens(element, mapping)
