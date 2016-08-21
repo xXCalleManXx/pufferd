@@ -22,7 +22,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pufferpanel/pufferd/data/templates"
 	"github.com/pufferpanel/pufferd/logging"
-	"github.com/pufferpanel/pufferd/permissions"
 	"github.com/pufferpanel/pufferd/programs"
 	"github.com/pufferpanel/pufferd/routing"
 	"github.com/pufferpanel/pufferd/routing/legacy"
@@ -30,6 +29,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strconv"
+	"path/filepath"
 )
 
 func main() {
@@ -45,7 +45,7 @@ func main() {
 	logging.Debug("Logging set to " + loggingLevel)
 
 	if _, err := os.Stat(templates.Folder); os.IsNotExist(err) {
-		logging.Debug("Error on running stat on "+templates.Folder, err)
+		logging.Debug("Error on running stat on " + templates.Folder, err)
 		err = os.Mkdir(templates.Folder, 755)
 		if err != nil {
 			logging.Error("Error creating template folder", err)
@@ -82,7 +82,20 @@ func main() {
 		server.RegisterRoutes(r)
 	}
 
-	permissions.GetGlobal()
+	var useHttps bool
+	useHttps = false
 
-	manners.ListenAndServe(":"+strconv.FormatInt(int64(port), 10), r)
+	if _, err := os.Stat(filepath.Join("data", "https.pem")); os.IsNotExist(err) {
+		logging.Warn("No HTTPS.PEM found in data folder, will use no http")
+	} else if _, err := os.Stat(filepath.Join("data", "https.key")); os.IsNotExist(err) {
+		logging.Warn("No HTTPS.KEY found in data folder, will use no http")
+	} else {
+		useHttps = true
+	}
+
+	if useHttps {
+		manners.ListenAndServeTLS(":" + strconv.FormatInt(int64(port), 10), filepath.Join("data", "https.pem"), filepath.Join("data", "https.key"), r)
+	} else {
+		manners.ListenAndServe(":" + strconv.FormatInt(int64(port), 10), r)
+	}
 }
