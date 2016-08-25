@@ -1,0 +1,47 @@
+package httphandlers
+
+import (
+	"github.com/gin-gonic/gin"
+	"strings"
+	"github.com/pufferpanel/pufferd/config"
+	"net/http"
+	"github.com/pufferpanel/pufferd/logging"
+	"encoding/json"
+)
+
+func OAuth2Handler (gin *gin.Context) {
+	authHeader := gin.Request.Header.Get("Authorization")
+	if authHeader == "" {
+		gin.AbortWithStatus(401)
+		return
+	}
+	authArr := strings.SplitN(authHeader, " ", 2)
+	if authArr[0] != "Bearer" {
+		gin.AbortWithStatus(401)
+		return
+	}
+
+	authUrl := config.Get("authserver")
+	token := config.Get("authtoken")
+	client := http.Client{}
+	request, _ := http.NewRequest("GET", authUrl, nil)
+	request.Header.Add("Authorization", "Bearer" + token)
+	response, err := client.Do(request)
+	if err != nil {
+		logging.Error("Error talking to auth server", err)
+		gin.AbortWithStatus(500)
+		return
+	}
+	var respArr map[string]interface{}
+	json.NewDecoder(response.Body).Decode(&respArr)
+	if respArr["error"] != nil {
+		gin.AbortWithStatus(500)
+		return
+	}
+	if respArr["active"].(bool) == false {
+		gin.AbortWithStatus(401)
+		return
+	}
+	gin.Set("server_id", respArr["server_id"].(string))
+	gin.Set("scopes", strings.Split(respArr["scope"].(string), " "))
+}

@@ -20,7 +20,9 @@ import (
 	"flag"
 	"github.com/braintree/manners"
 	"github.com/gin-gonic/gin"
+	"github.com/pufferpanel/pufferd/config"
 	"github.com/pufferpanel/pufferd/data/templates"
+	"github.com/pufferpanel/pufferd/httphandlers"
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/programs"
 	"github.com/pufferpanel/pufferd/routing"
@@ -28,8 +30,8 @@ import (
 	"github.com/pufferpanel/pufferd/routing/server"
 	"io/ioutil"
 	"os"
-	"strconv"
 	"path/filepath"
+	"strconv"
 )
 
 func main() {
@@ -44,8 +46,10 @@ func main() {
 
 	logging.Debug("Logging set to " + loggingLevel)
 
+	config.Load()
+
 	if _, err := os.Stat(templates.Folder); os.IsNotExist(err) {
-		logging.Debug("Error on running stat on " + templates.Folder, err)
+		logging.Debug("Error on running stat on "+templates.Folder, err)
 		err = os.Mkdir(templates.Folder, 755)
 		if err != nil {
 			logging.Error("Error creating template folder", err)
@@ -81,6 +85,7 @@ func main() {
 		legacy.RegisterRoutes(r)
 		server.RegisterRoutes(r)
 	}
+	r.Use(httphandlers.OAuth2Handler)
 
 	var useHttps bool
 	useHttps = false
@@ -94,8 +99,8 @@ func main() {
 	}
 
 	if useHttps {
-		manners.ListenAndServeTLS(":" + strconv.FormatInt(int64(port), 10), filepath.Join("data", "https.pem"), filepath.Join("data", "https.key"), r)
+		manners.ListenAndServeTLS(":"+strconv.FormatInt(int64(port), 10), filepath.Join("data", "https.pem"), filepath.Join("data", "https.key"), r)
 	} else {
-		manners.ListenAndServe(":" + strconv.FormatInt(int64(port), 10), r)
+		manners.ListenAndServe(":"+strconv.FormatInt(int64(port), 10), r)
 	}
 }
