@@ -24,7 +24,6 @@ import (
 	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/pufferd/install"
 	"github.com/pufferpanel/pufferd/logging"
-	"github.com/pufferpanel/pufferd/programs/types"
 	"github.com/pufferpanel/pufferd/utils"
 	"io/ioutil"
 	"os"
@@ -54,7 +53,7 @@ func LoadFromFolder() {
 			logging.Error(fmt.Sprintf("Error loading server details from json (%s)", element.Name()), err)
 			continue
 		}
-		logging.Infof("Loaded server %s as %s", program.Id(), program.Name())
+		logging.Infof("Loaded server %s", program.Id())
 		programs = append(programs, program)
 	}
 }
@@ -94,7 +93,6 @@ func LoadFromData(id string, source []byte) (program Program, err error) {
 
 func LoadFromMapping(id string, source map[string]interface{}) (program Program, err error) {
 	var pufferdData = utils.GetMapOrNull(source, "pufferd")
-	var t = utils.GetStringOrDefault(pufferdData, "type", "")
 	var installSection = getInstallSection(utils.GetMapOrNull(pufferdData, "install"))
 	var runSection = utils.GetMapOrNull(pufferdData, "run")
 	var environmentSection = utils.GetMapOrNull(runSection, "environment")
@@ -113,26 +111,23 @@ func LoadFromMapping(id string, source map[string]interface{}) (program Program,
 		environment = &environments.System{RootDirectory: utils.GetStringOrDefault(environmentSection, "root", serverRoot)}
 	}
 
-	switch t {
-	case "java":
-		var runBlock types.JavaRun
-		if pufferdData["run"] == nil {
-			runBlock = types.JavaRun{}
-		} else {
-			var stop = utils.GetStringOrDefault(runSection, "stop", "")
-			var pre = utils.GetStringArrayOrNull(runSection, "pre")
-			var post = utils.GetStringArrayOrNull(runSection, "post")
-			var arguments = utils.GetStringArrayOrNull(runSection, "arguments")
-			var enabled = utils.GetBooleanOrDefault(runSection, "enabled", true)
-			var autostart = utils.GetBooleanOrDefault(runSection, "autostart", true)
-			runBlock = types.JavaRun{Stop: stop, Pre: pre, Post: post, Arguments: arguments, Enabled: enabled, AutoStart: autostart}
-		}
-		program = &types.Java{Data: dataCasted, Identifier: id, RunData: runBlock, InstallData: installSection, Environment: environment}
+	var runBlock Runtime
+	if pufferdData["run"] == nil {
+		runBlock = Runtime{}
+	} else {
+		var stop = utils.GetStringOrDefault(runSection, "stop", "")
+		var pre = utils.GetStringArrayOrNull(runSection, "pre")
+		var post = utils.GetStringArrayOrNull(runSection, "post")
+		var arguments = utils.GetStringArrayOrNull(runSection, "arguments")
+		var enabled = utils.GetBooleanOrDefault(runSection, "enabled", true)
+		var autostart = utils.GetBooleanOrDefault(runSection, "autostart", true)
+		runBlock = Runtime{Stop: stop, Pre: pre, Post: post, Arguments: arguments, Enabled: enabled, AutoStart: autostart}
 	}
+	program = &ProgramStruct{Data: dataCasted, Identifier: id, RunData: runBlock, InstallData: installSection, Environment: environment}
 	return
 }
 
-func Create(id string, serverType string, data map[string]interface{}) bool{
+func Create(id string, serverType string, data map[string]interface{}) bool {
 	if GetFromCache(id) != nil {
 		return false
 	}

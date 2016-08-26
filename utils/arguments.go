@@ -17,8 +17,8 @@
 package utils
 
 import (
-	"strings"
 	"fmt"
+	"strings"
 )
 
 func ReplaceTokens(msg string, mapping map[string]interface{}) string {

@@ -19,19 +19,24 @@ package routing
 import (
 	"github.com/braintree/manners"
 	"github.com/gin-gonic/gin"
-	"github.com/pufferpanel/pufferd/httphandlers"
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/programs"
+	"github.com/pufferpanel/pufferd/utils"
 )
 
 func RegisterRoutes(e *gin.Engine) {
 	e.GET("/", func(c *gin.Context) {
 		c.String(200, "pufferd is running")
 	})
-	e.GET("_shutdown", httphandlers.AdminServerAccessHandler, Shutdown)
+	e.GET("_shutdown", Shutdown)
 }
 
 func Shutdown(c *gin.Context) {
+	if !hasScope(c, "node.stop") {
+		c.AbortWithStatus(401)
+		return
+	}
+
 	for _, element := range programs.GetAll() {
 		running := element.IsRunning()
 		if running {
@@ -40,4 +45,9 @@ func Shutdown(c *gin.Context) {
 		}
 	}
 	manners.Close()
+}
+
+func hasScope(gin *gin.Context, scope string) bool {
+	scopes, _ := gin.Get("scopes")
+	return utils.ContainsValue(scopes.([]string), scope)
 }

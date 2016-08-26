@@ -56,7 +56,8 @@ const Spigot = `{
       	"-Xmx${memory}",
       	"-jar",
       	"server.jar"
-      ]
+      ],
+      "program": "java"
     },
     "data": {
       "version": "1.10"
@@ -104,7 +105,8 @@ const CraftbukkitBySpigot = `{
       	"-Xmx${memory}",
       	"-jar",
       	"server.jar"
-      ]
+      ],
+      "program": "java"
     },
     "data": {
       "version": "1.10"
@@ -131,7 +133,8 @@ const Vanilla = `{
       	"-Xmx${memory}",
       	"-jar",
       	"minecraft_server.${version}.jar"
-      ]
+      ],
+      "program": "java"
     },
     "data": {
       "version": "1.10"

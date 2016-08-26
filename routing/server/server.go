@@ -19,7 +19,6 @@ package server
 import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
-	"github.com/pufferpanel/pufferd/httphandlers"
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/programs"
 	"github.com/pufferpanel/pufferd/utils"
@@ -31,13 +30,13 @@ import (
 )
 
 func RegisterRoutes(e *gin.Engine) {
-	l2 := e.Group("/server", httphandlers.AdminServerAccessHandler, httphandlers.HasServerAccessHandler)
+	l2 := e.Group("/server")
 	{
 		l2.PUT("/:id", CreateServer)
 		l2.DELETE("/:id", DeleteServer)
 	}
 
-	l1 := e.Group("/server", httphandlers.UserServerAccessHandler)
+	l1 := e.Group("/server")
 	{
 		l1.GET("/:id/start", StartServer)
 		l1.GET("/:id/stop", StopServer)
@@ -81,10 +80,7 @@ func CreateServer(c *gin.Context) {
 		return
 	}
 
-	/*if !permissions.GetGlobal().HasPermission(privKey, "server.create") {
-		c.AbortWithStatus(403)
-		return
-	}*/
+	handleInitialCallServer(c, "server.create", false)
 
 	existing := programs.GetFromCache(serverId)
 
@@ -201,12 +197,12 @@ func GetConsole(c *gin.Context) {
 
 func handleInitialCallServer(c *gin.Context, perm string, requireGlobal bool) (valid bool, program programs.Program) {
 	serverId := c.Param("id")
+	targetId, _ := c.Get("server_id")
 
-	/*if requireGlobal && !permissions.GetGlobal().HasPermission(privKey, perm) {
-		c.AbortWithStatus(403)
-		valid = false
+	if targetId != serverId && targetId != "*" {
+		c.AbortWithStatus(401)
 		return
-	}*/
+	}
 
 	program, _ = programs.Get(serverId)
 
@@ -216,12 +212,13 @@ func handleInitialCallServer(c *gin.Context, perm string, requireGlobal bool) (v
 		return
 	}
 
-	/*if !requireGlobal && !program.GetPermissionManager().HasPermission(privKey, perm) {
-		c.AbortWithStatus(403)
-		valid = false
-		return
-	}*/
+	scopes, _ := c.Get("scopes")
 
-	valid = true
+	for _, v := range scopes.([]string) {
+		if v == perm {
+			valid = true
+		}
+	}
+
 	return
 }

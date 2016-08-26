@@ -81,11 +81,11 @@ func main() {
 
 	r := gin.Default()
 	{
+		r.Use(httphandlers.OAuth2Handler)
 		routing.RegisterRoutes(r)
 		legacy.RegisterRoutes(r)
 		server.RegisterRoutes(r)
 	}
-	r.Use(httphandlers.OAuth2Handler)
 
 	var useHttps bool
 	useHttps = false
