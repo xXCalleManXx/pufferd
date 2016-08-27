@@ -95,7 +95,7 @@ func CreateServer(c *gin.Context) {
 }
 
 func DeleteServer(c *gin.Context) {
-	valid, existing := handleInitialCallServer(c, "server.delete", true)
+	valid, existing := handleInitialCallServer(c, "server.delete", false)
 
 	if !valid {
 		return
@@ -105,7 +105,7 @@ func DeleteServer(c *gin.Context) {
 }
 
 func InstallServer(c *gin.Context) {
-	valid, existing := handleInitialCallServer(c, "server.install", false)
+	valid, existing := handleInitialCallServer(c, "server.install", true)
 
 	if !valid {
 		return
@@ -195,7 +195,9 @@ func GetConsole(c *gin.Context) {
 
 }
 
-func handleInitialCallServer(c *gin.Context, perm string, requireGlobal bool) (valid bool, program programs.Program) {
+func handleInitialCallServer(c *gin.Context, perm string, requireServer bool) (valid bool, program programs.Program) {
+	valid = true
+
 	serverId := c.Param("id")
 	targetId, _ := c.Get("server_id")
 
@@ -206,7 +208,7 @@ func handleInitialCallServer(c *gin.Context, perm string, requireGlobal bool) (v
 
 	program, _ = programs.Get(serverId)
 
-	if program == nil {
+	if requireServer && program == nil {
 		c.AbortWithStatus(404)
 		valid = false
 		return
