@@ -25,11 +25,15 @@ import (
 	"strconv"
 	"syscall"
 	"time"
+	"github.com/pufferpanel/pufferd/utils"
+	"github.com/gorilla/websocket"
 )
 
 type System struct {
 	mainProcess   *exec.Cmd
 	RootDirectory string
+	ConsoleBuffer utils.Cache
+	WSManager utils.WebSocketManager
 }
 
 func (s *System) Execute(cmd string, args []string) (stdOut []byte, err error) {
@@ -39,8 +43,8 @@ func (s *System) Execute(cmd string, args []string) (stdOut []byte, err error) {
 	}
 	s.mainProcess = exec.Command(cmd, args...)
 	s.mainProcess.Dir = s.RootDirectory
-	s.mainProcess.Stdout = os.Stdout
-	s.mainProcess.Stderr = os.Stderr
+	s.mainProcess.Stdout = s.createWrapper(os.Stdout)
+	s.mainProcess.Stderr = s.createWrapper(os.Stderr)
 	err = s.mainProcess.Run()
 	go func() {
 		s.mainProcess.Wait()
@@ -58,8 +62,8 @@ func (s *System) ExecuteAsync(cmd string, args []string) (err error) {
 	}
 	s.mainProcess = exec.Command(cmd, args...)
 	s.mainProcess.Dir = s.RootDirectory
-	s.mainProcess.Stdout = os.Stdout
-	s.mainProcess.Stderr = os.Stderr
+	s.mainProcess.Stdout = s.createWrapper(os.Stdout)
+	s.mainProcess.Stderr = s.createWrapper(os.Stderr)
 	err = s.mainProcess.Start()
 	go func() {
 		s.mainProcess.Wait()
@@ -134,4 +138,17 @@ func (s *System) WaitForMainProcessFor(timeout int) (err error) {
 
 func (s *System) GetRootDirectory() string {
 	return s.RootDirectory
+}
+
+func (s *System) GetConsole() []string {
+	return s.ConsoleBuffer.Read()
+}
+
+func (s *System) AddListener(ws *websocket.Conn) {
+	logging.Debug("Adding to inter")
+	s.WSManager.Register(ws)
+}
+
+func (s *System) createWrapper(out io.Writer) io.Writer{
+	return io.MultiWriter(s.ConsoleBuffer, out, s.WSManager)
 }

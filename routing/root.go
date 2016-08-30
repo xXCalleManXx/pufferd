@@ -22,13 +22,14 @@ import (
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/programs"
 	"github.com/pufferpanel/pufferd/utils"
+	"github.com/pufferpanel/pufferd/httphandlers"
 )
 
 func RegisterRoutes(e *gin.Engine) {
 	e.GET("/", func(c *gin.Context) {
 		c.String(200, "pufferd is running")
 	})
-	e.GET("_shutdown", Shutdown)
+	e.GET("_shutdown", httphandlers.OAuth2Handler, Shutdown)
 }
 
 func Shutdown(c *gin.Context) {

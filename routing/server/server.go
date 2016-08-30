@@ -27,25 +27,40 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+	"github.com/pufferpanel/pufferd/httphandlers"
+	"net/http"
+	"github.com/gorilla/websocket"
+	"github.com/itsjamie/gin-cors"
 )
 
-func RegisterRoutes(e *gin.Engine) {
-	l2 := e.Group("/server")
-	{
-		l2.PUT("/:id", CreateServer)
-		l2.DELETE("/:id", DeleteServer)
-	}
+var wsupgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
 
-	l1 := e.Group("/server")
+func RegisterRoutes(e *gin.Engine) {
+	l := e.Group("/server")
 	{
-		l1.GET("/:id/start", StartServer)
-		l1.GET("/:id/stop", StopServer)
-		l1.POST("/:id/install", InstallServer)
-		l1.GET("/:id/file/*filename", GetFile)
-		l1.PUT("/:id/file/*filename", PutFile)
-		l1.POST("/:id/console", PostConsole)
-		l1.GET("/:id/console", GetConsole)
+		e.Handle("CONNECT", "/:id/console", func (c *gin.Context) {
+			c.Header("Access-Control-Allow-Origin", "http://svr-i5-p1")
+		})
+		l.Use(httphandlers.OAuth2Handler)
+		l.PUT("/:id", CreateServer)
+		l.DELETE("/:id", DeleteServer)
+		l.GET("/:id/start", StartServer)
+		l.GET("/:id/stop", StopServer)
+		l.POST("/:id/install", InstallServer)
+		l.GET("/:id/file/*filename", GetFile)
+		l.PUT("/:id/file/*filename", PutFile)
+		l.POST("/:id/console", PostConsole)
 	}
+	e.GET("/server/:id/console", cors.Middleware(cors.Config{
+		Origins: "http://svr-i5-p1",
+		Credentials: true,
+	}), GetConsole)
 }
 
 func StartServer(c *gin.Context) {
@@ -111,7 +126,10 @@ func InstallServer(c *gin.Context) {
 		return
 	}
 
-	existing.Install()
+	c.Status(200);
+	go func() {
+		existing.Install()
+	}()
 }
 
 func GetFile(c *gin.Context) {
@@ -192,11 +210,28 @@ func PostConsole(c *gin.Context) {
 }
 
 func GetConsole(c *gin.Context) {
-
+	httphandlers.ParseToken(c.Query("accessToken"), c)
+	valid, program := handleInitialCallServer(c, "server.console", true)
+	if !valid {
+		return
+	}
+	logging.Debugf("Websocket request recieved (%s)", program.Id())
+	conn, err := wsupgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		logging.Error("Error creating websocket", err)
+		c.AbortWithError(500, err)
+		return
+	}
+	console := program.GetEnvironment().GetConsole()
+	for _, v := range console {
+		conn.WriteMessage(websocket.TextMessage, []byte(v))
+	}
+	logging.Debug("Adding to existing listener")
+	program.GetEnvironment().AddListener(conn)
 }
 
 func handleInitialCallServer(c *gin.Context, perm string, requireServer bool) (valid bool, program programs.Program) {
-	valid = true
+	valid = false
 
 	serverId := c.Param("id")
 	targetId, _ := c.Get("server_id")
@@ -221,6 +256,8 @@ func handleInitialCallServer(c *gin.Context, perm string, requireServer bool) (v
 			valid = true
 		}
 	}
+
+	valid = true
 
 	return
 }

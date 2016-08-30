@@ -76,11 +76,11 @@ type Program interface {
 }
 
 type ProgramStruct struct {
-	RunData     Runtime
-	InstallData install.InstallSection
-	Environment environments.Environment
-	Identifier  string
-	Data        map[string]interface{}
+	RunData       Runtime
+	InstallData   install.InstallSection
+	Environment   environments.Environment
+	Identifier    string
+	Data          map[string]interface{}
 }
 
 //Starts the program.

@@ -16,6 +16,10 @@
 
 package environments
 
+import (
+	"github.com/gorilla/websocket"
+)
+
 type Environment interface {
 	//Executes a command within the environment.
 	Execute(cmd string, args []string) (stdOut []byte, err error)
@@ -42,4 +46,8 @@ type Environment interface {
 	WaitForMainProcessFor(timeout int) (err error)
 
 	GetRootDirectory() string
+
+	GetConsole() []string
+
+	AddListener(ws *websocket.Conn)
 }

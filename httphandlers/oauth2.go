@@ -23,14 +23,17 @@ func OAuth2Handler(gin *gin.Context) {
 		gin.AbortWithStatus(401)
 		return
 	}
+	ParseToken(authArr[1], gin)
+}
 
+func ParseToken(accessToken string, gin *gin.Context) {
 	authUrl := config.Get("authserver")
 	token := config.Get("authtoken")
 	client := &http.Client{}
 	data := url.Values{}
-	data.Set("token", authArr[1])
+	data.Set("token", accessToken)
 	request, _ := http.NewRequest("POST", authUrl, bytes.NewBufferString(data.Encode()))
-	request.Header.Add("Authorization", "Bearer"+token)
+	request.Header.Add("Authorization", "Bearer" + token)
 	request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	request.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
 	response, err := client.Do(request)

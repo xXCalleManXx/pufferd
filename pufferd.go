@@ -22,7 +22,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pufferpanel/pufferd/config"
 	"github.com/pufferpanel/pufferd/data/templates"
-	"github.com/pufferpanel/pufferd/httphandlers"
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/programs"
 	"github.com/pufferpanel/pufferd/routing"
@@ -81,7 +80,6 @@ func main() {
 
 	r := gin.Default()
 	{
-		r.Use(httphandlers.OAuth2Handler)
 		routing.RegisterRoutes(r)
 		legacy.RegisterRoutes(r)
 		server.RegisterRoutes(r)
