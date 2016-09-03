@@ -2,7 +2,6 @@ package utils
 
 import (
 	"github.com/gorilla/websocket"
-	"github.com/pufferpanel/pufferd/logging"
 )
 
 type WebSocketManager interface {
@@ -20,9 +19,7 @@ func CreateWSManager() WebSocketManager {
 }
 
 func (ws *wsManager) Register(conn *websocket.Conn) {
-	logging.Debug("asdfadsf")
 	ws.sockets = append(ws.sockets, *conn)
-	logging.Debugf("%s", len(ws.sockets))
 }
 
 func (ws *wsManager) Write(msg []byte) (n int, e error) {
@@ -30,13 +27,11 @@ func (ws *wsManager) Write(msg []byte) (n int, e error) {
 	for k, v := range ws.sockets {
 		err := v.WriteMessage(websocket.TextMessage, msg)
 		if err != nil {
-			logging.Debug("Client detached")
 			invalid = append(invalid, k)
 		}
 	}
 	if len(invalid) > 0 {
 		for b := range invalid {
-			logging.Debugf("Removing client %s", b)
 			ws.sockets = append(ws.sockets[:b], ws.sockets[b+1:]...)
 		}
 	}

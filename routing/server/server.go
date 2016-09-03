@@ -215,7 +215,6 @@ func GetConsole(c *gin.Context) {
 	if !valid {
 		return
 	}
-	logging.Debugf("Websocket request recieved (%s)", program.Id())
 	conn, err := wsupgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		logging.Error("Error creating websocket", err)
@@ -226,7 +225,6 @@ func GetConsole(c *gin.Context) {
 	for _, v := range console {
 		conn.WriteMessage(websocket.TextMessage, []byte(v))
 	}
-	logging.Debug("Adding to existing listener")
 	program.GetEnvironment().AddListener(conn)
 }
 

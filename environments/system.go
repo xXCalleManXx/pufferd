@@ -145,10 +145,9 @@ func (s *System) GetConsole() []string {
 }
 
 func (s *System) AddListener(ws *websocket.Conn) {
-	logging.Debug("Adding to inter")
 	s.WSManager.Register(ws)
 }
 
 func (s *System) createWrapper(out io.Writer) io.Writer{
-	return io.MultiWriter(s.ConsoleBuffer, out, s.WSManager)
+	return io.MultiWriter(s.ConsoleBuffer, s.WSManager)
 }
