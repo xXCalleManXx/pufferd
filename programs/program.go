@@ -73,14 +73,16 @@ type Program interface {
 	GetEnvironment() environments.Environment
 
 	Save(file string) (err error)
+
+	Edit(data map[string]interface{}) (err error)
 }
 
 type ProgramStruct struct {
-	RunData       Runtime
-	InstallData   install.InstallSection
-	Environment   environments.Environment
-	Identifier    string
-	Data          map[string]interface{}
+	RunData     Runtime
+	InstallData install.InstallSection
+	Environment environments.Environment
+	Identifier  string
+	Data        map[string]interface{}
 }
 
 //Starts the program.
@@ -201,6 +203,17 @@ func (p *ProgramStruct) Save(file string) (err error) {
 	}
 
 	err = ioutil.WriteFile(file, data, 664)
+	return
+}
+
+func (p *ProgramStruct) Edit(data map[string]interface{}) (err error) {
+	for k, v := range data {
+		if v == nil || v == "" {
+			delete(p.Data, k)
+		}
+		p.Data[k] = v
+	}
+	Save(p.Id())
 	return
 }
 

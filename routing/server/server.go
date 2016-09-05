@@ -51,6 +51,7 @@ func RegisterRoutes(e *gin.Engine) {
 		l.Use(httphandlers.OAuth2Handler)
 		l.PUT("/:id", CreateServer)
 		l.DELETE("/:id", DeleteServer)
+		l.POST("/:id", EditServer)
 		l.GET("/:id/start", StartServer)
 		l.GET("/:id/stop", StopServer)
 		l.POST("/:id/install", InstallServer)
@@ -134,6 +135,20 @@ func InstallServer(c *gin.Context) {
 	}()
 }
 
+func EditServer(c *gin.Context) {
+	valid, existing := handleInitialCallServer(c, "server.edit", true)
+
+	if !valid {
+		return
+	}
+
+	data := make(map[string]interface{}, 0)
+	json.NewDecoder(c.Request.Body).Decode(&data)
+
+	c.Status(200);
+	existing.Edit(data)
+}
+
 func GetFile(c *gin.Context) {
 
 	valid, server := handleInitialCallServer(c, "server.file.get", true)
@@ -208,7 +223,12 @@ func PutFile(c *gin.Context) {
 }
 
 func PostConsole(c *gin.Context) {
-
+	valid, program := handleInitialCallServer(c, "server.console.send", true)
+	if !valid {
+		return
+	}
+	program.Execute(c.Param("command"));
+	c.Status(200);
 }
 
 func GetConsole(c *gin.Context) {
