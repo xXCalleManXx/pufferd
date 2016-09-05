@@ -44,8 +44,9 @@ var wsupgrader = websocket.Upgrader{
 func RegisterRoutes(e *gin.Engine) {
 	l := e.Group("/server")
 	{
-		e.Handle("CONNECT", "/:id/console", func (c *gin.Context) {
-			c.Header("Access-Control-Allow-Origin", "http://svr-i5-p1")
+		e.Handle("CONNECT", "/:id/console", func(c *gin.Context) {
+			c.Header("Access-Control-Allow-Origin", "*")
+			c.Header("Access-Control-Allow-Credentials", "false")
 		})
 		l.Use(httphandlers.OAuth2Handler)
 		l.PUT("/:id", CreateServer)
@@ -56,15 +57,16 @@ func RegisterRoutes(e *gin.Engine) {
 		l.GET("/:id/file/*filename", GetFile)
 		l.PUT("/:id/file/*filename", PutFile)
 		l.POST("/:id/console", PostConsole)
+		l.GET("/:id/stats", GetStats)
 	}
 	e.GET("/server/:id/console", cors.Middleware(cors.Config{
-		Origins: "http://svr-i5-p1",
+		Origins: "*",
 		Credentials: true,
 	}), GetConsole)
 }
 
 func StartServer(c *gin.Context) {
-	valid, existing := handleInitialCallServer(c, "server.start", false)
+	valid, existing := handleInitialCallServer(c, "server.start", true)
 
 	if !valid {
 		return
@@ -74,7 +76,7 @@ func StartServer(c *gin.Context) {
 }
 
 func StopServer(c *gin.Context) {
-	valid, existing := handleInitialCallServer(c, "server.stop", false)
+	valid, existing := handleInitialCallServer(c, "server.stop", true)
 
 	if !valid {
 		return
@@ -110,7 +112,7 @@ func CreateServer(c *gin.Context) {
 }
 
 func DeleteServer(c *gin.Context) {
-	valid, existing := handleInitialCallServer(c, "server.delete", false)
+	valid, existing := handleInitialCallServer(c, "server.delete", true)
 
 	if !valid {
 		return
@@ -134,7 +136,7 @@ func InstallServer(c *gin.Context) {
 
 func GetFile(c *gin.Context) {
 
-	valid, server := handleInitialCallServer(c, "server.file.get", false)
+	valid, server := handleInitialCallServer(c, "server.file.get", true)
 
 	if !valid {
 		return
@@ -178,7 +180,7 @@ func GetFile(c *gin.Context) {
 }
 
 func PutFile(c *gin.Context) {
-	valid, server := handleInitialCallServer(c, "server.file.put", false)
+	valid, server := handleInitialCallServer(c, "server.file.put", true)
 
 	if !valid {
 		return
@@ -226,6 +228,23 @@ func GetConsole(c *gin.Context) {
 		conn.WriteMessage(websocket.TextMessage, []byte(v))
 	}
 	program.GetEnvironment().AddListener(conn)
+}
+
+func GetStats(c *gin.Context) {
+	valid, server := handleInitialCallServer(c, "server.stats", true)
+
+	if !valid {
+		return
+	}
+
+	results, err := server.GetEnvironment().GetStats()
+	if err != nil {
+		result := make(map[string]interface{})
+		result["error"] = err.Error()
+		c.JSON(200, result)
+	} else {
+		c.JSON(200, results)
+	}
 }
 
 func handleInitialCallServer(c *gin.Context, perm string, requireServer bool) (valid bool, program programs.Program) {

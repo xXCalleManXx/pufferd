@@ -27,6 +27,7 @@ import (
 	"time"
 	"github.com/pufferpanel/pufferd/utils"
 	"github.com/gorilla/websocket"
+	"github.com/shirou/gopsutil/process"
 )
 
 type System struct {
@@ -146,6 +147,22 @@ func (s *System) GetConsole() []string {
 
 func (s *System) AddListener(ws *websocket.Conn) {
 	s.WSManager.Register(ws)
+}
+
+func (s *System) GetStats() (map[string]interface{}, error) {
+	if !s.IsRunning() {
+		return nil, errors.New("Server not running")
+	}
+	process, err := process.NewProcess(int32(s.mainProcess.Process.Pid))
+	if err != nil {
+		return nil, err
+	}
+	resultMap := make(map[string]interface{})
+	memMap, _ := process.MemoryInfo()
+	resultMap["memory"] = memMap.VMS
+	cpu, _ := process.Times()
+	resultMap["cpu"] = cpu.User
+	return resultMap, nil
 }
 
 func (s *System) createWrapper(out io.Writer) io.Writer{
