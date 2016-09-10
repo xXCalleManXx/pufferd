@@ -54,8 +54,9 @@ func (s *System) ExecuteAsync(cmd string, args []string) (err error) {
 	}
 	s.mainProcess = exec.Command(cmd, args...)
 	s.mainProcess.Dir = s.RootDirectory
-	s.mainProcess.Stdout = s.createWrapper(os.Stdout)
-	s.mainProcess.Stderr = s.createWrapper(os.Stderr)
+	wrapper := s.createWrapper()
+	s.mainProcess.Stdout = wrapper
+	s.mainProcess.Stderr = wrapper
 	pipe, err := s.mainProcess.StdinPipe()
 	if err != nil {
 		logging.Error("Error starting process", err)
@@ -77,7 +78,6 @@ func (s *System) ExecuteInMainProcess(cmd string) (err error) {
 		return
 	}
 	stdIn := s.stdInWriter
-	logging.Debugf("Writing: %s", cmd)
 	_, err = io.WriteString(stdIn, cmd + "\r")
 	return
 }
@@ -161,6 +161,6 @@ func (s *System) GetStats() (map[string]interface{}, error) {
 	return resultMap, nil
 }
 
-func (s *System) createWrapper(out io.Writer) io.Writer {
-	return io.MultiWriter(s.ConsoleBuffer, out, s.WSManager)
+func (s *System) createWrapper() io.Writer {
+	return io.MultiWriter(s.ConsoleBuffer, s.WSManager)
 }

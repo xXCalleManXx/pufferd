@@ -122,7 +122,6 @@ func LoadFromMapping(id string, source map[string]interface{}) (program Program,
 		var enabled = utils.GetBooleanOrDefault(runSection, "enabled", true)
 		var autostart = utils.GetBooleanOrDefault(runSection, "autostart", true)
 		var program = utils.GetStringOrDefault(runSection, "program", "")
-		logging.Debug(program)
 		runBlock = Runtime{Stop: stop, Pre: pre, Post: post, Arguments: arguments, Enabled: enabled, AutoStart: autostart, Program: program}
 	}
 	program = &ProgramStruct{Data: dataCasted, Identifier: id, RunData: runBlock, InstallData: installSection, Environment: environment}
