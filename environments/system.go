@@ -156,8 +156,8 @@ func (s *System) GetStats() (map[string]interface{}, error) {
 	resultMap := make(map[string]interface{})
 	memMap, _ := process.MemoryInfo()
 	resultMap["memory"] = memMap.RSS
-	cpu, _ := process.Times()
-	resultMap["cpu"] = cpu.User
+	cpu, _ := process.Percent(time.Millisecond * 50)
+	resultMap["cpu"] = cpu
 	return resultMap, nil
 }
 

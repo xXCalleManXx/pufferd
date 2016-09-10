@@ -232,8 +232,14 @@ func PostConsole(c *gin.Context) {
 	if !valid {
 		return
 	}
-	program.Execute(c.Param("command"))
-	c.Status(200)
+	d, _ := ioutil.ReadAll(c.Request.Body)
+	cmd := string(d)
+	err := program.Execute(cmd)
+	if err != nil {
+		c.Error(err)
+	} else {
+		c.Status(200)
+	}
 }
 
 func GetConsole(c *gin.Context) {
