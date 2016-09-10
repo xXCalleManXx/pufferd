@@ -78,8 +78,9 @@ func main() {
 		}
 	}
 
-	r := gin.Default()
+	r := gin.New()
 	{
+		r.Use(gin.Recovery())
 		routing.RegisterRoutes(r)
 		legacy.RegisterRoutes(r)
 		server.RegisterRoutes(r)
