@@ -18,41 +18,32 @@ package environments
 
 import (
 	"errors"
+	"github.com/gorilla/websocket"
 	"github.com/pufferpanel/pufferd/logging"
+	"github.com/pufferpanel/pufferd/utils"
+	"github.com/shirou/gopsutil/process"
 	"io"
 	"os"
 	"os/exec"
 	"strconv"
 	"syscall"
 	"time"
-	"github.com/pufferpanel/pufferd/utils"
-	"github.com/gorilla/websocket"
-	"github.com/shirou/gopsutil/process"
 )
 
 type System struct {
 	mainProcess   *exec.Cmd
 	RootDirectory string
 	ConsoleBuffer utils.Cache
-	WSManager utils.WebSocketManager
+	WSManager     utils.WebSocketManager
+	stdInWriter   io.Writer
 }
 
 func (s *System) Execute(cmd string, args []string) (stdOut []byte, err error) {
-	if s.IsRunning() {
-		err = errors.New("A process is already running (" + strconv.Itoa(s.mainProcess.Process.Pid) + ")")
+	err = s.ExecuteAsync(cmd, args)
+	if err != nil {
 		return
 	}
-	s.mainProcess = exec.Command(cmd, args...)
-	s.mainProcess.Dir = s.RootDirectory
-	s.mainProcess.Stdout = s.createWrapper(os.Stdout)
-	s.mainProcess.Stderr = s.createWrapper(os.Stderr)
-	err = s.mainProcess.Run()
-	go func() {
-		s.mainProcess.Wait()
-	}()
-	if err != nil && err.Error() != "exit status 1" {
-		logging.Error("Error starting process", err)
-	}
+	err = s.WaitForMainProcess()
 	return
 }
 
@@ -65,10 +56,18 @@ func (s *System) ExecuteAsync(cmd string, args []string) (err error) {
 	s.mainProcess.Dir = s.RootDirectory
 	s.mainProcess.Stdout = s.createWrapper(os.Stdout)
 	s.mainProcess.Stderr = s.createWrapper(os.Stderr)
+	pipe, err := s.mainProcess.StdinPipe()
+	if err != nil {
+		logging.Error("Error starting process", err)
+	}
+	s.stdInWriter = pipe
 	err = s.mainProcess.Start()
 	go func() {
 		s.mainProcess.Wait()
 	}()
+	if err != nil && err.Error() != "exit status 1" {
+		logging.Error("Error starting process", err)
+	}
 	return
 }
 
@@ -77,12 +76,9 @@ func (s *System) ExecuteInMainProcess(cmd string) (err error) {
 		err = errors.New("Main process has not been started")
 		return
 	}
-	var stdIn, processErr = s.mainProcess.StdinPipe()
-	if processErr != nil {
-		err = processErr
-		return
-	}
-	io.WriteString(stdIn, cmd)
+	stdIn := s.stdInWriter
+	logging.Debugf("Writing: %s", cmd)
+	_, err = io.WriteString(stdIn, cmd + "\r")
 	return
 }
 
@@ -159,12 +155,12 @@ func (s *System) GetStats() (map[string]interface{}, error) {
 	}
 	resultMap := make(map[string]interface{})
 	memMap, _ := process.MemoryInfo()
-	resultMap["memory"] = memMap.VMS
+	resultMap["memory"] = memMap.RSS
 	cpu, _ := process.Times()
 	resultMap["cpu"] = cpu.User
 	return resultMap, nil
 }
 
-func (s *System) createWrapper(out io.Writer) io.Writer{
-	return io.MultiWriter(s.ConsoleBuffer, s.WSManager)
+func (s *System) createWrapper(out io.Writer) io.Writer {
+	return io.MultiWriter(s.ConsoleBuffer, out, s.WSManager)
 }

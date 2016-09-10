@@ -75,6 +75,8 @@ type Program interface {
 	Save(file string) (err error)
 
 	Edit(data map[string]interface{}) (err error)
+
+	Reload(data Program)
 }
 
 type ProgramStruct struct {
@@ -88,6 +90,7 @@ type ProgramStruct struct {
 //Starts the program.
 //This includes starting the environment if it is not running.
 func (p *ProgramStruct) Start() (err error) {
+	logging.Debugf("Starting server %s", p.Id())
 	p.Environment.ExecuteAsync(p.RunData.Program, utils.ReplaceTokensInArr(p.RunData.Arguments, p.Data))
 	return
 }
@@ -215,6 +218,13 @@ func (p *ProgramStruct) Edit(data map[string]interface{}) (err error) {
 	}
 	Save(p.Id())
 	return
+}
+
+func (p *ProgramStruct) Reload(data Program) {
+	replacement := data.(*ProgramStruct)
+	p.Data = replacement.Data
+	p.InstallData = replacement.InstallData
+	p.RunData = replacement.RunData
 }
 
 type Runtime struct {

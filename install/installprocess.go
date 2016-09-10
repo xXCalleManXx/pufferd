@@ -48,6 +48,10 @@ func GenerateInstallProcess(data *InstallSection, environment environments.Envir
 			for _, element := range utils.ToStringArray(mapping["files"]) {
 				ops = append(ops, &operations.Download{File: utils.ReplaceTokens(element, datamap), Environment: environment})
 			}
+		case "move":
+			source := mapping["source"].(string)
+			target := mapping["target"].(string)
+			ops = append(ops, &operations.Move{SourceFile: source, TargetFile: target, Environment: environment})
 		}
 	}
 	return InstallProcess{processInstructions: ops}

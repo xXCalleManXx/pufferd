@@ -19,10 +19,10 @@ package routing
 import (
 	"github.com/braintree/manners"
 	"github.com/gin-gonic/gin"
+	"github.com/pufferpanel/pufferd/httphandlers"
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/programs"
 	"github.com/pufferpanel/pufferd/utils"
-	"github.com/pufferpanel/pufferd/httphandlers"
 )
 
 func RegisterRoutes(e *gin.Engine) {

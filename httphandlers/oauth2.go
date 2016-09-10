@@ -33,7 +33,7 @@ func ParseToken(accessToken string, gin *gin.Context) {
 	data := url.Values{}
 	data.Set("token", accessToken)
 	request, _ := http.NewRequest("POST", authUrl, bytes.NewBufferString(data.Encode()))
-	request.Header.Add("Authorization", "Bearer" + token)
+	request.Header.Add("Authorization", "Bearer"+token)
 	request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	request.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
 	response, err := client.Do(request)

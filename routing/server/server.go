@@ -19,18 +19,18 @@ package server
 import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
+	"github.com/itsjamie/gin-cors"
+	"github.com/pufferpanel/pufferd/httphandlers"
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/programs"
 	"github.com/pufferpanel/pufferd/utils"
 	"io"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"path/filepath"
 	"time"
-	"github.com/pufferpanel/pufferd/httphandlers"
-	"net/http"
-	"github.com/gorilla/websocket"
-	"github.com/itsjamie/gin-cors"
 )
 
 var wsupgrader = websocket.Upgrader{
@@ -59,9 +59,10 @@ func RegisterRoutes(e *gin.Engine) {
 		l.PUT("/:id/file/*filename", PutFile)
 		l.POST("/:id/console", PostConsole)
 		l.GET("/:id/stats", GetStats)
+		l.POST("/:id/reload", ReloadServer)
 	}
 	e.GET("/server/:id/console", cors.Middleware(cors.Config{
-		Origins: "*",
+		Origins:     "*",
 		Credentials: true,
 	}), GetConsole)
 }
@@ -70,6 +71,7 @@ func StartServer(c *gin.Context) {
 	valid, existing := handleInitialCallServer(c, "server.start", true)
 
 	if !valid {
+		c.Status(404)
 		return
 	}
 
@@ -83,7 +85,10 @@ func StopServer(c *gin.Context) {
 		return
 	}
 
-	existing.Stop()
+	err := existing.Stop()
+	if err != nil {
+		c.Error(err)
+	}
 }
 
 func CreateServer(c *gin.Context) {
@@ -129,7 +134,7 @@ func InstallServer(c *gin.Context) {
 		return
 	}
 
-	c.Status(200);
+	c.Status(200)
 	go func() {
 		existing.Install()
 	}()
@@ -145,7 +150,7 @@ func EditServer(c *gin.Context) {
 	data := make(map[string]interface{}, 0)
 	json.NewDecoder(c.Request.Body).Decode(&data)
 
-	c.Status(200);
+	c.Status(200)
 	existing.Edit(data)
 }
 
@@ -227,8 +232,8 @@ func PostConsole(c *gin.Context) {
 	if !valid {
 		return
 	}
-	program.Execute(c.Param("command"));
-	c.Status(200);
+	program.Execute(c.Param("command"))
+	c.Status(200)
 }
 
 func GetConsole(c *gin.Context) {
@@ -265,6 +270,17 @@ func GetStats(c *gin.Context) {
 	} else {
 		c.JSON(200, results)
 	}
+}
+
+func ReloadServer(c *gin.Context) {
+	valid, existing := handleInitialCallServer(c, "server.reload", true)
+
+	if !valid {
+		c.Status(404)
+		return
+	}
+
+	programs.Reload(existing.Id())
 }
 
 func handleInitialCallServer(c *gin.Context, perm string, requireServer bool) (valid bool, program programs.Program) {

@@ -1,20 +1,20 @@
 package utils
 
 type cache struct {
-	buffer []string
+	buffer   []string
 	capacity int
 }
 
 type Cache interface {
 	Read() []string
 
-	Write (b []byte) (n int, err error)
+	Write(b []byte) (n int, err error)
 }
 
 func CreateCache() *cache {
 	capacity := 3
 	return &cache{
-		buffer: make([]string, 0),
+		buffer:   make([]string, 0),
 		capacity: capacity,
 	}
 }
@@ -29,7 +29,7 @@ func (c *cache) Read() []string {
 
 func (c *cache) Write(b []byte) (n int, err error) {
 	if len(c.buffer) == c.capacity {
-		newbuffer := make([]string, c.capacity - 1)
+		newbuffer := make([]string, c.capacity-1)
 		copy(newbuffer, c.buffer)
 		c.buffer = newbuffer
 	}

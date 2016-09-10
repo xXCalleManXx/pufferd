@@ -121,7 +121,9 @@ func LoadFromMapping(id string, source map[string]interface{}) (program Program,
 		var arguments = utils.GetStringArrayOrNull(runSection, "arguments")
 		var enabled = utils.GetBooleanOrDefault(runSection, "enabled", true)
 		var autostart = utils.GetBooleanOrDefault(runSection, "autostart", true)
-		runBlock = Runtime{Stop: stop, Pre: pre, Post: post, Arguments: arguments, Enabled: enabled, AutoStart: autostart}
+		var program = utils.GetStringOrDefault(runSection, "program", "")
+		logging.Debug(program)
+		runBlock = Runtime{Stop: stop, Pre: pre, Post: post, Arguments: arguments, Enabled: enabled, AutoStart: autostart, Program: program}
 	}
 	program = &ProgramStruct{Data: dataCasted, Identifier: id, RunData: runBlock, InstallData: installSection, Environment: environment}
 	return
@@ -203,6 +205,23 @@ func Save(id string) (err error) {
 	}
 	err = program.Save(utils.JoinPath(ServerFolder, id + ".json"))
 	return
+}
+
+func Reload(id string) error {
+	oldPg, err := Get(id)
+	if err != nil {
+		return err
+	}
+
+	var newPg Program
+
+	newPg, err = Load(id)
+	if err != nil {
+		return err
+	}
+
+	oldPg.Reload(newPg)
+	return nil
 }
 
 func getInstallSection(mapping map[string]interface{}) install.InstallSection {

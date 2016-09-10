@@ -22,34 +22,24 @@ const Spigot = `{
     "install": {
       "commands": [
         {
-          "type": "download",
-          "files": "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar"
+          "files": "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar",
+          "type": "download"
         },
         {
-          "type": "command",
           "commands": [
-            "java -jar BuildTools.jar --rev ${version}",
-            "mv spigot-${version}.jar server.jar",
-            "rm -rf apache-maven* BuildTools.jar BuildTools.log.txt Bukkit Spigot BuildData CraftBukkit work craftbukkit-*.jar"
-          ]
-        }
-      ],
-      "windows": [
-        {
-          "type": "download",
-          "files": "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar"
+            "java -jar BuildTools.jar --rev ${version}"
+          ],
+          "type": "command"
         },
         {
-          "type": "command",
-          "commands": [
-            "java -jar BuildTools.jar --rev ${version}",
-            "move spigot/spigot*.jar server.jar"
-          ]
+          "source": "spigot-*.jar",
+          "target": "server.jar",
+          "type": "move"
         }
       ]
     },
     "run": {
-      "stop": "/stop",
+      "stop": "stop",
       "pre": [],
       "post": [],
       "arguments": [
@@ -71,34 +61,24 @@ const CraftbukkitBySpigot = `{
     "install": {
       "commands": [
         {
-          "type": "download",
-          "files": "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar"
+          "files": "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar",
+          "type": "download"
         },
         {
-          "type": "command",
           "commands": [
-            "java -jar BuildTools.jar --rev ${version}",
-            "mv craftbukkit-${version}.jar server.jar",
-            "rm -rf apache-maven* BuildTools.jar BuildTools.log.txt Bukkit Spigot BuildData CraftBukkit work spigot-*.jar"
-          ]
-        }
-      ],
-      "windows": [
-        {
-          "type": "download",
-          "files": "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar"
+            "java -jar BuildTools.jar --rev ${version}"
+          ],
+          "type": "command"
         },
         {
-          "type": "command",
-          "commands": [
-            "java -jar BuildTools.jar --rev ${version}",
-            "move spigot/spigot*.jar server.jar"
-          ]
+          "source": "spigot-*.jar",
+          "target": "server.jar",
+          "type": "move"
         }
       ]
     },
     "run": {
-      "stop": "/stop",
+      "stop": "stop",
       "pre": [],
       "post": [],
       "arguments": [
@@ -126,7 +106,7 @@ const Vanilla = `{
       ]
     },
     "run": {
-      "stop": "/stop",
+      "stop": "stop",
       "pre": [],
       "post": [],
       "arguments": [
