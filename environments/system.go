@@ -28,6 +28,7 @@ import (
 	"strconv"
 	"syscall"
 	"time"
+	"sync"
 )
 
 type System struct {
@@ -36,6 +37,7 @@ type System struct {
 	ConsoleBuffer utils.Cache
 	WSManager     utils.WebSocketManager
 	stdInWriter   io.Writer
+	wait sync.WaitGroup
 }
 
 func (s *System) Execute(cmd string, args []string) (stdOut []byte, err error) {
@@ -62,9 +64,12 @@ func (s *System) ExecuteAsync(cmd string, args []string) (err error) {
 		logging.Error("Error starting process", err)
 	}
 	s.stdInWriter = pipe
+	s.wait = sync.WaitGroup{}
+	s.wait.Add(1)
 	err = s.mainProcess.Start()
 	go func() {
 		s.mainProcess.Wait()
+		s.wait.Done()
 	}()
 	if err != nil && err.Error() != "exit status 1" {
 		logging.Error("Error starting process", err)
@@ -102,7 +107,7 @@ func (s *System) Delete() (err error) {
 }
 
 func (s *System) IsRunning() (isRunning bool) {
-	isRunning = s.mainProcess != nil && s.mainProcess.Process != nil
+	isRunning = s.mainProcess != nil && s.mainProcess.Process != nil 
 	if isRunning {
 		process, pErr := os.FindProcess(s.mainProcess.Process.Pid)
 		if process == nil || pErr != nil {
@@ -124,10 +129,10 @@ func (s *System) WaitForMainProcessFor(timeout int) (err error) {
 			var timer = time.AfterFunc(time.Duration(timeout)*time.Millisecond, func() {
 				err = s.Kill()
 			})
-			err = s.mainProcess.Wait()
+			s.wait.Wait()
 			timer.Stop()
 		} else {
-			err = s.mainProcess.Wait()
+			s.wait.Wait()
 		}
 	}
 	return

@@ -80,6 +80,10 @@ func StartServer(c *gin.Context) {
 
 func StopServer(c *gin.Context) {
 	valid, existing := handleInitialCallServer(c, "server.stop", true)
+	wait := c.Param("wait")
+	if wait == "" || (wait != "true" && wait != "false") {
+		wait = "true"
+	}
 
 	if !valid {
 		return
@@ -88,6 +92,13 @@ func StopServer(c *gin.Context) {
 	err := existing.Stop()
 	if err != nil {
 		c.Error(err)
+	}
+
+	if wait == "true" {
+		err = existing.GetEnvironment().WaitForMainProcess()
+		if err != nil {
+			c.Error(err)
+		}
 	}
 }
 
