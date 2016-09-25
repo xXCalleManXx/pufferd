@@ -26,9 +26,9 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"sync"
 	"syscall"
 	"time"
-	"sync"
 )
 
 type System struct {
@@ -37,7 +37,7 @@ type System struct {
 	ConsoleBuffer utils.Cache
 	WSManager     utils.WebSocketManager
 	stdInWriter   io.Writer
-	wait sync.WaitGroup
+	wait          sync.WaitGroup
 }
 
 func (s *System) Execute(cmd string, args []string) (stdOut []byte, err error) {
@@ -83,7 +83,7 @@ func (s *System) ExecuteInMainProcess(cmd string) (err error) {
 		return
 	}
 	stdIn := s.stdInWriter
-	_, err = io.WriteString(stdIn, cmd + "\r")
+	_, err = io.WriteString(stdIn, cmd+"\r")
 	return
 }
 
@@ -107,7 +107,7 @@ func (s *System) Delete() (err error) {
 }
 
 func (s *System) IsRunning() (isRunning bool) {
-	isRunning = s.mainProcess != nil && s.mainProcess.Process != nil 
+	isRunning = s.mainProcess != nil && s.mainProcess.Process != nil
 	if isRunning {
 		process, pErr := os.FindProcess(s.mainProcess.Process.Pid)
 		if process == nil || pErr != nil {

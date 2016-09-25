@@ -27,7 +27,7 @@ func OAuth2Handler(gin *gin.Context) {
 }
 
 func ParseToken(accessToken string, gin *gin.Context) {
-	authUrl := config.Get("authserver")
+	authUrl := config.Get("infoserver")
 	token := config.Get("authtoken")
 	client := &http.Client{}
 	data := url.Values{}

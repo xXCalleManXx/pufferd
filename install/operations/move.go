@@ -34,9 +34,9 @@ func (m *Move) Run() error {
 func validateMove(source string, target string) (result map[string]string, valid bool) {
 	result = make(map[string]string)
 	sourceFiles, _ := filepath.Glob(source)
-	info, err := os.Stat(target);
+	info, err := os.Stat(target)
 
-	if (err != nil) {
+	if err != nil {
 		if os.IsNotExist(err) && len(sourceFiles) > 1 {
 			logging.Error("Target folder does not exist", err)
 			valid = false

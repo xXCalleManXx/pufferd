@@ -27,6 +27,7 @@ import (
 	"github.com/pufferpanel/pufferd/routing"
 	"github.com/pufferpanel/pufferd/routing/legacy"
 	"github.com/pufferpanel/pufferd/routing/server"
+	"github.com/pufferpanel/pufferd/sftp"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -36,7 +37,7 @@ import (
 func main() {
 	var loggingLevel string
 	var port int
-	flag.StringVar(&loggingLevel, "logging", "DEBUG", "Lowest logging level to display")
+	flag.StringVar(&loggingLevel, "logging", "INFO", "Lowest logging level to display")
 	flag.IntVar(&port, "port", 5656, "Port to run service on")
 	flag.Parse()
 
@@ -97,6 +98,9 @@ func main() {
 		useHttps = true
 	}
 
+	sftp.Run()
+
+	logging.Info("Starting web access on 0.0.0.0:" + strconv.Itoa(port))
 	if useHttps {
 		manners.ListenAndServeTLS(":"+strconv.FormatInt(int64(port), 10), filepath.Join("data", "https.pem"), filepath.Join("data", "https.key"), r)
 	} else {
