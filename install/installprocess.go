@@ -36,6 +36,7 @@ func GenerateInstallProcess(data *InstallSection, environment environments.Envir
 	if directions == nil {
 		directions = data.Global
 	}
+	datamap["rootdir"] = environment.GetRootDirectory()
 	ops := make([]operations.Operation, 0)
 	for _, element := range directions {
 		var mapping = element.(map[string]interface{})
