@@ -78,7 +78,7 @@ func runServer() error {
 
 	config.AddHostKey(hkey)
 
-	bind := configuration.Get("sftp")
+	bind := configuration.GetOrDefault("sftp", "0.0.0.0:5657")
 
 	listener, e := net.Listen("tcp", bind)
 	if e != nil {

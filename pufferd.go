@@ -44,25 +44,25 @@ func main() {
 	logging.SetLevelByString(loggingLevel)
 	gin.SetMode(gin.ReleaseMode)
 
-	logging.Debug("Logging set to " + loggingLevel)
+	logging.Info("Logging set to " + loggingLevel)
 
 	config.Load()
 
 	if _, err := os.Stat(templates.Folder); os.IsNotExist(err) {
-		logging.Debug("Error on running stat on "+templates.Folder, err)
-		err = os.Mkdir(templates.Folder, 755)
+		logging.Info("No template directory found, creating")
+		err = os.MkdirAll(templates.Folder, 755)
 		if err != nil {
 			logging.Error("Error creating template folder", err)
 		}
 
 	}
 	if files, _ := ioutil.ReadDir(templates.Folder); len(files) == 0 {
-		logging.Debug("Templates being copied to " + templates.Folder)
+		logging.Info("Templates being copied to " + templates.Folder)
 		templates.CopyTemplates()
 	}
 
 	if _, err := os.Stat(programs.ServerFolder); os.IsNotExist(err) {
-		logging.Debug("No server directory found, creating", err)
+		logging.Info("No server directory found, creating")
 		os.MkdirAll(programs.ServerFolder, 755)
 	}
 

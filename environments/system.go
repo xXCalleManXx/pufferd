@@ -56,6 +56,10 @@ func (s *System) ExecuteAsync(cmd string, args []string) (err error) {
 	}
 	s.mainProcess = exec.Command(cmd, args...)
 	s.mainProcess.Dir = s.RootDirectory
+	if s.mainProcess.Env == nil {
+		s.mainProcess.Env = make([]string, 0)
+	}
+	s.mainProcess.Env = append(s.mainProcess.Env, "HOME="+s.RootDirectory)
 	wrapper := s.createWrapper()
 	s.mainProcess.Stdout = wrapper
 	s.mainProcess.Stderr = wrapper
