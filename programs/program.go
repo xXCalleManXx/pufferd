@@ -91,7 +91,11 @@ type ProgramStruct struct {
 //This includes starting the environment if it is not running.
 func (p *ProgramStruct) Start() (err error) {
 	logging.Debugf("Starting server %s", p.Id())
-	p.Environment.ExecuteAsync(p.RunData.Program, utils.ReplaceTokensInArr(p.RunData.Arguments, p.Data))
+	data := make(map[string]interface{})
+	for k, v := range p.Data {
+		data[k] = v.(map[string]interface{})["value"]
+	}
+	p.Environment.ExecuteAsync(p.RunData.Program, utils.ReplaceTokensInArr(p.RunData.Arguments, data))
 	return
 }
 

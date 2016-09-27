@@ -23,7 +23,7 @@ import (
 	"runtime"
 )
 
-func GenerateInstallProcess(data *InstallSection, environment environments.Environment, datamap map[string]interface{}) InstallProcess {
+func GenerateInstallProcess(data *InstallSection, environment environments.Environment, dataMapping map[string]interface{}) InstallProcess {
 	var directions []interface{}
 	switch runtime.GOOS {
 	case "windows":
@@ -35,6 +35,10 @@ func GenerateInstallProcess(data *InstallSection, environment environments.Envir
 	}
 	if directions == nil {
 		directions = data.Global
+	}
+	datamap := make(map[string]interface{})
+	for k, v := range dataMapping {
+		datamap[k] = v.(map[string]interface{})["value"]
 	}
 	datamap["rootdir"] = environment.GetRootDirectory()
 	ops := make([]operations.Operation, 0)

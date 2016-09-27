@@ -43,14 +43,27 @@ const Spigot = `{
       "pre": [],
       "post": [],
       "arguments": [
-      	"-Xmx${memory}",
+      	"-Xmx${memory}M",
       	"-jar",
       	"server.jar"
       ],
       "program": "java"
     },
     "data": {
-      "version": "1.10"
+      "version": {
+      	"value": "1.10",
+      	"required": true,
+      	"desc": "Version of Minecraft to install",
+      	"display": "Version",
+      	"internal": false
+      },
+      "memory": {
+      	"value": "1024",
+      	"required": true,
+      	"desc": "How much memory in MB to allocate to the Java Heap",
+      	"display": "Memory (MB)",
+      	"internal": false
+      }
     }
   }
 }`
@@ -71,7 +84,7 @@ const CraftbukkitBySpigot = `{
           "type": "command"
         },
         {
-          "source": "spigot-*.jar",
+          "source": "craftbukkit-*.jar",
           "target": "server.jar",
           "type": "move"
         }
@@ -82,14 +95,27 @@ const CraftbukkitBySpigot = `{
       "pre": [],
       "post": [],
       "arguments": [
-      	"-Xmx${memory}",
+      	"-Xmx${memory}M",
       	"-jar",
       	"server.jar"
       ],
       "program": "java"
     },
     "data": {
-      "version": "1.10"
+      "version": {
+      	"value": "1.10",
+      	"required": true,
+      	"desc": "Version of Minecraft to install",
+      	"display": "Version",
+      	"internal": false
+      },
+      "memory": {
+      	"value": "1024",
+      	"required": true,
+      	"desc": "How much memory in MB to allocate to the Java Heap",
+      	"display": "Memory (MB)",
+      	"internal": false
+      }
     }
   }
 }`
@@ -102,6 +128,11 @@ const Vanilla = `{
         {
           "type": "download",
           "files": "https://s3.amazonaws.com/Minecraft.Download/versions/${version}/minecraft_server.${version}.jar"
+        },
+        {
+          "source": "minecraft_server.*.jar",
+          "target": "server.jar",
+          "type": "move"
         }
       ]
     },
@@ -110,14 +141,27 @@ const Vanilla = `{
       "pre": [],
       "post": [],
       "arguments": [
-      	"-Xmx${memory}",
+      	"-Xmx${memory}M",
       	"-jar",
-      	"minecraft_server.${version}.jar"
+      	"server.jar"
       ],
       "program": "java"
     },
     "data": {
-      "version": "1.10"
+      "version": {
+      	"value": "1.10",
+      	"required": true,
+      	"desc": "Version of Minecraft to install",
+      	"display": "Version",
+      	"internal": false
+      },
+      "memory": {
+      	"value": "1024",
+      	"required": true,
+      	"desc": "How much memory in MB to allocate to the Java Heap",
+      	"display": "Memory (MB)",
+      	"internal": false
+      }
     }
   }
 }`
