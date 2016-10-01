@@ -82,7 +82,6 @@ func main() {
 	{
 		r.Use(gin.Recovery())
 		routing.RegisterRoutes(r)
-		legacy.RegisterRoutes(r)
 		server.RegisterRoutes(r)
 	}
 
