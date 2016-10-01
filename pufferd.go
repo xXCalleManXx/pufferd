@@ -49,7 +49,7 @@ func main() {
 
 	if _, err := os.Stat(templates.Folder); os.IsNotExist(err) {
 		logging.Info("No template directory found, creating")
-		err = os.MkdirAll(templates.Folder, 755)
+		err = os.MkdirAll(templates.Folder, 0755)
 		if err != nil {
 			logging.Error("Error creating template folder", err)
 		}
@@ -62,7 +62,7 @@ func main() {
 
 	if _, err := os.Stat(programs.ServerFolder); os.IsNotExist(err) {
 		logging.Info("No server directory found, creating")
-		os.MkdirAll(programs.ServerFolder, 755)
+		os.MkdirAll(programs.ServerFolder, 0755)
 	}
 
 	programs.LoadFromFolder()

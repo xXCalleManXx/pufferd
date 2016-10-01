@@ -54,7 +54,7 @@ func runServer() error {
 			Headers: nil,
 			Bytes:   data,
 		}
-		ioutil.WriteFile(path.Join("data", "server.key"), pem.EncodeToMemory(&block), 700)
+		ioutil.WriteFile(path.Join("data", "server.key"), pem.EncodeToMemory(&block), 0700)
 		if e != nil {
 			return e
 		}
