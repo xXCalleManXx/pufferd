@@ -173,7 +173,7 @@ func (fs VirtualFS) Mkdir(name string, attr *sftpd.Attr) error {
 	if e != nil {
 		return e
 	}
-	return os.Mkdir(p, 755)
+	return os.Mkdir(p, 0755)
 }
 
 func (fs VirtualFS) Rmdir(name string) error {

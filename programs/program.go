@@ -137,7 +137,7 @@ func (p *ProgramStruct) Install() (err error) {
 		p.Stop()
 	}
 
-	os.MkdirAll(p.Environment.GetRootDirectory(), 755)
+	os.MkdirAll(p.Environment.GetRootDirectory(), 0755)
 
 	process := install.GenerateInstallProcess(&p.InstallData, p.Environment, p.Data)
 	for process.HasNext() {

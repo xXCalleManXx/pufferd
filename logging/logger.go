@@ -48,7 +48,7 @@ const (
 
 func init() {
 	var err error
-	os.Mkdir(logFileFolder, 755)
+	os.Mkdir(logFileFolder, 0755)
 	logFile, err = os.OpenFile(path.Join(logFileFolder, time.Now().Format(logFileName)), os.O_WRONLY|os.O_CREATE, os.ModeType)
 	if err != nil {
 		Critical("Could not create log file", err)
