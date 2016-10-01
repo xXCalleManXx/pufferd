@@ -39,6 +39,9 @@ func CopyTemplates() {
 
 	data = Vanilla
 	writeFile("vanilla", data)
+
+	data = SRCDS
+	writeFile("srcds", data)
 }
 
 func writeFile(name string, data string) {
