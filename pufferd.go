@@ -25,7 +25,6 @@ import (
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/programs"
 	"github.com/pufferpanel/pufferd/routing"
-	"github.com/pufferpanel/pufferd/routing/legacy"
 	"github.com/pufferpanel/pufferd/routing/server"
 	"github.com/pufferpanel/pufferd/sftp"
 	"io/ioutil"
