@@ -26,7 +26,7 @@ import (
 var Folder = utils.JoinPath("data", "templates")
 
 func CopyTemplates() {
-	os.MkdirAll(Folder, 755)
+	os.MkdirAll(Folder, 0755)
 
 	data := Spigot
 	writeFile("spigot", data)
