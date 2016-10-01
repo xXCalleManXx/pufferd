@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/linkosmos/mapop"
 	"github.com/pufferpanel/pufferd/data/templates"
 	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/pufferd/install"
@@ -29,12 +30,11 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"github.com/linkosmos/mapop"
 )
 
 var (
 	programs     []Program = make([]Program, 0)
-	ServerFolder string = utils.JoinPath("data", "servers")
+	ServerFolder string    = utils.JoinPath("data", "servers")
 )
 
 func LoadFromFolder() {
@@ -73,7 +73,7 @@ func GetAll() []Program {
 
 func Load(id string) (program Program, err error) {
 	var data []byte
-	data, err = ioutil.ReadFile(utils.JoinPath(ServerFolder, id + ".json"))
+	data, err = ioutil.ReadFile(utils.JoinPath(ServerFolder, id+".json"))
 	if len(data) == 0 || err != nil {
 		return
 	}
@@ -134,14 +134,14 @@ func Create(id string, serverType string, data map[string]interface{}) bool {
 		return false
 	}
 
-	templateData, err := ioutil.ReadFile(utils.JoinPath(templates.Folder, serverType + ".json"))
+	templateData, err := ioutil.ReadFile(utils.JoinPath(templates.Folder, serverType+".json"))
 
 	var templateJson map[string]interface{}
 	err = json.Unmarshal(templateData, &templateJson)
 	segment := utils.GetMapOrNull(templateJson, "pufferd")
 
 	if err != nil {
-		logging.Error("Error reading template file for type " + serverType, err)
+		logging.Error("Error reading template file for type "+serverType, err)
 		return false
 	}
 
@@ -164,8 +164,8 @@ func Create(id string, serverType string, data map[string]interface{}) bool {
 		segment["data"] = mapper
 	}
 
-	templateData, _ = json.Marshal(templateJson)
-	err = ioutil.WriteFile(utils.JoinPath(ServerFolder, id + ".json"), templateData, 0644)
+	templateData, _ = json.MarshalIndent(templateJson, "", "  ")
+	err = ioutil.WriteFile(utils.JoinPath(ServerFolder, id+".json"), templateData, 0644)
 
 	if err != nil {
 		logging.Error("Error writing server file", err)
@@ -193,8 +193,8 @@ func Delete(id string) (err error) {
 	}
 
 	err = program.Destroy()
-	os.Remove(utils.JoinPath(ServerFolder, program.Id() + ".json"))
-	programs = append(programs[:index], programs[index + 1:]...)
+	os.Remove(utils.JoinPath(ServerFolder, program.Id()+".json"))
+	programs = append(programs[:index], programs[index+1:]...)
 	return
 }
 
@@ -213,7 +213,7 @@ func Save(id string) (err error) {
 		err = errors.New("No server with given id")
 		return
 	}
-	err = program.Save(utils.JoinPath(ServerFolder, id + ".json"))
+	err = program.Save(utils.JoinPath(ServerFolder, id+".json"))
 	return
 }
 
@@ -245,7 +245,7 @@ func GetPlugins() map[string]interface{} {
 			continue
 		}
 		name := strings.TrimSuffix(element.Name(), filepath.Ext(element.Name()))
-		templateData, _ := ioutil.ReadFile(utils.JoinPath(templates.Folder, name + ".json"))
+		templateData, _ := ioutil.ReadFile(utils.JoinPath(templates.Folder, name+".json"))
 
 		var templateJson map[string]interface{}
 		json.Unmarshal(templateData, &templateJson)
