@@ -137,7 +137,7 @@ func (p *ProgramStruct) Install() (err error) {
 		p.Stop()
 	}
 
-	os.MkdirAll(p.Environment.GetRootDirectory(), os.ModeDir)
+	os.MkdirAll(p.Environment.GetRootDirectory(), 755)
 
 	process := install.GenerateInstallProcess(&p.InstallData, p.Environment, p.Data)
 	for process.HasNext() {
@@ -209,7 +209,7 @@ func (p *ProgramStruct) Save(file string) (err error) {
 		return
 	}
 
-	err = ioutil.WriteFile(file, data, 664)
+	err = ioutil.WriteFile(file, data, 0664)
 	return
 }
 
