@@ -204,7 +204,7 @@ func (p *ProgramStruct) Save(file string) (err error) {
 	endResult := make(map[string]interface{})
 	endResult["pufferd"] = result
 
-	data, err := json.Marshal(endResult)
+	data, err := json.MarshalIndent(endResult, "", "  ")
 	if err != nil {
 		return
 	}
