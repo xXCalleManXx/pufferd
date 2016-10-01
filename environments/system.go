@@ -102,7 +102,7 @@ func (s *System) Kill() (err error) {
 }
 
 func (s *System) Create() (err error) {
-	os.Mkdir(s.RootDirectory, os.ModeDir)
+	os.Mkdir(s.RootDirectory, 0755)
 	return
 }
 
