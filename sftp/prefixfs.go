@@ -3,10 +3,10 @@ package sftp
 import (
 	"errors"
 	"github.com/pufferpanel/pufferd/logging"
+	"github.com/pufferpanel/pufferd/utils"
 	"github.com/taruti/sftpd"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 type VirtualFS struct {
@@ -65,24 +65,16 @@ func (d vdir) Close() error {
 	return d.d.Close()
 }
 
-// Warning:
-// Use your own path mangling functionality in production code.
-// This can be quite non-trivial depending on the operating system.
-// The code below is not sufficient for production servers.
 func (fs VirtualFS) prefix(path string) (string, error) {
-	if strings.Contains(path, "..") {
-		return "<invalid>", errors.New("Invalid path")
-	}
 	if len(path) > 0 && path[0] == '/' {
 		path = path[1:]
 	}
 	newPath := filepath.Clean(filepath.Join(fs.Prefix, path))
-	if strings.HasPrefix(newPath, fs.Prefix) {
+	if utils.EnsureAccess(newPath, fs.Prefix) {
 		return newPath, nil
 	} else {
 		return "<invalid>", errors.New("Invalid path")
 	}
-
 }
 
 func (fs VirtualFS) OpenDir(path string) (sftpd.Dir, error) {

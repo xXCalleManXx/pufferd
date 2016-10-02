@@ -19,6 +19,7 @@ package templates
 const Spigot = `{
   "pufferd": {
     "type": "java",
+    "display": "Spigot - Minecraft",
     "install": {
       "commands": [
         {
@@ -71,6 +72,7 @@ const Spigot = `{
 const CraftbukkitBySpigot = `{
   "pufferd": {
     "type": "java",
+    "display": "CraftBukkit by Spigot - Minecraft",
     "install": {
       "commands": [
         {
@@ -123,6 +125,7 @@ const CraftbukkitBySpigot = `{
 const Vanilla = `{
   "pufferd": {
     "type": "java",
+    "display": "Vanilla - Minecraft",
     "install": {
       "commands": [
         {
@@ -155,6 +158,120 @@ const Vanilla = `{
       	"display": "Version",
       	"internal": false
       },
+      "memory": {
+      	"value": "1024",
+      	"required": true,
+      	"desc": "How much memory in MB to allocate to the Java Heap",
+      	"display": "Memory (MB)",
+      	"internal": false
+      }
+    }
+  }
+}`
+
+const Forge = `{
+  "pufferd": {
+    "type": "java",
+    "display": "MinecraftForge - Minecraft",
+    "install": {
+      "commands": [
+        {
+          "type": "download",
+          "files": "http://files.minecraftforge.net/maven/net/minecraftforge/forge/1.10.2-12.18.1.2011/forge-1.10.2-12.18.1.2011-installer.jar"
+        },
+        {
+          "source": "forge-*.jar",
+          "target": "installer.jar",
+          "type": "move"
+        },
+        {
+          "commands": [
+            "java -jar installer.jar --installServer"
+          ],
+          "type": "command"
+        },
+        {
+          "source": "forge-*-universal.jar",
+          "target": "server.jar",
+          "type": "move"
+        }
+      ]
+    },
+    "run": {
+      "stop": "stop",
+      "pre": [],
+      "post": [],
+      "arguments": [
+      	"-Xmx${memory}M",
+      	"-jar",
+      	"server.jar"
+      ],
+      "program": "java"
+    },
+    "data": {
+      "memory": {
+      	"value": "1024",
+      	"required": true,
+      	"desc": "How much memory in MB to allocate to the Java Heap",
+      	"display": "Memory (MB)",
+      	"internal": false
+      }
+    }
+  }
+}`
+
+const Sponge = `{
+  "pufferd": {
+    "type": "java",
+    "display": "SpongeForge - Minecraft",
+    "install": {
+      "commands": [
+        {
+          "type": "download",
+          "files": [
+          	"http://files.minecraftforge.net/maven/net/minecraftforge/forge/1.10.2-12.18.1.2011/forge-1.10.2-12.18.1.2011-installer.jar",
+          	"http://files.minecraftforge.net/maven/org/spongepowered/spongeforge/1.8.9-1890-4.2.0-BETA-1653/spongeforge-1.8.9-1890-4.2.0-BETA-1653.jar"
+          ]
+        },
+        {
+          "source": "forge-*.jar",
+          "target": "installer.jar",
+          "type": "move"
+        },
+        {
+          "target": "mods",
+          "type": "mkdir"
+        },
+        {
+          "source": "spongeforge-*.jar",
+          "target": "mods",
+          "type": "move"
+        },
+        {
+          "commands": [
+            "java -jar installer.jar --installServer"
+          ],
+          "type": "command"
+        },
+        {
+          "source": "forge-*-universal.jar",
+          "target": "server.jar",
+          "type": "move"
+        }
+      ]
+    },
+    "run": {
+      "stop": "stop",
+      "pre": [],
+      "post": [],
+      "arguments": [
+      	"-Xmx${memory}M",
+      	"-jar",
+      	"server.jar"
+      ],
+      "program": "java"
+    },
+    "data": {
       "memory": {
       	"value": "1024",
       	"required": true,

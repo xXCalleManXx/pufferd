@@ -16,7 +16,7 @@
 
 package templates
 
-const SRCDS = `{
+const TF2 = `{
   "pufferd": {
     "type": "srcds",
     "install": {
@@ -29,7 +29,7 @@ const SRCDS = `{
           "commands": [
             "mkdir steamcmd",
             "tar --no-same-owner -xzvf steamcmd_linux.tar.gz -C steamcmd",
-            "steamcmd/steamcmd.sh +login anonymous +force_install_dir ${rootdir} +app_update ${appid} +quit",
+            "steamcmd/steamcmd.sh +login anonymous +force_install_dir ${rootdir} +app_update 232250 +quit",
             "mkdir -p .steam/sdk32",
             "cp steamcmd/linux32/steamclient.so .steam/sdk32/steamclient.so"
           ],
@@ -50,11 +50,11 @@ const SRCDS = `{
       "program": "./srcds_run"
     },
     "data": {
-      "appid": {
-      	"value": "232250",
+      "map": {
+      	"value": "ctf_2fort",
       	"required": true,
-      	"desc": "App ID of game to install",
-      	"display": "App ID",
+      	"desc": "TF2 Map",
+      	"display": "Team Fortess 2 Map to load",
       	"internal": false
       }
     }

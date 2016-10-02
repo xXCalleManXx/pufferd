@@ -175,8 +175,13 @@ func GetFile(c *gin.Context) {
 
 	targetPath := c.Param("filename")
 
-	file := utils.JoinPath(server.GetEnvironment().GetRootDirectory(), targetPath)
-	info, err := os.Stat(file)
+	targetFile := utils.JoinPath(server.GetEnvironment().GetRootDirectory(), targetPath)
+
+	if !utils.EnsureAccess(targetFile, server.GetEnvironment().GetRootDirectory()) {
+		return
+	}
+
+	info, err := os.Stat(targetFile)
 
 	if os.IsNotExist(err) {
 		c.Status(404)
@@ -184,7 +189,7 @@ func GetFile(c *gin.Context) {
 	}
 
 	if info.IsDir() {
-		files, _ := ioutil.ReadDir(file)
+		files, _ := ioutil.ReadDir(targetFile)
 		fileNames := make([]interface{}, 0)
 		for _, file := range files {
 			type FileDesc struct {
@@ -206,7 +211,7 @@ func GetFile(c *gin.Context) {
 		}
 		c.JSON(200, fileNames)
 	} else {
-		c.File(file)
+		c.File(targetFile)
 	}
 }
 
@@ -224,7 +229,13 @@ func PutFile(c *gin.Context) {
 		return
 	}
 
-	file, err := os.Create(utils.JoinPath(server.GetEnvironment().GetRootDirectory(), targetPath))
+	targetFile := utils.JoinPath(server.GetEnvironment().GetRootDirectory(), targetPath)
+
+	if !utils.EnsureAccess(targetFile, server.GetEnvironment().GetRootDirectory()) {
+		return
+	}
+
+	file, err := os.Create(targetFile)
 
 	if err != nil {
 		logging.Error("Error writing file", err)

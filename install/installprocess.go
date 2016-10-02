@@ -57,6 +57,9 @@ func GenerateInstallProcess(data *InstallSection, environment environments.Envir
 			source := mapping["source"].(string)
 			target := mapping["target"].(string)
 			ops = append(ops, &operations.Move{SourceFile: source, TargetFile: target, Environment: environment})
+		case "mkdir":
+			target := mapping["target"].(string)
+			ops = append(ops, &operations.Mkdir{TargetFile: target, Environment: environment})
 		}
 	}
 	return InstallProcess{processInstructions: ops}

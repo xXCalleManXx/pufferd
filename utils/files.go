@@ -18,9 +18,15 @@ package utils
 
 import (
 	"path/filepath"
+	"strings"
 )
 
 func JoinPath(paths ...string) string {
-	result, _  := filepath.Abs(filepath.Join(paths...))
+	result, _ := filepath.Abs(filepath.Join(paths...))
 	return result
+}
+
+func EnsureAccess(source string, prefix string) bool {
+	abs, _ := filepath.Abs(source)
+	return strings.HasPrefix(abs, prefix)
 }

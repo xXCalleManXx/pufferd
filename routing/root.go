@@ -53,7 +53,6 @@ func GetTemplates(c *gin.Context) {
 	c.JSON(200, programs.GetPlugins())
 }
 
-
 func hasScope(gin *gin.Context, scope string) bool {
 	scopes, _ := gin.Get("scopes")
 	return utils.ContainsValue(scopes.([]string), scope)
