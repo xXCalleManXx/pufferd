@@ -30,6 +30,7 @@ import (
 	"syscall"
 	"time"
 	"github.com/kr/pty"
+	"github.com/pufferpanel/pufferd/config"
 )
 
 type System struct {
@@ -55,27 +56,33 @@ func (s *System) ExecuteAsync(cmd string, args []string) (err error) {
 		err = errors.New("A process is already running (" + strconv.Itoa(s.mainProcess.Process.Pid) + ")")
 		return
 	}
-	s.mainProcess = exec.Command(cmd, args...)
-	s.mainProcess.Dir = s.RootDirectory
-	s.mainProcess.Env = append(os.Environ(), "HOME="+s.RootDirectory)
-	_, tty, err := pty.Open()
-	wrapper := s.createWrapper(tty)
-	s.mainProcess.Stdout = wrapper
-	s.mainProcess.Stderr = wrapper
-	pipe, err := s.mainProcess.StdinPipe()
+	process := exec.Command(cmd, args...)
+	process.Dir = s.RootDirectory
+	process.Env = append(os.Environ(), "HOME="+s.RootDirectory)
+	pty, tty, err := pty.Open()
 	if err != nil {
 		logging.Error("Error starting process", err)
 	}
-	s.stdInWriter = pipe
+	wrapper := s.createWrapper(tty)
+	process.Stdout = wrapper
+	process.Stderr = wrapper
+	s.stdInWriter = tty
+	process.Stdin = tty
+	if err != nil {
+		logging.Error("Error starting process", err)
+	}
 	s.wait = sync.WaitGroup{}
 	s.wait.Add(1)
-	err = s.mainProcess.Start()
+	process.SysProcAttr = &syscall.SysProcAttr{Setctty: true, Setsid: true}
+	s.mainProcess = process
+	defer tty.Close()
+	err = process.Start()
 	go func() {
-		s.mainProcess.Wait()
-		tty.Close()
+		process.Wait()
+		pty.Close()
 		s.wait.Done()
 	}()
-	if err != nil && err.Error() != "exit status 1" {
+	if err != nil /*&& err.Error() != "exit status 1"*/ {
 		logging.Error("Error starting process", err)
 	}
 	return
@@ -171,5 +178,8 @@ func (s *System) GetStats() (map[string]interface{}, error) {
 }
 
 func (s *System) createWrapper(tty *os.File) io.Writer {
-	return io.MultiWriter(s.ConsoleBuffer, s.WSManager, tty)
+	if config.Get("forward") == "true" {
+		return io.MultiWriter(os.Stdout, s.ConsoleBuffer, s.WSManager)
+	}
+	return io.MultiWriter(s.ConsoleBuffer, s.WSManager)
 }
