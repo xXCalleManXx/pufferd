@@ -38,7 +38,7 @@ const TF2 = `{
       ]
     },
     "run": {
-      "stop": "stop",
+      "stop": "exit",
       "pre": [],
       "post": [],
       "arguments": [
