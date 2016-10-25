@@ -59,15 +59,11 @@ func (s *System) ExecuteAsync(cmd string, args []string) (err error) {
 	process := exec.Command(cmd, args...)
 	process.Dir = s.RootDirectory
 	process.Env = append(os.Environ(), "HOME="+s.RootDirectory)
-	pty, tty, err := pty.Open()
 	if err != nil {
 		logging.Error("Error starting process", err)
 	}
-	wrapper := s.createWrapper(tty)
-	process.Stdout = wrapper
-	process.Stderr = wrapper
-	s.stdInWriter = tty
-	process.Stdin = tty
+	wrapper := s.createWrapper()
+
 	if err != nil {
 		logging.Error("Error starting process", err)
 	}
@@ -75,11 +71,11 @@ func (s *System) ExecuteAsync(cmd string, args []string) (err error) {
 	s.wait.Add(1)
 	process.SysProcAttr = &syscall.SysProcAttr{Setctty: true, Setsid: true}
 	s.mainProcess = process
-	defer tty.Close()
-	err = process.Start()
+	tty, err := pty.Start(process)
+	s.stdInWriter = tty
 	go func() {
+		io.Copy(wrapper, tty)
 		process.Wait()
-		pty.Close()
 		s.wait.Done()
 	}()
 	if err != nil /*&& err.Error() != "exit status 1"*/ {
@@ -177,7 +173,7 @@ func (s *System) GetStats() (map[string]interface{}, error) {
 	return resultMap, nil
 }
 
-func (s *System) createWrapper(tty *os.File) io.Writer {
+func (s *System) createWrapper() io.Writer {
 	if config.Get("forward") == "true" {
 		return io.MultiWriter(os.Stdout, s.ConsoleBuffer, s.WSManager)
 	}
