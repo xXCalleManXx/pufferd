@@ -31,19 +31,63 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"github.com/pufferpanel/pufferd/data"
+	"github.com/pufferpanel/pufferd/utils"
+	"bytes"
+	"encoding/json"
 )
 
 func main() {
 	var loggingLevel string
 	var port int
+	var authRoot string
+	var authToken string
+	var install bool
 	flag.StringVar(&loggingLevel, "logging", "INFO", "Lowest logging level to display")
 	flag.IntVar(&port, "port", 5656, "Port to run service on")
+	flag.StringVar(&authRoot, "auth", "", "Base URL to the authorization server")
+	flag.StringVar(&authToken, "token", "", "Authorization token")
+	flag.BoolVar(&install, "install", false, "If installing instead of running")
 	flag.Parse()
 
 	logging.SetLevelByString(loggingLevel)
 	gin.SetMode(gin.ReleaseMode)
 
 	logging.Info("Logging set to " + loggingLevel)
+
+	if install {
+
+		if authRoot == "" {
+			logging.Error("Authorization server root not passed")
+			os.Exit(1)
+		}
+
+		if authToken == "" {
+			logging.Error("Authorization token not passed")
+			os.Exit(1)
+		}
+
+		config := data.CONFIG
+
+		replacements := make(map[string]interface{})
+		replacements["authurl"] = authRoot
+		replacements["authtoken"] = authToken
+
+		configData := []byte(utils.ReplaceTokens(config, replacements))
+
+		var prettyJson bytes.Buffer
+		json.Indent(&prettyJson, configData, "", "  ")
+		err := ioutil.WriteFile("config.json", prettyJson.Bytes(), 0664)
+
+		if err != nil {
+			logging.Error("Error writing new config")
+			os.Exit(1)
+		}
+
+		logging.Info("Config saved, install is complete")
+
+		os.Exit(0)
+	}
 
 	config.Load()
 
