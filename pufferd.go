@@ -44,16 +44,24 @@ func main() {
 	var authRoot string
 	var authToken string
 	var install bool
+	var version bool
 	flag.StringVar(&loggingLevel, "logging", "INFO", "Lowest logging level to display")
 	flag.IntVar(&port, "port", 5656, "Port to run service on")
 	flag.StringVar(&authRoot, "auth", "", "Base URL to the authorization server")
 	flag.StringVar(&authToken, "token", "", "Authorization token")
 	flag.BoolVar(&install, "install", false, "If installing instead of running")
+	flag.BoolVar(&version, "version", false, "Get the version")
 	flag.Parse()
+
+	if version {
+		os.Stdout.WriteString("pufferd (" + data.VERSION + ")")
+		return
+	}
 
 	logging.SetLevelByString(loggingLevel)
 	gin.SetMode(gin.ReleaseMode)
 
+	logging.Info("pufferd (" + data.VERSION + ")")
 	logging.Info("Logging set to " + loggingLevel)
 
 	if install {
