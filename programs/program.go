@@ -18,12 +18,13 @@ package programs
 
 import (
 	"encoding/json"
+	"io/ioutil"
+	"os"
+
 	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/pufferd/install"
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/utils"
-	"io/ioutil"
-	"os"
 )
 
 type Program interface {

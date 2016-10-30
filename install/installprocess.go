@@ -17,10 +17,11 @@
 package install
 
 import (
+	"runtime"
+
 	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/pufferd/install/operations"
 	"github.com/pufferpanel/pufferd/utils"
-	"runtime"
 )
 
 func GenerateInstallProcess(data *InstallSection, environment environments.Environment, dataMapping map[string]interface{}) InstallProcess {

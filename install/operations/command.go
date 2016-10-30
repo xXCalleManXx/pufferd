@@ -18,8 +18,9 @@ package operations
 
 import (
 	"fmt"
-	"github.com/pufferpanel/pufferd/environments"
 	"strings"
+
+	"github.com/pufferpanel/pufferd/environments"
 )
 
 type Command struct {

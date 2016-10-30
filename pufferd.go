@@ -17,24 +17,25 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"flag"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"strconv"
+
 	"github.com/braintree/manners"
 	"github.com/gin-gonic/gin"
 	"github.com/pufferpanel/pufferd/config"
+	"github.com/pufferpanel/pufferd/data"
 	"github.com/pufferpanel/pufferd/data/templates"
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/programs"
 	"github.com/pufferpanel/pufferd/routing"
 	"github.com/pufferpanel/pufferd/routing/server"
 	"github.com/pufferpanel/pufferd/sftp"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"strconv"
-	"github.com/pufferpanel/pufferd/data"
 	"github.com/pufferpanel/pufferd/utils"
-	"bytes"
-	"encoding/json"
 )
 
 func main() {

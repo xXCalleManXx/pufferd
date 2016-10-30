@@ -1,3 +1,19 @@
+/*
+ Copyright 2016 Padduck, LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ 	http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+*/
+
 package sftp
 
 import (
@@ -7,12 +23,6 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"encoding/pem"
-	"github.com/pkg/errors"
-	configuration "github.com/pufferpanel/pufferd/config"
-	"github.com/pufferpanel/pufferd/logging"
-	"github.com/pufferpanel/pufferd/programs"
-	"github.com/taruti/sftpd"
-	"golang.org/x/crypto/ssh"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -21,9 +31,15 @@ import (
 	"path"
 	"strconv"
 	"strings"
+
+	"github.com/pkg/errors"
+	configuration "github.com/pufferpanel/pufferd/config"
+	"github.com/pufferpanel/pufferd/logging"
+	"github.com/pufferpanel/pufferd/programs"
+	"github.com/taruti/sftpd"
+	"golang.org/x/crypto/ssh"
 )
 
-// RunServerLowLevel is an example how to use the low level API
 func Run() {
 	e := runServer()
 	if e != nil {
