@@ -32,7 +32,11 @@ func (ws *wsManager) Write(msg []byte) (n int, e error) {
 	}
 	if len(invalid) > 0 {
 		for b := range invalid {
-			ws.sockets = append(ws.sockets[:b], ws.sockets[b+1:]...)
+			if len(ws.sockets) == 1 {
+				ws.sockets = make([]websocket.Conn, 0)
+			} else {
+				ws.sockets = append(ws.sockets[:b], ws.sockets[b+1:]...)
+			}
 		}
 	}
 	n = len(msg)
