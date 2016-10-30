@@ -18,10 +18,6 @@ package environments
 
 import (
 	"errors"
-	"github.com/gorilla/websocket"
-	"github.com/pufferpanel/pufferd/logging"
-	"github.com/pufferpanel/pufferd/utils"
-	"github.com/shirou/gopsutil/process"
 	"io"
 	"os"
 	"os/exec"
@@ -29,6 +25,12 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/gorilla/websocket"
+	"github.com/pufferpanel/pufferd/config"
+	"github.com/pufferpanel/pufferd/logging"
+	"github.com/pufferpanel/pufferd/utils"
+	"github.com/shirou/gopsutil/process"
 )
 
 type System struct {
