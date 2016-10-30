@@ -1,0 +1,14 @@
+pipeline:
+  build:
+    image: golang
+    commands:
+      - go get
+      - go build
+  notify:
+      irc:
+        prefix: build
+        nick: pufferbuild
+        channel: #pufferpanel
+        server:
+            host: irc.esper.net
+            port: 6667
