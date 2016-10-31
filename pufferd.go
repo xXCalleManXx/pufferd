@@ -40,10 +40,10 @@ import (
 	"github.com/pufferpanel/pufferd/utils"
 )
 
-const (
-	MAJORVERSION = "git"
-	BUILDDATE = "unknown"
-	GITHASH = "unknown"
+var (
+	MAJORVERSION string
+	BUILDDATE string
+	GITHASH string
 )
 
 func main() {
