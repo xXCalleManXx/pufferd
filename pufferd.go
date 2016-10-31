@@ -42,8 +42,8 @@ import (
 
 var (
 	MAJORVERSION string
-	BUILDDATE string
-	GITHASH string
+	BUILDDATE    string
+	GITHASH      string
 )
 
 func main() {
@@ -53,18 +53,27 @@ func main() {
 	var authToken string
 	var install bool
 	var version bool
+	var license bool
 	flag.StringVar(&loggingLevel, "logging", "INFO", "Lowest logging level to display")
 	flag.IntVar(&port, "port", 5656, "Port to run service on")
 	flag.StringVar(&authRoot, "auth", "", "Base URL to the authorization server")
 	flag.StringVar(&authToken, "token", "", "Authorization token")
 	flag.BoolVar(&install, "install", false, "If installing instead of running")
 	flag.BoolVar(&version, "version", false, "Get the version")
+	flag.BoolVar(&license, "license", false, "View license")
 	flag.Parse()
 
 	versionString := fmt.Sprintf("pufferd %s (%s %s)", MAJORVERSION, BUILDDATE, GITHASH)
 
 	if version {
 		os.Stdout.WriteString(versionString + "\r\n")
+	}
+
+	if license {
+		os.Stdout.WriteString(data.LICENSE + "\r\n")
+	}
+
+	if license || version {
 		return
 	}
 
