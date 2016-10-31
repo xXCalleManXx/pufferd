@@ -1,6 +1,6 @@
 pipeline:
   build:
-    image: library/golang:1.7
+    image: golang
     environment:
       - GOPATH=/drone
       - GOBIN=/drone/bin
@@ -8,7 +8,7 @@ pipeline:
       - go get
       - go build
   notify:
-      irc:
+       image irc:
         prefix: build
         nick: pufferbuild
         channel: #pufferpanel
@@ -16,3 +16,5 @@ pipeline:
             host: irc.esper.net
             tls: true
             port: 6697
+        when:
+         status: [ success, failure ]
