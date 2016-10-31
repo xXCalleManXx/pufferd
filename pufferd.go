@@ -25,6 +25,8 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"fmt"
+
 	"github.com/braintree/manners"
 	"github.com/gin-gonic/gin"
 	"github.com/pufferpanel/pufferd/config"
@@ -36,6 +38,12 @@ import (
 	"github.com/pufferpanel/pufferd/routing/server"
 	"github.com/pufferpanel/pufferd/sftp"
 	"github.com/pufferpanel/pufferd/utils"
+)
+
+const (
+	MAJORVERSION = "git"
+	BUILDDATE = "unknown"
+	GITHASH = "unknown"
 )
 
 func main() {
@@ -53,15 +61,17 @@ func main() {
 	flag.BoolVar(&version, "version", false, "Get the version")
 	flag.Parse()
 
+	versionString := fmt.Sprintf("pufferd %s (%s %s)", MAJORVERSION, BUILDDATE, GITHASH)
+
 	if version {
-		os.Stdout.WriteString("pufferd (" + data.VERSION + ")")
+		os.Stdout.WriteString(versionString + "\r\n")
 		return
 	}
 
 	logging.SetLevelByString(loggingLevel)
 	gin.SetMode(gin.ReleaseMode)
 
-	logging.Info("pufferd (" + data.VERSION + ")")
+	logging.Info(versionString)
 	logging.Info("Logging set to " + loggingLevel)
 
 	if install {
