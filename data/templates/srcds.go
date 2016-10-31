@@ -56,14 +56,14 @@ const SRCDS = `{
         "desc": "App ID",
         "display": "Application ID",
         "internal": false
-    }
+    },
      "gametype": {
       "value": "tf",
       "required": true,
       "desc": "Game Type",
       "display": "tf, csgo, etc.",
       "internal": false
-    }
+   },
       "map": {
       	"value": "ctf_2fort",
       	"required": false,
