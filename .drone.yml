@@ -11,4 +11,5 @@ pipeline:
         channel: #pufferpanel
         server:
             host: irc.esper.net
-            port: 6667
+            tls: true
+            port: 6697
