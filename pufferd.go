@@ -78,6 +78,7 @@ func main() {
 	}
 
 	logging.SetLevelByString(loggingLevel)
+	logging.Init()
 	gin.SetMode(gin.ReleaseMode)
 
 	logging.Info(versionString)

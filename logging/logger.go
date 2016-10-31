@@ -46,7 +46,7 @@ const (
 	formatWithData = "[%s] [%s] %s\n%v\n"
 )
 
-func init() {
+func Init() {
 	var err error
 	os.Mkdir(logFileFolder, 0755)
 	logFile, err = os.OpenFile(path.Join(logFileFolder, time.Now().Format(logFileName)), os.O_WRONLY|os.O_CREATE, 0644)
