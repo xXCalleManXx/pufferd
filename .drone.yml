@@ -2,8 +2,12 @@ pipeline:
   build:
     image: golang
     pull: true
+    environment:
+      - GOPATH=/drone
+      - GOBIN=/drone/bin
     commands:
       - go get
+      - go build
   notify:
       irc:
         prefix: build
