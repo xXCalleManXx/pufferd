@@ -1,9 +1,9 @@
 pipeline:
   build:
     image: golang
+    pull: true
     commands:
       - go get
-      - go build
   notify:
       irc:
         prefix: build
