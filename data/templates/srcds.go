@@ -16,6 +16,65 @@
 
 package templates
 
+const SRCDS = `{
+  "pufferd": {
+    "type": "srcds",
+    "install": {
+      "commands": [
+        {
+          "files": "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz",
+          "type": "download"
+        },
+        {
+          "commands": [
+            "mkdir steamcmd",
+            "tar --no-same-owner -xzvf steamcmd_linux.tar.gz -C steamcmd",
+            "steamcmd/steamcmd.sh +login anonymous +force_install_dir ${rootdir} +app_update ${appid} +quit",
+            "mkdir -p .steam/sdk32",
+            "cp steamcmd/linux32/steamclient.so .steam/sdk32/steamclient.so"
+          ],
+          "type": "command"
+        }
+      ]
+    },
+    "run": {
+      "stop": "exit",
+      "pre": [],
+      "post": [],
+      "arguments": [
+      	"-game ${gametype}",
+      	"-console",
+        "+map ${map}",
+      	"-norestart"
+      ],
+      "program": "./srcds_run"
+    },
+    "data": {
+      "appid": {
+        "value": "232250",
+        "required": true,
+        "desc": "App ID",
+        "display": "Application ID",
+        "internal": false
+    }
+     "gametype": {
+      "value": "tf",
+      "required": true,
+      "desc": "Game Type",
+      "display": "tf, csgo, etc.",
+      "internal": false
+    }
+      "map": {
+      	"value": "ctf_2fort",
+      	"required": false,
+      	"desc": "Map",
+      	"display": "Map to load",
+      	"internal": false
+      }
+    }
+  }
+}`
+
 const TF2 = `{
   "pufferd": {
     "type": "srcds",
@@ -42,9 +101,9 @@ const TF2 = `{
       "pre": [],
       "post": [],
       "arguments": [
-      	"--game tf",
+      	"-game tf",
       	"-console",
-        "+map ctf_2fort",
+        "+map ${map}",
       	"-norestart"
       ],
       "program": "./srcds_run"

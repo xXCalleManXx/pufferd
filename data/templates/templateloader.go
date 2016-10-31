@@ -40,14 +40,17 @@ func CopyTemplates() {
 	data = Vanilla
 	writeFile("vanilla", data)
 
-	data = TF2
-	writeFile("tf2", data)
-
 	data = Forge
 	writeFile("forge", data)
 
 	data = Sponge
 	writeFile("spongeforge", data)
+
+	data = SRCDS
+	writeFile("srcds", data)
+
+	data = TF2
+	writeFile("tf2", data)
 }
 
 func writeFile(name string, data string) {
