@@ -11,8 +11,8 @@ pipeline:
   notify:
     irc:
     prefix: build
-    nick: pufferci
-    channel: pufferpanel
+    nick: PufferCI
+    channel: $$IRCCHANNEL
     server:
         host: irc.esper.net
         tls: true
