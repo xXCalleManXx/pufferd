@@ -97,20 +97,32 @@ func LoadFromMapping(id string, source map[string]interface{}) (program Program,
 	var pufferdData = utils.GetMapOrNull(source, "pufferd")
 	var installSection = getInstallSection(utils.GetMapOrNull(pufferdData, "install"))
 	var runSection = utils.GetMapOrNull(pufferdData, "run")
-	var environmentSection = utils.GetMapOrNull(runSection, "environment")
+	var environmentSection = utils.GetMapOrNull(pufferdData, "environment")
 	var environment environments.Environment
-	var defaultEnvType = "system"
-	var environmentType = utils.GetStringOrDefault(environmentSection, "type", defaultEnvType)
 	var dataSection = utils.GetMapOrNull(pufferdData, "data")
 	dataCasted := make(map[string]interface{}, len(dataSection))
 	for key, value := range dataSection {
 		dataCasted[key] = value
 	}
 
+	var environmentType string
+	if environmentSection == nil {
+		environmentType = "standard"
+	} else {
+		environmentType = utils.GetStringOrDefault(environmentSection, "type", "standard")
+	}
+
+	logging.Debugf("Loading server as %s", environmentType)
+
 	switch environmentType {
-	case "system":
+	case "tty":
+		logging.Debugf("Loading server as tty")
 		serverRoot := utils.JoinPath(ServerFolder, id)
-		environment = &environments.System{RootDirectory: utils.GetStringOrDefault(environmentSection, "root", serverRoot), ConsoleBuffer: utils.CreateCache(), WSManager: utils.CreateWSManager()}
+		environment = &environments.Tty{RootDirectory: utils.GetStringOrDefault(environmentSection, "root", serverRoot), ConsoleBuffer: utils.CreateCache(), WSManager: utils.CreateWSManager()}
+	default:
+		logging.Debugf("Loading server as standard")
+		serverRoot := utils.JoinPath(ServerFolder, id)
+		environment = &environments.Standard{RootDirectory: utils.GetStringOrDefault(environmentSection, "root", serverRoot), ConsoleBuffer: utils.CreateCache(), WSManager: utils.CreateWSManager()}
 	}
 
 	var runBlock Runtime

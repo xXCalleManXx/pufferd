@@ -50,6 +50,9 @@ const Spigot = `{
       ],
       "program": "java"
     },
+    "environment": {
+      "type": "standard"
+    },
     "data": {
       "version": {
       	"value": "1.10",
@@ -103,6 +106,9 @@ const CraftbukkitBySpigot = `{
       ],
       "program": "java"
     },
+    "environment": {
+      "type": "standard"
+    },
     "data": {
       "version": {
       	"value": "1.10",
@@ -149,6 +155,9 @@ const Vanilla = `{
       	"server.jar"
       ],
       "program": "java"
+    },
+    "environment": {
+      "type": "standard"
     },
     "data": {
       "version": {
@@ -207,6 +216,9 @@ const Forge = `{
       	"server.jar"
       ],
       "program": "java"
+    },
+    "environment": {
+      "type": "standard"
     },
     "data": {
       "memory": {
@@ -270,6 +282,9 @@ const Sponge = `{
       	"server.jar"
       ],
       "program": "java"
+    },
+    "environment": {
+      "type": "standard"
     },
     "data": {
       "memory": {

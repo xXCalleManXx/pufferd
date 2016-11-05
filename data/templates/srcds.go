@@ -108,6 +108,9 @@ const TF2 = `{
       ],
       "program": "./srcds_run"
     },
+    "environment": {
+      "type": "tty"
+    },
     "data": {
       "map": {
       	"value": "ctf_2fort",
