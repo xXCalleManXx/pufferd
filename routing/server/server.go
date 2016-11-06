@@ -32,6 +32,8 @@ import (
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/programs"
 	"github.com/pufferpanel/pufferd/utils"
+	"github.com/pkg/errors"
+	"strings"
 )
 
 var wsupgrader = websocket.Upgrader{
@@ -62,6 +64,7 @@ func RegisterRoutes(e *gin.Engine) {
 		l.GET("/:id/stats", GetStats)
 		l.POST("/:id/reload", ReloadServer)
 	}
+	e.GET("/network", httphandlers.OAuth2Handler, NetworkServer)
 	e.GET("/server/:id/console", cors.Middleware(cors.Config{
 		Origins:     "*",
 		Credentials: true,
@@ -310,6 +313,37 @@ func ReloadServer(c *gin.Context) {
 	}
 
 	programs.Reload(existing.Id())
+}
+
+func NetworkServer(c *gin.Context) {
+
+	scopes, _ := c.Get("scopes")
+	valid := false
+	for _, v := range scopes.([]string) {
+		if v == "pufferadmin"{
+			valid = true
+		}
+	}
+	if !valid {
+		c.AbortWithStatus(401)
+		return
+	}
+
+	servers := c.DefaultQuery("ids", "")
+	if servers == "" {
+		c.AbortWithError(400, errors.New("Server ids required"))
+		return
+	}
+	serverIds := strings.Split(servers, ",")
+	result := make(map[string]string)
+	for _, v := range serverIds {
+		program, _ := programs.Get(v)
+		if program == nil {
+			continue
+		}
+		result[program.Id()] = program.GetNetwork()
+	}
+	c.JSON(200, result)
 }
 
 func handleInitialCallServer(c *gin.Context, perm string, requireServer bool) (valid bool, program programs.Program) {

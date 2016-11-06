@@ -78,6 +78,10 @@ type Program interface {
 	Edit(data map[string]interface{}) (err error)
 
 	Reload(data Program)
+
+	GetData() map[string]interface{}
+
+	GetNetwork() string
 }
 
 type ProgramStruct struct {
@@ -230,6 +234,28 @@ func (p *ProgramStruct) Reload(data Program) {
 	p.Data = replacement.Data
 	p.InstallData = replacement.InstallData
 	p.RunData = replacement.RunData
+}
+
+func (p *ProgramStruct) GetData() map[string]interface{} {
+	return p.Data
+}
+
+func (p *ProgramStruct) GetNetwork() string {
+	data := p.GetData()
+	ip := "0.0.0.0"
+	port := "0"
+
+	ipData := data["ip"]
+	if ipData != nil {
+		ip = ipData.(map[string]interface{})["value"].(string)
+	}
+
+	portData := data["port"]
+	if portData != nil {
+		port = portData.(map[string]interface{})["value"].(string)
+	}
+
+	return ip + ":" + port
 }
 
 type Runtime struct {
