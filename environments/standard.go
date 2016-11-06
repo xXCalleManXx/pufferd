@@ -106,6 +106,7 @@ func (s *Standard) Create() (err error) {
 }
 
 func (s *Standard) Delete() (err error) {
+	err = os.RemoveAll(s.RootDirectory)
 	return
 }
 
