@@ -21,10 +21,7 @@ import (
 )
 
 type InstallSection struct {
-	Global  []interface{} `json:"commands,omitempty"`
-	Linux   []interface{} `json:"linux,omitempty"`
-	Mac     []interface{} `json:"mac,omitempty"`
-	Windows []interface{} `json:"windows,omitempty"`
+	Commands  []interface{} `json:"commands,omitempty"`
 }
 
 func (i *InstallSection) SaveToString() string {

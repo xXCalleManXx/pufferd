@@ -114,16 +114,7 @@ func LoadFromMapping(id string, source map[string]interface{}) (program Program,
 
 	logging.Debugf("Loading server as %s", environmentType)
 
-	switch environmentType {
-	case "tty":
-		logging.Debugf("Loading server as tty")
-		serverRoot := utils.JoinPath(ServerFolder, id)
-		environment = &environments.Tty{RootDirectory: utils.GetStringOrDefault(environmentSection, "root", serverRoot), ConsoleBuffer: utils.CreateCache(), WSManager: utils.CreateWSManager()}
-	default:
-		logging.Debugf("Loading server as standard")
-		serverRoot := utils.JoinPath(ServerFolder, id)
-		environment = &environments.Standard{RootDirectory: utils.GetStringOrDefault(environmentSection, "root", serverRoot), ConsoleBuffer: utils.CreateCache(), WSManager: utils.CreateWSManager()}
-	}
+	environment = LoadEnvironment(environmentType, ServerFolder, id, environmentSection)
 
 	var runBlock Runtime
 	if pufferdData["run"] == nil {
@@ -280,9 +271,6 @@ func GetPlugins() map[string]interface{} {
 
 func getInstallSection(mapping map[string]interface{}) install.InstallSection {
 	return install.InstallSection{
-		Global:  utils.GetObjectArrayOrNull(mapping, "commands"),
-		Linux:   utils.GetObjectArrayOrNull(mapping, "linux"),
-		Mac:     utils.GetObjectArrayOrNull(mapping, "mac"),
-		Windows: utils.GetObjectArrayOrNull(mapping, "windows"),
+		Commands:  utils.GetObjectArrayOrNull(mapping, "commands"),
 	}
 }

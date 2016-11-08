@@ -17,26 +17,13 @@
 package install
 
 import (
-	"runtime"
-
 	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/pufferd/install/operations"
 	"github.com/pufferpanel/pufferd/utils"
 )
 
 func GenerateInstallProcess(data *InstallSection, environment environments.Environment, dataMapping map[string]interface{}) InstallProcess {
-	var directions []interface{}
-	switch runtime.GOOS {
-	case "windows":
-		directions = data.Windows
-	case "mac":
-		directions = data.Mac
-	default:
-		directions = data.Linux
-	}
-	if directions == nil {
-		directions = data.Global
-	}
+	var directions = data.Commands
 	datamap := make(map[string]interface{})
 	for k, v := range dataMapping {
 		datamap[k] = v.(map[string]interface{})["value"]
