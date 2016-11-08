@@ -67,6 +67,20 @@ const Spigot = `{
       	"desc": "How much memory in MB to allocate to the Java Heap",
       	"display": "Memory (MB)",
       	"internal": false
+      },
+      "ip": {
+        "value": "0.0.0.0",
+        "required": true,
+        "desc": "What IP to bind the server to",
+        "display": "IP",
+        "internal": false
+      },
+      "port": {
+        "value": "25565",
+        "required": true,
+        "desc": "What port to bind the server to",
+        "display": "Port",
+        "internal": false
       }
     }
   }
@@ -123,6 +137,20 @@ const CraftbukkitBySpigot = `{
       	"desc": "How much memory in MB to allocate to the Java Heap",
       	"display": "Memory (MB)",
       	"internal": false
+      },
+      "ip": {
+        "value": "0.0.0.0",
+        "required": true,
+        "desc": "What IP to bind the server to",
+        "display": "IP",
+        "internal": false
+      },
+      "port": {
+        "value": "25565",
+        "required": true,
+        "desc": "What port to bind the server to",
+        "display": "Port",
+        "internal": false
       }
     }
   }
@@ -173,6 +201,20 @@ const Vanilla = `{
       	"desc": "How much memory in MB to allocate to the Java Heap",
       	"display": "Memory (MB)",
       	"internal": false
+      },
+      "ip": {
+        "value": "0.0.0.0",
+        "required": true,
+        "desc": "What IP to bind the server to",
+        "display": "IP",
+        "internal": false
+      },
+      "port": {
+        "value": "25565",
+        "required": true,
+        "desc": "What port to bind the server to",
+        "display": "Port",
+        "internal": false
       }
     }
   }
@@ -227,6 +269,20 @@ const Forge = `{
       	"desc": "How much memory in MB to allocate to the Java Heap",
       	"display": "Memory (MB)",
       	"internal": false
+      },
+      "ip": {
+        "value": "0.0.0.0",
+        "required": true,
+        "desc": "What IP to bind the server to",
+        "display": "IP",
+        "internal": false
+      },
+      "port": {
+        "value": "25565",
+        "required": true,
+        "desc": "What port to bind the server to",
+        "display": "Port",
+        "internal": false
       }
     }
   }
@@ -293,6 +349,20 @@ const Sponge = `{
       	"desc": "How much memory in MB to allocate to the Java Heap",
       	"display": "Memory (MB)",
       	"internal": false
+      },
+      "ip": {
+        "value": "0.0.0.0",
+        "required": true,
+        "desc": "What IP to bind the server to",
+        "display": "IP",
+        "internal": false
+      },
+      "port": {
+        "value": "25565",
+        "required": true,
+        "desc": "What port to bind the server to",
+        "display": "Port",
+        "internal": false
       }
     }
   }

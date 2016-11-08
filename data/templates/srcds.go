@@ -47,7 +47,7 @@ const SRCDS = `{
         "+map ${map}",
       	"-norestart"
       ],
-      "program": "./srcds_run"
+      "program": "./srcds_run +ip ${ip} +port ${port}"
     },
     "data": {
       "appid": {
@@ -56,20 +56,34 @@ const SRCDS = `{
         "desc": "App ID",
         "display": "Application ID",
         "internal": false
-    },
-     "gametype": {
-      "value": "tf",
-      "required": true,
-      "desc": "Game Type",
-      "display": "tf, csgo, etc.",
-      "internal": false
-   },
+      },
+        "gametype": {
+        "value": "tf",
+        "required": true,
+        "desc": "Game Type",
+        "display": "tf, csgo, etc.",
+        "internal": false
+      },
       "map": {
       	"value": "ctf_2fort",
       	"required": false,
       	"desc": "Map",
       	"display": "Map to load",
       	"internal": false
+      },
+      "ip": {
+        "value": "0.0.0.0",
+        "required": true,
+        "desc": "What IP to bind the server to",
+        "display": "IP",
+        "internal": false
+      },
+      "port": {
+        "value": "25565",
+        "required": true,
+        "desc": "What port to bind the server to",
+        "display": "Port",
+        "internal": false
       }
     }
   }
@@ -118,6 +132,20 @@ const TF2 = `{
       	"desc": "TF2 Map",
       	"display": "Team Fortess 2 Map to load",
       	"internal": false
+      },
+      "ip": {
+        "value": "0.0.0.0",
+        "required": true,
+        "desc": "What IP to bind the server to",
+        "display": "IP",
+        "internal": false
+      },
+      "port": {
+        "value": "25565",
+        "required": true,
+        "desc": "What port to bind the server to",
+        "display": "Port",
+        "internal": false
       }
     }
   }
