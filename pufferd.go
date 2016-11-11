@@ -33,6 +33,7 @@ import (
 	"github.com/pufferpanel/pufferd/data"
 	"github.com/pufferpanel/pufferd/data/templates"
 	"github.com/pufferpanel/pufferd/logging"
+	"github.com/pufferpanel/pufferd/migration"
 	"github.com/pufferpanel/pufferd/programs"
 	"github.com/pufferpanel/pufferd/routing"
 	"github.com/pufferpanel/pufferd/routing/server"
@@ -54,6 +55,7 @@ func main() {
 	var install bool
 	var version bool
 	var license bool
+	var migrate bool
 	flag.StringVar(&loggingLevel, "logging", "INFO", "Lowest logging level to display")
 	flag.IntVar(&port, "port", 5656, "Port to run service on")
 	flag.StringVar(&authRoot, "auth", "", "Base URL to the authorization server")
@@ -61,6 +63,7 @@ func main() {
 	flag.BoolVar(&install, "install", false, "If installing instead of running")
 	flag.BoolVar(&version, "version", false, "Get the version")
 	flag.BoolVar(&license, "license", false, "View license")
+	flag.BoolVar(&migrate, "migrate", false, "Migrate Scales data to pufferd")
 	flag.Parse()
 
 	versionString := fmt.Sprintf("pufferd %s (%s %s)", MAJORVERSION, BUILDDATE, GITHASH)
@@ -73,7 +76,11 @@ func main() {
 		os.Stdout.WriteString(data.LICENSE + "\r\n")
 	}
 
-	if license || version {
+	if migrate {
+		migration.MigrateFromScales()
+	}
+
+	if license || version || migrate {
 		return
 	}
 
