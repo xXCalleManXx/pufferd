@@ -57,7 +57,7 @@ const SRCDS = `{
         "display": "Application ID",
         "internal": false
       },
-        "gametype": {
+      "gametype": {
         "value": "tf",
         "required": true,
         "desc": "Game Type",
@@ -120,7 +120,7 @@ const TF2 = `{
         "+map ${map}",
       	"-norestart"
       ],
-      "program": "./srcds_run"
+      "program": "./srcds_run +ip ${ip} +port ${port}"
     },
     "environment": {
       "type": "tty"

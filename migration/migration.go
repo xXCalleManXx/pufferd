@@ -54,6 +54,10 @@ func MigrateFromScales() {
 		serverData["port"] = scales.Gameport
 		if scales.Plugin == "minecraft" {
 			serverData["memory"] = scales.Build.Memory
+		} else if scales.Plugin == "srcds" {
+			serverData["appid"] = scales.Startup.Variables.Build_Params
+			serverData["gametype"] = scales.Startup.Variables.Game
+			serverData["map"] = scales.Startup.Variables.Map
 		}
 		programs.Create(scales.Name, scales.Plugin, serverData)
 	}
@@ -66,6 +70,7 @@ type scalesServer struct {
 	Gameport int               `json:"gameport,omitempty"`
 	Gamehost string            `json:"gamehost,omitempty"`
 	Plugin   string            `json:"plugin,omitempty"`
+	Startup  scalesServerStartup `json:"startup,omitempty"`
 }
 
 type scalesServerBuild struct {
@@ -78,4 +83,7 @@ type scalesServerStartup struct {
 
 type scalesServerStartupVariables struct {
 	Build_Params string `json:"build_params,omitempty"`
+	Game         string `json:"game,omitempty"`
+	Map          string `json:"map,omitempty"`
+	Players      string `json:"players,omitempty"`
 }
