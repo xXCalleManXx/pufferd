@@ -17,6 +17,7 @@ const Scales = "/srv/scales/data"
 
 func MigrateFromScales() {
 	templates.CopyTemplates()
+	os.MkdirAll(programs.ServerFolder, 0755)
 
 	programFiles, err := ioutil.ReadDir(Scales)
 	if err != nil {
@@ -29,15 +30,15 @@ func MigrateFromScales() {
 		}
 		id := strings.TrimSuffix(element.Name(), filepath.Ext(element.Name()))
 		logging.Infof("Attempting to migrate %s", id)
-		data, err := ioutil.ReadAll(utils.JoinPath(Scales, element))
+		data, err := ioutil.ReadFile(utils.JoinPath(Scales, element.Name()))
 		if err != nil {
-			logging.Error("Error read server config " + id, err)
+			logging.Error("Error read server config", err)
 			continue
 		}
 		scales := scalesServer{}
 		err = json.Unmarshal(data, &scales)
 		if err != nil {
-			logging.Error("Error read server config " + id, err)
+			logging.Error("Error read server config", err)
 			continue
 		}
 		newPath := utils.JoinPath("data", "servers", scales.Name)
@@ -46,7 +47,13 @@ func MigrateFromScales() {
 			logging.Error("Error moving folder", err);
 			continue
 		}
-		err = os.Chown(newPath, os.Getuid(), os.Getgid())
+
+		err = filepath.Walk(newPath, func(name string, info os.FileInfo, err error) {
+			if err == nil {
+				err = os.Chown(name, os.Getuid(), os.Getgid())
+			}
+			return err
+		})
 		if err != nil {
 			logging.Error("Error changing owner of folder", err);
 			continue
@@ -76,7 +83,7 @@ type scalesServer struct {
 }
 
 type scalesServerBuild struct {
-	Memory string `json:"memory,omitempty"`
+	Memory int `json:"memory,omitempty"`
 }
 
 type scalesServerStartup struct {
