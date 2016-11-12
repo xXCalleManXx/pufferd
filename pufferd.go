@@ -42,9 +42,9 @@ import (
 )
 
 var (
-	MAJORVERSION string
-	BUILDDATE    string
-	GITHASH      string
+	MAJORVERSION = "unknown"
+	BUILDDATE = "unknown"
+	GITHASH = "unknown"
 )
 
 func main() {
