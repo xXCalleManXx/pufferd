@@ -48,7 +48,7 @@ func MigrateFromScales() {
 			continue
 		}
 
-		err = filepath.Walk(newPath, func(name string, info os.FileInfo, err error) {
+		err = filepath.Walk(newPath, func(name string, info os.FileInfo, err error) error {
 			if err == nil {
 				err = os.Chown(name, os.Getuid(), os.Getgid())
 			}
