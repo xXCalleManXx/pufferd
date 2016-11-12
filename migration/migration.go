@@ -10,12 +10,14 @@ import (
 	"github.com/pufferpanel/pufferd/utils"
 	"os"
 	"github.com/pufferpanel/pufferd/programs"
+	"github.com/pufferpanel/pufferd/data/templates"
 )
 
 const Scales = "/srv/scales/data"
 
 func MigrateFromScales() {
-	wd, err := os.Getwd()
+	templates.CopyTemplates()
+
 	programFiles, err := ioutil.ReadDir(Scales)
 	if err != nil {
 		logging.Critical("Error reading from old Scales folder", err)
@@ -38,7 +40,7 @@ func MigrateFromScales() {
 			logging.Error("Error read server config " + id, err)
 			continue
 		}
-		newPath := utils.JoinPath(wd, "data", "servers", scales.Name)
+		newPath := utils.JoinPath("data", "servers", scales.Name)
 		err = os.Rename(utils.JoinPath("/home", scales.User), newPath)
 		if err != nil {
 			logging.Error("Error moving folder", err);
