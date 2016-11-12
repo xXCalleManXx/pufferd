@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"github.com/pufferpanel/pufferd/utils"
 	"os"
+	"github.com/pufferpanel/pufferd/programs"
 )
 
 const Scales = "/srv/scales/data"
@@ -48,6 +49,13 @@ func MigrateFromScales() {
 			logging.Error("Error changing owner of folder", err);
 			continue
 		}
+		serverData := make(map[string]interface{})
+		serverData["ip"] = scales.Gamehost
+		serverData["port"] = scales.Gameport
+		if scales.Plugin == "minecraft" {
+			serverData["memory"] = scales.Build.Memory
+		}
+		programs.Create(scales.Name, scales.Plugin, serverData)
 	}
 }
 
