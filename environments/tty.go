@@ -1,3 +1,5 @@
+// +build !windows
+
 /*
  Copyright 2016 Padduck, LLC
 
@@ -13,7 +15,6 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 */
-// +build !windows
 
 package environments
 
