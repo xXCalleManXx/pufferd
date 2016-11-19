@@ -29,9 +29,6 @@ func RegisterRoutes(e *gin.Engine) {
 	e.GET("", func(c *gin.Context) {
 		c.String(200, "pufferd is running")
 	})
-	e.GET("/", func(c *gin.Context) {
-		c.String(200, "pufferd is running")
-	})
 	e.GET("/templates", GetTemplates)
 	e.GET("_shutdown", httphandlers.OAuth2Handler, Shutdown)
 }
