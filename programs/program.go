@@ -22,7 +22,7 @@ import (
 	"os"
 
 	"github.com/pufferpanel/pufferd/environments"
-	"github.com/pufferpanel/pufferd/install"
+	"github.com/pufferpanel/pufferd/programs/install"
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/utils"
 )

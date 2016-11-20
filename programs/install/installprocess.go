@@ -18,7 +18,7 @@ package install
 
 import (
 	"github.com/pufferpanel/pufferd/environments"
-	"github.com/pufferpanel/pufferd/install/operations"
+	"github.com/pufferpanel/pufferd/programs/install/operations"
 	"github.com/pufferpanel/pufferd/utils"
 )
 

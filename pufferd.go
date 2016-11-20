@@ -32,6 +32,7 @@ import (
 	"github.com/pufferpanel/pufferd/config"
 	"github.com/pufferpanel/pufferd/data"
 	"github.com/pufferpanel/pufferd/data/templates"
+	"github.com/pufferpanel/pufferd/install"
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/migration"
 	"github.com/pufferpanel/pufferd/programs"
@@ -53,7 +54,7 @@ func main() {
 	var port int
 	var authRoot string
 	var authToken string
-	var install bool
+	var runInstaller bool
 	var version bool
 	var license bool
 	var migrate bool
@@ -61,7 +62,7 @@ func main() {
 	flag.IntVar(&port, "port", 5656, "Port to run service on")
 	flag.StringVar(&authRoot, "auth", "", "Base URL to the authorization server")
 	flag.StringVar(&authToken, "token", "", "Authorization token")
-	flag.BoolVar(&install, "install", false, "If installing instead of running")
+	flag.BoolVar(&runInstaller, "install", false, "If installing instead of running")
 	flag.BoolVar(&version, "version", false, "Get the version")
 	flag.BoolVar(&license, "license", false, "View license")
 	flag.BoolVar(&migrate, "migrate", false, "Migrate Scales data to pufferd")
@@ -92,7 +93,7 @@ func main() {
 	logging.Info(versionString)
 	logging.Info("Logging set to " + loggingLevel)
 
-	if install {
+	if runInstaller {
 
 		if authRoot == "" {
 			logging.Error("Authorization server root not passed")
@@ -121,7 +122,10 @@ func main() {
 			os.Exit(1)
 		}
 
-		logging.Info("Config saved, install is complete")
+		logging.Info("Config saved")
+
+		logging.Info("Attempting to install service")
+		install.InstallService()
 
 		os.Exit(0)
 	}
