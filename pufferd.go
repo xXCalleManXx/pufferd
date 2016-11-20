@@ -39,6 +39,7 @@ import (
 	"github.com/pufferpanel/pufferd/routing/server"
 	"github.com/pufferpanel/pufferd/sftp"
 	"github.com/pufferpanel/pufferd/utils"
+	"strings"
 )
 
 var (
@@ -106,7 +107,7 @@ func main() {
 		config := data.CONFIG
 
 		replacements := make(map[string]interface{})
-		replacements["authurl"] = authRoot
+		replacements["authurl"] = strings.TrimSuffix(authRoot, "/")
 		replacements["authtoken"] = authToken
 
 		configData := []byte(utils.ReplaceTokens(config, replacements))

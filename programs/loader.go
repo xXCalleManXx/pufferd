@@ -139,6 +139,10 @@ func Create(id string, serverType string, data map[string]interface{}) bool {
 	}
 
 	templateData, err := ioutil.ReadFile(utils.JoinPath(templates.Folder, serverType+".json"))
+	if err != nil {
+		logging.Error("Error reading template file for type "+serverType, err)
+		return false
+	}
 
 	var templateJson map[string]interface{}
 	err = json.Unmarshal(templateData, &templateJson)
