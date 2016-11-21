@@ -21,5 +21,5 @@ const CONFIG = `{
 	"infoserver": "${authurl}/oauth2/token/info",
 	"authtoken": "${authtoken}",
 	"forward": "false",
-	"console-buffer": "100"
+	"console-buffer": "50"
 }`
