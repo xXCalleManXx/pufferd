@@ -28,7 +28,8 @@ const Spigot = `{
         },
         {
           "commands": [
-            "java -jar BuildTools.jar --rev ${version}"
+            "java -jar BuildTools.jar --rev ${version}",
+            "echo eula=${eula} > eula.txt"
           ],
           "type": "command"
         },
@@ -81,6 +82,13 @@ const Spigot = `{
         "desc": "What port to bind the server to",
         "display": "Port",
         "internal": false
+      },
+      "eula": {
+        "value": "false",
+        "required": true,
+        "desc": "Do you agree to the Minecraft EULA?",
+        "display": "EULA Agreement (true/false)",
+        "internal": false
       }
     }
   }
@@ -98,7 +106,8 @@ const CraftbukkitBySpigot = `{
         },
         {
           "commands": [
-            "java -jar BuildTools.jar --rev ${version}"
+            "java -jar BuildTools.jar --rev ${version}",
+            "echo eula=${eula} > eula.txt"
           ],
           "type": "command"
         },
@@ -151,6 +160,13 @@ const CraftbukkitBySpigot = `{
         "desc": "What port to bind the server to",
         "display": "Port",
         "internal": false
+      },
+      "eula": {
+        "value": "false",
+        "required": true,
+        "desc": "Do you agree to the Minecraft EULA?",
+        "display": "EULA Agreement (true/false)",
+        "internal": false
       }
     }
   }
@@ -170,7 +186,13 @@ const Vanilla = `{
           "source": "minecraft_server.*.jar",
           "target": "server.jar",
           "type": "move"
-        }
+        },
+        {
+          "commands": [
+            "echo eula=${eula} > eula.txt"
+          ],
+          "type": "command"
+        },
       ]
     },
     "run": {
@@ -215,6 +237,13 @@ const Vanilla = `{
         "desc": "What port to bind the server to",
         "display": "Port",
         "internal": false
+      },
+      "eula": {
+        "value": "false",
+        "required": true,
+        "desc": "Do you agree to the Minecraft EULA?",
+        "display": "EULA Agreement (true/false)",
+        "internal": false
       }
     }
   }
@@ -237,7 +266,8 @@ const Forge = `{
         },
         {
           "commands": [
-            "java -jar installer.jar --installServer"
+            "java -jar installer.jar --installServer",
+            "echo eula=${eula} > eula.txt"
           ],
           "type": "command"
         },
@@ -282,6 +312,13 @@ const Forge = `{
         "required": true,
         "desc": "What port to bind the server to",
         "display": "Port",
+        "internal": false
+      },
+      "eula": {
+        "value": "false",
+        "required": true,
+        "desc": "Do you agree to the Minecraft EULA?",
+        "display": "EULA Agreement (true/false)",
         "internal": false
       }
     }
@@ -317,7 +354,8 @@ const Sponge = `{
         },
         {
           "commands": [
-            "java -jar installer.jar --installServer"
+            "java -jar installer.jar --installServer",
+            "echo eula=${eula} > eula.txt"
           ],
           "type": "command"
         },
@@ -362,6 +400,13 @@ const Sponge = `{
         "required": true,
         "desc": "What port to bind the server to",
         "display": "Port",
+        "internal": false
+      },
+      "eula": {
+        "value": "false",
+        "required": true,
+        "desc": "Do you agree to the Minecraft EULA?",
+        "display": "EULA Agreement (true/false)",
         "internal": false
       }
     }
