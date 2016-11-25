@@ -320,7 +320,7 @@ func NetworkServer(c *gin.Context) {
 	scopes, _ := c.Get("scopes")
 	valid := false
 	for _, v := range scopes.([]string) {
-		if v == "pufferadmin"{
+		if v == "server.network"{
 			valid = true
 		}
 	}
@@ -350,14 +350,14 @@ func handleInitialCallServer(c *gin.Context, perm string, requireServer bool) (v
 	valid = false
 
 	serverId := c.Param("id")
-	targetId, _ := c.Get("server_id")
+	canAccessId, _ := c.Get("server_id")
 
-	if targetId != serverId && targetId != "*" {
+	if canAccessId != serverId && canAccessId != "*" {
 		c.AbortWithStatus(401)
 		return
 	}
 
-	program, _ = programs.Get(serverId)
+	program, _ = programs.Get(canAccessId)
 
 	if requireServer && program == nil {
 		c.AbortWithStatus(404)
