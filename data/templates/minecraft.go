@@ -192,7 +192,7 @@ const Vanilla = `{
             "echo eula=${eula} > eula.txt"
           ],
           "type": "command"
-        },
+        }
       ]
     },
     "run": {
