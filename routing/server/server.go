@@ -34,6 +34,7 @@ import (
 	"github.com/pufferpanel/pufferd/utils"
 	"github.com/pkg/errors"
 	"strings"
+	"strconv"
 )
 
 var wsupgrader = websocket.Upgrader{
@@ -63,12 +64,13 @@ func RegisterRoutes(e *gin.Engine) {
 		l.POST("/:id/console", PostConsole)
 		l.GET("/:id/stats", GetStats)
 		l.POST("/:id/reload", ReloadServer)
+		l.GET("/:id/console", cors.Middleware(cors.Config{
+			Origins:     "*",
+			Credentials: true,
+		}), GetConsole)
+		l.GET("/:ids/logs", GetLogs)
 	}
 	e.GET("/network", httphandlers.OAuth2Handler, NetworkServer)
-	e.GET("/server/:id/console", cors.Middleware(cors.Config{
-		Origins:     "*",
-		Credentials: true,
-	}), GetConsole)
 }
 
 func StartServer(c *gin.Context) {
@@ -346,18 +348,43 @@ func NetworkServer(c *gin.Context) {
 	c.JSON(200, result)
 }
 
+func GetLogs (c *gin.Context) {
+	valid, program := handleInitialCallServer(c, "server.console", true)
+	if !valid {
+		return
+	}
+
+	time := c.DefaultQuery("time", "0")
+
+	castedTime, ok := strconv.ParseInt(time, 10, 64)
+
+	if ok != nil {
+		c.AbortWithError(400, errors.New("Time provided is not a valid UNIX time"))
+		return
+	}
+
+	console := program.GetEnvironment().GetConsoleFrom(castedTime)
+	msg := ""
+	for _, k := range console {
+		msg += k + "\n"
+	}
+	c.String(200, msg)
+}
+
 func handleInitialCallServer(c *gin.Context, perm string, requireServer bool) (valid bool, program programs.Program) {
 	valid = false
 
 	serverId := c.Param("id")
 	canAccessId, _ := c.Get("server_id")
 
-	if canAccessId != serverId && canAccessId != "*" {
+	accessId := canAccessId.(string)
+
+	if accessId != serverId && accessId != "*" {
 		c.AbortWithStatus(401)
 		return
 	}
 
-	program, _ = programs.Get(canAccessId)
+	program, _ = programs.Get(accessId)
 
 	if requireServer && program == nil {
 		c.AbortWithStatus(404)

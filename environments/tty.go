@@ -157,6 +157,10 @@ func (s *Tty) GetConsole() []string {
 	return s.ConsoleBuffer.Read()
 }
 
+func (s *Tty) GetConsoleFrom(time int64) []string {
+	return s.ConsoleBuffer.ReadFrom(time)
+}
+
 func (s *Tty) AddListener(ws *websocket.Conn) {
 	s.WSManager.Register(ws)
 }

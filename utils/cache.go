@@ -20,15 +20,18 @@ import (
 	"strconv"
 
 	"github.com/pufferpanel/pufferd/config"
+	"time"
 )
 
 type cache struct {
-	buffer   []string
+	buffer   []message
 	capacity int
 }
 
 type Cache interface {
 	Read() []string
+
+	ReadFrom(startTime int64) []string
 
 	Write(b []byte) (n int, err error)
 }
@@ -39,15 +42,21 @@ func CreateCache() *cache {
 		capacity = 50
 	}
 	return &cache{
-		buffer:   make([]string, 0),
+		buffer:   make([]message, 0),
 		capacity: capacity,
 	}
 }
 
 func (c *cache) Read() []string {
-	result := make([]string, len(c.buffer))
-	for k, v := range c.buffer {
-		result[k] = v
+	return c.ReadFrom(0)
+}
+
+func (c *cache) ReadFrom(time int64) []string {
+	result := make([]string, 0)
+	for _, v := range c.buffer {
+		if v.time >= time {
+			result = append(result, v.msg)
+		}
 	}
 	return result
 }
@@ -56,7 +65,12 @@ func (c *cache) Write(b []byte) (n int, err error) {
 	if len(c.buffer) == c.capacity {
 		c.buffer = c.buffer[1:]
 	}
-	c.buffer = append(c.buffer, string(b))
+	c.buffer = append(c.buffer, message{msg: string(b), time: time.Now().Unix()})
 	n = len(b)
 	return
+}
+
+type message struct {
+	msg string
+	time int64
 }

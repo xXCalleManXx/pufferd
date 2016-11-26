@@ -49,6 +49,8 @@ type Environment interface {
 
 	GetConsole() []string
 
+	GetConsoleFrom(time int64) []string
+
 	AddListener(ws *websocket.Conn)
 
 	GetStats() (map[string]interface{}, error)
