@@ -68,7 +68,7 @@ func RegisterRoutes(e *gin.Engine) {
 			Origins:     "*",
 			Credentials: true,
 		}), GetConsole)
-		l.GET("/:ids/logs", GetLogs)
+		l.GET("/:id/logs", GetLogs)
 	}
 	e.GET("/network", httphandlers.OAuth2Handler, NetworkServer)
 }
