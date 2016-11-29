@@ -39,7 +39,7 @@ WantedBy=multi-user.target
 `
 
 func InstallService() {
-	cmd := exec.Command("adduser","-r", "-d", "/srv/pufferd", "pufferd")
+	cmd := exec.Command("adduser", "-d", "/srv/pufferd", "pufferd")
 
 	err := cmd.Run()
 	if err != nil {
