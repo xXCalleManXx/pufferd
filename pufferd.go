@@ -203,7 +203,7 @@ func main() {
 			if err != nil {
 				return
 			}
-			if onlineVersion != GITHASH {
+			if string(onlineVersion) != GITHASH {
 				logging.Warn("DL server reports a different hash than this version, an update may be available")
 				logging.Warnf("Installed: %s", GITHASH)
 				logging.Warnf("Online: %s", onlineVersion)
