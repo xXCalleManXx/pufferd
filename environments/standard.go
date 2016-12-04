@@ -105,7 +105,7 @@ func (s *Standard) Create() (err error) {
 	return
 }
 
-func (s *Standard) Update (err error) {
+func (s *Standard) Update () (err error) {
 	return
 }
 

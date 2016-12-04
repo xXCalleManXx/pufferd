@@ -61,7 +61,7 @@ func (s *Tty) ExecuteAsync(cmd string, args []string) (err error) {
 	}
 	process := exec.Command(cmd, args...)
 	process.Dir = s.RootDirectory
-	process.Env = append(os.Environ(), "HOME="+s.RootDirectory)
+	process.Env = append(os.Environ(), "HOME=" + s.RootDirectory)
 	if err != nil {
 		logging.Error("Error starting process", err)
 	}
@@ -93,7 +93,7 @@ func (s *Tty) ExecuteInMainProcess(cmd string) (err error) {
 		return
 	}
 	stdIn := s.stdInWriter
-	_, err = io.WriteString(stdIn, cmd+"\r")
+	_, err = io.WriteString(stdIn, cmd + "\r")
 	return
 }
 
@@ -112,7 +112,7 @@ func (s *Tty) Create() (err error) {
 	return
 }
 
-func (s *Tty) Update (err error) {
+func (s *Tty) Update() (err error) {
 	return
 }
 
@@ -141,7 +141,7 @@ func (s *Tty) WaitForMainProcess() (err error) {
 func (s *Tty) WaitForMainProcessFor(timeout int) (err error) {
 	if s.IsRunning() {
 		if timeout > 0 {
-			var timer = time.AfterFunc(time.Duration(timeout)*time.Millisecond, func() {
+			var timer = time.AfterFunc(time.Duration(timeout) * time.Millisecond, func() {
 				err = s.Kill()
 			})
 			s.wait.Wait()
