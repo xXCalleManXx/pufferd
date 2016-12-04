@@ -48,7 +48,7 @@ func Get(key string) string {
 
 	switch  val.(type) {
 	case string:
-		return val
+		return val.(string)
 	case int:
 		return strconv.Itoa(val.(int))
 	case bool:
