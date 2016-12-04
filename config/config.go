@@ -21,6 +21,8 @@ import (
 	"io/ioutil"
 
 	"github.com/pufferpanel/pufferd/logging"
+	"strconv"
+	"fmt"
 )
 
 var config map[string]interface{}
@@ -40,10 +42,23 @@ func Load() {
 
 func Get(key string) string {
 	val := config[key]
-	if val != nil {
-		return val.(string)
-	} else {
+	if val == nil {
 		return ""
+	}
+
+	switch  val.(type) {
+	case string:
+		return val
+	case int:
+		return strconv.Itoa(val.(int))
+	case bool:
+		if val.(bool) == true {
+			return "true"
+		} else {
+			return "false"
+		}
+	default:
+		return fmt.Sprintf("%v", val)
 	}
 }
 
