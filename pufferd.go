@@ -41,6 +41,7 @@ import (
 	"github.com/pufferpanel/pufferd/sftp"
 	"github.com/pufferpanel/pufferd/utils"
 	"strings"
+	"net/http"
 )
 
 var (
@@ -188,5 +189,25 @@ func main() {
 		manners.ListenAndServeTLS(":"+strconv.FormatInt(int64(port), 10), filepath.Join("data", "https.pem"), filepath.Join("data", "https.key"), r)
 	} else {
 		manners.ListenAndServe(":"+strconv.FormatInt(int64(port), 10), r)
+	}
+
+	//check if there's an update
+	if config.GetOrDefault("update-check", "true") == "true" {
+		go func() {
+			resp, err := http.Get("https://dl.pufferpanel.com/pufferd/" + MAJORVERSION + "/version")
+			if err != nil {
+				return
+			}
+			defer resp.Body.Close()
+			onlineVersion, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return
+			}
+			if onlineVersion != GITHASH {
+				logging.Warn("DL server reports a different hash than this version, an update may be available")
+				logging.Warnf("Installed: %s", GITHASH)
+				logging.Warnf("Online: %s", onlineVersion)
+			}
+		}()
 	}
 }

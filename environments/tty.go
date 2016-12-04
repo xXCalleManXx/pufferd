@@ -112,6 +112,10 @@ func (s *Tty) Create() (err error) {
 	return
 }
 
+func (s *Tty) Update (err error) {
+	return
+}
+
 func (s *Tty) Delete() (err error) {
 	err = os.RemoveAll(s.RootDirectory)
 	return

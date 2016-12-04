@@ -39,6 +39,8 @@ type Environment interface {
 	//Deletes the environment.
 	Delete() (err error)
 
+	Update() (err error)
+
 	IsRunning() (isRunning bool)
 
 	WaitForMainProcess() (err error)
