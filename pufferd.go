@@ -40,14 +40,14 @@ import (
 	"github.com/pufferpanel/pufferd/routing/server"
 	"github.com/pufferpanel/pufferd/sftp"
 	"github.com/pufferpanel/pufferd/utils"
-	"strings"
 	"net/http"
+	"strings"
 )
 
 var (
-	MAJORVERSION = "unknown"
-	BUILDDATE = "unknown"
-	GITHASH = "unknown"
+	MAJORVERSION = "nightly"
+	BUILDDATE    = "unknown"
+	GITHASH      = "unknown"
 )
 
 func main() {
@@ -184,17 +184,10 @@ func main() {
 
 	sftp.Run()
 
-	logging.Info("Starting web access on 0.0.0.0:" + strconv.Itoa(port))
-	if useHttps {
-		manners.ListenAndServeTLS(":"+strconv.FormatInt(int64(port), 10), filepath.Join("data", "https.pem"), filepath.Join("data", "https.key"), r)
-	} else {
-		manners.ListenAndServe(":"+strconv.FormatInt(int64(port), 10), r)
-	}
-
 	//check if there's an update
 	if config.GetOrDefault("update-check", "true") == "true" {
 		go func() {
-			resp, err := http.Get("https://dl.pufferpanel.com/pufferd/" + MAJORVERSION + "/version")
+			resp, err := http.Get("https://dl.pufferpanel.com/pufferd/" + MAJORVERSION + "/version.txt")
 			if err != nil {
 				return
 			}
@@ -209,5 +202,12 @@ func main() {
 				logging.Warnf("Online: %s", onlineVersion)
 			}
 		}()
+	}
+
+	logging.Info("Starting web access on 0.0.0.0:" + strconv.Itoa(port))
+	if useHttps {
+		manners.ListenAndServeTLS(":"+strconv.FormatInt(int64(port), 10), filepath.Join("data", "https.pem"), filepath.Join("data", "https.key"), r)
+	} else {
+		manners.ListenAndServe(":"+strconv.FormatInt(int64(port), 10), r)
 	}
 }

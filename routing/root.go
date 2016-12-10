@@ -26,6 +26,7 @@ import (
 )
 
 func RegisterRoutes(e *gin.Engine) {
+	e.Use(httphandlers.Recovery())
 	e.GET("", func(c *gin.Context) {
 		c.String(200, "pufferd is running")
 	})

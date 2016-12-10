@@ -271,7 +271,6 @@ func PostConsole(c *gin.Context) {
 }
 
 func GetConsole(c *gin.Context) {
-	httphandlers.ParseToken(c.Query("accessToken"), c)
 	valid, program := handleInitialCallServer(c, "server.console", true)
 	if !valid {
 		return

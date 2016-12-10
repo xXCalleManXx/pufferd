@@ -31,19 +31,25 @@ import (
 
 func OAuth2Handler(gin *gin.Context) {
 	authHeader := gin.Request.Header.Get("Authorization")
+	var authToken string;
 	if authHeader == "" {
-		gin.AbortWithStatus(401)
-		return
+		authToken = gin.Query("accessToken")
+		if authToken == "" {
+			gin.AbortWithStatus(401)
+			return
+		}
+	} else {
+		authArr := strings.SplitN(authHeader, " ", 2)
+		if len(authArr) < 2 || authArr[0] != "Bearer" {
+			gin.AbortWithStatus(400)
+			return
+		}
+		authToken = authArr[1];
 	}
-	authArr := strings.SplitN(authHeader, " ", 2)
-	if len(authArr) < 2 || authArr[0] != "Bearer" {
-		gin.AbortWithStatus(401)
-		return
-	}
-	ParseToken(authArr[1], gin)
+	validateToken(authToken, gin)
 }
 
-func ParseToken(accessToken string, gin *gin.Context) {
+func validateToken(accessToken string, gin *gin.Context) {
 	authUrl := config.Get("infoserver")
 	token := config.Get("authtoken")
 	client := &http.Client{}
