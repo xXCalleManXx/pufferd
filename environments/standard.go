@@ -150,12 +150,14 @@ func (s *Standard) GetRootDirectory() string {
 	return s.RootDirectory
 }
 
-func (s *Standard) GetConsole() []string {
-	return s.ConsoleBuffer.Read()
+func (s *Standard) GetConsole() (console []string, epoch int64) {
+	console, epoch = s.ConsoleBuffer.Read()
+	return
 }
 
-func (s *Standard) GetConsoleFrom(time int64) []string {
-	return s.ConsoleBuffer.ReadFrom(time)
+func (s *Standard) GetConsoleFrom(time int64) (console []string, epoch int64) {
+	console, epoch = s.ConsoleBuffer.ReadFrom(time)
+	return
 }
 
 func (s *Standard) AddListener(ws *websocket.Conn) {

@@ -281,7 +281,7 @@ func GetConsole(c *gin.Context) {
 		c.AbortWithError(500, err)
 		return
 	}
-	console := program.GetEnvironment().GetConsole()
+	console, _ := program.GetEnvironment().GetConsole()
 	for _, v := range console {
 		conn.WriteMessage(websocket.TextMessage, []byte(v))
 	}
@@ -362,12 +362,15 @@ func GetLogs (c *gin.Context) {
 		return
 	}
 
-	console := program.GetEnvironment().GetConsoleFrom(castedTime)
+	console, epoch := program.GetEnvironment().GetConsoleFrom(castedTime)
 	msg := ""
 	for _, k := range console {
 		msg += k + "\n"
 	}
-	c.String(200, msg)
+	result := make(map[string]interface{})
+	result["epoch"] = epoch
+	result["logs"] = msg;
+	c.JSON(200, result)
 }
 
 func handleInitialCallServer(c *gin.Context, perm string, requireServer bool) (valid bool, program programs.Program) {

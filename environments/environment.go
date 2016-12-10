@@ -49,9 +49,9 @@ type Environment interface {
 
 	GetRootDirectory() string
 
-	GetConsole() []string
+	GetConsole() (console []string, epoch int64)
 
-	GetConsoleFrom(time int64) []string
+	GetConsoleFrom(time int64) (console []string, epoch int64)
 
 	AddListener(ws *websocket.Conn)
 

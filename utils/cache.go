@@ -29,9 +29,9 @@ type cache struct {
 }
 
 type Cache interface {
-	Read() []string
+	Read() (cache []string, epoch int64)
 
-	ReadFrom(startTime int64) []string
+	ReadFrom(startTime int64) (cache []string, epoch int64)
 
 	Write(b []byte) (n int, err error)
 }
@@ -47,18 +47,19 @@ func CreateCache() *cache {
 	}
 }
 
-func (c *cache) Read() []string {
-	return c.ReadFrom(0)
+func (c *cache) Read() (msg []string, lasttime int64) {
+	msg, lasttime = c.ReadFrom(0)
+	return
 }
 
-func (c *cache) ReadFrom(time int64) []string {
+func (c *cache) ReadFrom(time int64) (msg []string, lasttime int64) {
 	result := make([]string, 0)
 	for _, v := range c.buffer {
-		if v.time >= time {
+		if v.time > time {
 			result = append(result, v.msg)
 		}
 	}
-	return result
+	return result, c.buffer[(len(c.buffer)-1)].time
 }
 
 func (c *cache) Write(b []byte) (n int, err error) {

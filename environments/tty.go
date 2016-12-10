@@ -157,11 +157,11 @@ func (s *Tty) GetRootDirectory() string {
 	return s.RootDirectory
 }
 
-func (s *Tty) GetConsole() []string {
+func (s *Tty) GetConsole() (console []string, epoch int64) {
 	return s.ConsoleBuffer.Read()
 }
 
-func (s *Tty) GetConsoleFrom(time int64) []string {
+func (s *Tty) GetConsoleFrom(time int64) (console []string, epoch int64) {
 	return s.ConsoleBuffer.ReadFrom(time)
 }
 
