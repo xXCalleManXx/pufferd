@@ -39,7 +39,7 @@ WantedBy=multi-user.target
 `
 
 func InstallService() {
-	cmd := exec.Command("adduser", "--system", "--no-create-home", "pufferd")
+	cmd := exec.Command("useradd", "--system", "--no-create-home", "--user-group", "pufferd")
 
 	err := cmd.Run()
 	if err != nil {
