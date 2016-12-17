@@ -114,7 +114,7 @@ func LoadFromMapping(id string, source map[string]interface{}) (program Program,
 
 	logging.Debugf("Loading server as %s", environmentType)
 
-	environment = LoadEnvironment(environmentType, ServerFolder, id, environmentSection)
+	environment = environments.LoadEnvironment(environmentType, ServerFolder, id, environmentSection)
 
 	var runBlock Runtime
 	if pufferdData["run"] == nil {
