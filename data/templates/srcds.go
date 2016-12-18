@@ -115,12 +115,16 @@ const TF2 = `{
       "pre": [],
       "post": [],
       "arguments": [
+      	"+ip",
+      	"${ip}",
+      	"+port",
+      	"${port}",
       	"-game tf",
       	"-console",
         "+map ${map}",
       	"-norestart"
       ],
-      "program": "./srcds_run +ip ${ip} +port ${port}"
+      "program": "./srcds_run"
     },
     "environment": {
       "type": "tty"
