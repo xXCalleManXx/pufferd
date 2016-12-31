@@ -34,6 +34,9 @@ func CopyTemplates() {
 	writeFile("spigot", data)
 	writeFile("minecraft", data)
 
+	data = Bungeecord
+	writeFile("bungeecord", data)
+
 	data = CraftbukkitBySpigot
 	writeFile("fakecraftbukkit", data)
 

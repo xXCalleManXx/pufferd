@@ -16,6 +16,58 @@
 
 package templates
 
+const Bungeecord = `{
+  "pufferd": {
+    "type": "java",
+    "display": "Bungeecord - Minecraft",
+    "install": {
+      "commands": [
+        {
+          "files": "http://ci.md-5.net/job/BungeeCord/lastSuccessfulBuild/artifact/bootstrap/target/BungeeCord.jar",
+          "type": "download"
+        }
+      ]
+    },
+    "run": {
+      "stop": "stop",
+      "pre": [],
+      "post": [],
+      "arguments": [
+      	"-Xmx${memory}M",
+      	"-jar",
+      	"BungeeCord.jar"
+      ],
+      "program": "java"
+    },
+    "environment": {
+      "type": "standard"
+    },
+    "data": {
+      "memory": {
+      	"value": "1024",
+      	"required": true,
+      	"desc": "How much memory in MB to allocate to the Java Heap",
+      	"display": "Memory (MB)",
+      	"internal": false
+      },
+      "ip": {
+        "value": "0.0.0.0",
+        "required": true,
+        "desc": "What IP to bind the server to",
+        "display": "IP",
+        "internal": false
+      },
+      "port": {
+        "value": "25565",
+        "required": true,
+        "desc": "What port to bind the server to",
+        "display": "Port",
+        "internal": false
+      }
+    }
+  }
+}`
+
 const Spigot = `{
   "pufferd": {
     "type": "java",
