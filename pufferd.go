@@ -53,7 +53,8 @@ var (
 
 func main() {
 	var loggingLevel string
-	var port int
+	var webport int
+	var webhost string
 	var authRoot string
 	var authToken string
 	var runInstaller bool
@@ -61,7 +62,7 @@ func main() {
 	var license bool
 	var migrate bool
 	flag.StringVar(&loggingLevel, "logging", "INFO", "Lowest logging level to display")
-	flag.IntVar(&port, "port", 5656, "Port to run service on")
+	flag.IntVar(&webport, "webport", 5656, "Port to run web service on")
 	flag.StringVar(&authRoot, "auth", "", "Base URL to the authorization server")
 	flag.StringVar(&authToken, "token", "", "Authorization token")
 	flag.BoolVar(&runInstaller, "install", false, "If installing instead of running")
@@ -112,6 +113,7 @@ func main() {
 		replacements := make(map[string]interface{})
 		replacements["authurl"] = strings.TrimSuffix(authRoot, "/")
 		replacements["authtoken"] = authToken
+		replacements["webport"] = webport
 
 		configData := []byte(utils.ReplaceTokens(config, replacements))
 
@@ -209,10 +211,13 @@ func main() {
 		}()
 	}
 
-	logging.Info("Starting web access on 0.0.0.0:" + strconv.Itoa(port))
+	webhost = config.GetOrDefault("webhost", "0.0.0.0")
+	webport, _ = strconv.Atoi(config.GetOrDefault("webport", "5656"))
+
+	logging.Infof("Starting web access on %s:%s", webhost, webport)
 	if useHttps {
-		manners.ListenAndServeTLS(":"+strconv.FormatInt(int64(port), 10), filepath.Join("data", "https.pem"), filepath.Join("data", "https.key"), r)
+		manners.ListenAndServeTLS(webhost+":"+strconv.FormatInt(int64(webport), 10), filepath.Join("data", "https.pem"), filepath.Join("data", "https.key"), r)
 	} else {
-		manners.ListenAndServe(":"+strconv.FormatInt(int64(port), 10), r)
+		manners.ListenAndServe(webhost+":"+strconv.FormatInt(int64(webport), 10), r)
 	}
 }
