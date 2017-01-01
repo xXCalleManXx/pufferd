@@ -108,7 +108,7 @@ const Spigot = `{
     },
     "data": {
       "version": {
-      	"value": "1.10",
+      	"value": "1.11.2",
       	"required": true,
       	"desc": "Version of Minecraft to install",
       	"display": "Version",
@@ -186,7 +186,7 @@ const CraftbukkitBySpigot = `{
     },
     "data": {
       "version": {
-      	"value": "1.10",
+      	"value": "1.11.2",
       	"required": true,
       	"desc": "Version of Minecraft to install",
       	"display": "Version",
@@ -263,7 +263,7 @@ const Vanilla = `{
     },
     "data": {
       "version": {
-      	"value": "1.10",
+      	"value": "1.11.2",
       	"required": true,
       	"desc": "Version of Minecraft to install",
       	"display": "Version",
@@ -309,7 +309,7 @@ const Forge = `{
       "commands": [
         {
           "type": "download",
-          "files": "http://files.minecraftforge.net/maven/net/minecraftforge/forge/1.10.2-12.18.1.2011/forge-1.10.2-12.18.1.2011-installer.jar"
+          "files": "http://files.minecraftforge.net/maven/net/minecraftforge/forge/${version}/forge-${version}-installer.jar"
         },
         {
           "source": "forge-*.jar",
@@ -372,6 +372,13 @@ const Forge = `{
         "desc": "Do you agree to the Minecraft EULA?",
         "display": "EULA Agreement (true/false)",
         "internal": false
+      },
+      "version": {
+      	"value": "1.10.2-12.18.1.2011",
+      	"required": true,
+      	"desc": "Version of Forge to install",
+      	"display": "Version",
+      	"internal": false
       }
     }
   }
@@ -386,8 +393,8 @@ const Sponge = `{
         {
           "type": "download",
           "files": [
-          	"http://files.minecraftforge.net/maven/net/minecraftforge/forge/1.10.2-12.18.1.2011/forge-1.10.2-12.18.1.2011-installer.jar",
-          	"http://files.minecraftforge.net/maven/org/spongepowered/spongeforge/1.8.9-1890-4.2.0-BETA-1653/spongeforge-1.8.9-1890-4.2.0-BETA-1653.jar"
+          	"http://files.minecraftforge.net/maven/net/minecraftforge/forge/${forgeversion}/forge-${forgeversion}-installer.jar",
+          	"http://files.minecraftforge.net/maven/org/spongepowered/spongeforge/${spongeversion}/spongeforge-${spongeversion}.jar"
           ]
         },
         {
@@ -460,6 +467,20 @@ const Sponge = `{
         "desc": "Do you agree to the Minecraft EULA?",
         "display": "EULA Agreement (true/false)",
         "internal": false
+      },
+      "forgeversion": {
+      	"value": "1.10.2-12.18.1.2011",
+      	"required": true,
+      	"desc": "Version of Forge to install",
+      	"display": "Forge Version",
+      	"internal": false
+      },
+      "spongeversion": {
+      	"value": "1.8.9-1890-4.2.0-BETA-1653",
+      	"required": true,
+      	"desc": "Version of Sponge to install",
+      	"display": "Sponge Version",
+      	"internal": false
       }
     }
   }
