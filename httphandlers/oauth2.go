@@ -27,6 +27,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pufferpanel/pufferd/config"
 	"github.com/pufferpanel/pufferd/logging"
+	"fmt"
 )
 
 func OAuth2Handler(gin *gin.Context) {
@@ -62,18 +63,25 @@ func validateToken(accessToken string, gin *gin.Context) {
 	response, err := client.Do(request)
 	if err != nil {
 		logging.Error("Error talking to auth server", err)
-		gin.AbortWithStatus(500)
+		errMsg := make(map[string]string)
+		errMsg["error"] = err.Error();
+		gin.JSON(500, errMsg);
 		return
 	}
 	if response.StatusCode != 200 {
-		logging.Error("Error talking to auth server", response.StatusCode)
-		gin.AbortWithStatus(500)
+		logging.Error("Unexpected response code from auth server", response.StatusCode)
+		errMsg := make(map[string]string)
+		errMsg["error"] = fmt.Sprintf("Receieved response %i", response.StatusCode);
+		gin.JSON(500, errMsg);
 		return
 	}
 	var respArr map[string]interface{}
 	json.NewDecoder(response.Body).Decode(&respArr)
 	if respArr["error"] != nil {
-		gin.AbortWithStatus(500)
+		logging.Error("Error parsing response from auth server", err)
+		errMsg := make(map[string]string)
+		errMsg["error"] = "Failed to parse auth server response";
+		gin.JSON(500, errMsg);
 		return
 	}
 	if respArr["active"].(bool) == false {

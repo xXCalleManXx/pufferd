@@ -200,9 +200,11 @@ func Delete(id string) (err error) {
 		return
 	}
 
-	err = program.Stop()
-	if err != nil {
-		return err
+	if program.IsRunning() {
+		err = program.Stop()
+		if err != nil {
+			return err
+		}
 	}
 
 	err = program.Destroy()

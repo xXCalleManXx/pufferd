@@ -32,6 +32,7 @@ import (
 	"github.com/pufferpanel/pufferd/config"
 	"github.com/pufferpanel/pufferd/data"
 	"github.com/pufferpanel/pufferd/data/templates"
+	"github.com/pufferpanel/pufferd/httphandlers"
 	"github.com/pufferpanel/pufferd/install"
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/migration"
@@ -169,6 +170,10 @@ func main() {
 		r.Use(gin.Recovery())
 		routing.RegisterRoutes(r)
 		server.RegisterRoutes(r)
+	}
+
+	if config.GetOrDefault("log.api", "false") == "true" {
+		r.Use(httphandlers.ApiLoggingHandler)
 	}
 
 	var useHttps bool
