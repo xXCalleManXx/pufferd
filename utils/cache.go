@@ -52,14 +52,15 @@ func (c *cache) Read() (msg []string, lasttime int64) {
 	return
 }
 
-func (c *cache) ReadFrom(time int64) (msg []string, lasttime int64) {
+func (c *cache) ReadFrom(startTime int64) (msg []string, lasttime int64) {
 	result := make([]string, 0)
+	endTime := time.Now().Unix()
 	for _, v := range c.buffer {
-		if v.time > time {
+		if v.time > startTime {
 			result = append(result, v.msg)
 		}
 	}
-	return result, c.buffer[(len(c.buffer)-1)].time
+	return result, endTime
 }
 
 func (c *cache) Write(b []byte) (n int, err error) {
