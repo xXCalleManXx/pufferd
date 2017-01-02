@@ -142,6 +142,7 @@ func DeleteServer(c *gin.Context) {
 	}
 
 	programs.Delete(existing.Id())
+	c.Status(204)
 }
 
 func InstallServer(c *gin.Context) {
@@ -386,7 +387,12 @@ func handleInitialCallServer(c *gin.Context, perm string, requireServer bool) (v
 		return
 	}
 
-	program, _ = programs.Get(accessId)
+	if accessId == "*" {
+		program, _ = programs.Get(serverId)
+	} else {
+		program, _ = programs.Get(accessId)
+	}
+
 
 	if requireServer && program == nil {
 		c.AbortWithStatus(404)

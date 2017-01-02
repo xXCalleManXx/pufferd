@@ -268,7 +268,9 @@ func GetPlugins() map[string]interface{} {
 		var templateJson map[string]interface{}
 		json.Unmarshal(templateData, &templateJson)
 		segment := utils.GetMapOrNull(templateJson, "pufferd")
-		dataSec := segment["data"].(map[string]interface{})
+		dataSec := make(map[string]interface{})
+		dataSec["variables"] = segment["data"].(map[string]interface{})
+		dataSec["display"] = segment["display"]
 		mapping[name] = dataSec
 	}
 

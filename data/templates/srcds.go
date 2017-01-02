@@ -92,6 +92,7 @@ const SRCDS = `{
 const TF2 = `{
   "pufferd": {
     "type": "srcds",
+    "display": "Team Fortress 2",
     "install": {
       "commands": [
         {
