@@ -36,16 +36,16 @@ import (
 	"github.com/shirou/gopsutil/process"
 )
 
-type Tty struct {
-	mainProcess   *exec.Cmd
+type tty struct {
 	RootDirectory string
 	ConsoleBuffer utils.Cache
 	WSManager     utils.WebSocketManager
+	mainProcess   *exec.Cmd
 	stdInWriter   io.Writer
 	wait          sync.WaitGroup
 }
 
-func (s *Tty) Execute(cmd string, args []string) (stdOut []byte, err error) {
+func (s *tty) Execute(cmd string, args []string) (stdOut []byte, err error) {
 	err = s.ExecuteAsync(cmd, args)
 	if err != nil {
 		return
@@ -54,7 +54,7 @@ func (s *Tty) Execute(cmd string, args []string) (stdOut []byte, err error) {
 	return
 }
 
-func (s *Tty) ExecuteAsync(cmd string, args []string) (err error) {
+func (s *tty) ExecuteAsync(cmd string, args []string) (err error) {
 	if s.IsRunning() {
 		err = errors.New("A process is already running (" + strconv.Itoa(s.mainProcess.Process.Pid) + ")")
 		return
@@ -87,7 +87,7 @@ func (s *Tty) ExecuteAsync(cmd string, args []string) (err error) {
 	return
 }
 
-func (s *Tty) ExecuteInMainProcess(cmd string) (err error) {
+func (s *tty) ExecuteInMainProcess(cmd string) (err error) {
 	if !s.IsRunning() {
 		err = errors.New("Main process has not been started")
 		return
@@ -97,7 +97,7 @@ func (s *Tty) ExecuteInMainProcess(cmd string) (err error) {
 	return
 }
 
-func (s *Tty) Kill() (err error) {
+func (s *tty) Kill() (err error) {
 	if !s.IsRunning() {
 		return
 	}
@@ -107,21 +107,21 @@ func (s *Tty) Kill() (err error) {
 	return
 }
 
-func (s *Tty) Create() (err error) {
+func (s *tty) Create() (err error) {
 	os.Mkdir(s.RootDirectory, 0755)
 	return
 }
 
-func (s *Tty) Update() (err error) {
+func (s *tty) Update() (err error) {
 	return
 }
 
-func (s *Tty) Delete() (err error) {
+func (s *tty) Delete() (err error) {
 	err = os.RemoveAll(s.RootDirectory)
 	return
 }
 
-func (s *Tty) IsRunning() (isRunning bool) {
+func (s *tty) IsRunning() (isRunning bool) {
 	isRunning = s.mainProcess != nil && s.mainProcess.Process != nil
 	if isRunning {
 		process, pErr := os.FindProcess(s.mainProcess.Process.Pid)
@@ -134,11 +134,11 @@ func (s *Tty) IsRunning() (isRunning bool) {
 	return
 }
 
-func (s *Tty) WaitForMainProcess() (err error) {
+func (s *tty) WaitForMainProcess() (err error) {
 	return s.WaitForMainProcessFor(0)
 }
 
-func (s *Tty) WaitForMainProcessFor(timeout int) (err error) {
+func (s *tty) WaitForMainProcessFor(timeout int) (err error) {
 	if s.IsRunning() {
 		if timeout > 0 {
 			var timer = time.AfterFunc(time.Duration(timeout) * time.Millisecond, func() {
@@ -153,23 +153,23 @@ func (s *Tty) WaitForMainProcessFor(timeout int) (err error) {
 	return
 }
 
-func (s *Tty) GetRootDirectory() string {
+func (s *tty) GetRootDirectory() string {
 	return s.RootDirectory
 }
 
-func (s *Tty) GetConsole() (console []string, epoch int64) {
+func (s *tty) GetConsole() (console []string, epoch int64) {
 	return s.ConsoleBuffer.Read()
 }
 
-func (s *Tty) GetConsoleFrom(time int64) (console []string, epoch int64) {
+func (s *tty) GetConsoleFrom(time int64) (console []string, epoch int64) {
 	return s.ConsoleBuffer.ReadFrom(time)
 }
 
-func (s *Tty) AddListener(ws *websocket.Conn) {
+func (s *tty) AddListener(ws *websocket.Conn) {
 	s.WSManager.Register(ws)
 }
 
-func (s *Tty) GetStats() (map[string]interface{}, error) {
+func (s *tty) GetStats() (map[string]interface{}, error) {
 	if !s.IsRunning() {
 		return nil, errors.New("Server not running")
 	}
@@ -185,7 +185,7 @@ func (s *Tty) GetStats() (map[string]interface{}, error) {
 	return resultMap, nil
 }
 
-func (s *Tty) createWrapper() io.Writer {
+func (s *tty) createWrapper() io.Writer {
 	if config.Get("forward") == "true" {
 		return io.MultiWriter(os.Stdout, s.ConsoleBuffer, s.WSManager)
 	}

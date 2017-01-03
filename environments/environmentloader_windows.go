@@ -10,6 +10,6 @@ func LoadEnvironment(environmentType, folder, id string, environmentSection map[
 	default:
 		logging.Debugf("Loading server as standard")
 		serverRoot := utils.JoinPath(folder, id)
-		return &Standard{RootDirectory: utils.GetStringOrDefault(environmentSection, "root", serverRoot), ConsoleBuffer: utils.CreateCache(), WSManager: utils.CreateWSManager()}
+		return &standard{RootDirectory: utils.GetStringOrDefault(environmentSection, "root", serverRoot), ConsoleBuffer: utils.CreateCache(), WSManager: utils.CreateWSManager()}
 	}
 }
