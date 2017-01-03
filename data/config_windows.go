@@ -14,10 +14,18 @@
  limitations under the License.
 */
 
-package install
+package data
 
-import "github.com/pufferpanel/pufferd/logging"
-
-func InstallService(configPath string) {
-	logging.Error("No configured service installer for this OS")
-}
+const CONFIG = `{
+	"authserver": "${authurl}/oauth2/token/request",
+	"infoserver": "${authurl}/oauth2/token/info",
+	"authtoken": "${authtoken}",
+	"forward": "false",
+	"console-buffer": "50",
+	"webhost": "0.0.0.0",
+	"webport": "5656",
+	"sftp": "0.0.0.0:5657",
+	"update-check": true,
+	"serverfolder": "data/servers",
+	"templatefolder": "data/templates"
+}`

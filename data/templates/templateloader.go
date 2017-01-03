@@ -23,9 +23,10 @@ import (
 	"github.com/pufferpanel/pufferd/utils"
 	"io/ioutil"
 	"os"
+	"github.com/pufferpanel/pufferd/config"
 )
 
-var Folder = utils.JoinPath("data", "templates")
+var Folder = config.GetOrDefault("templatefolder", utils.JoinPath("data", "templates"))
 
 func CopyTemplates() {
 	os.MkdirAll(Folder, 0755)

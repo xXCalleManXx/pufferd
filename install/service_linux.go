@@ -21,6 +21,7 @@ import (
 	"os/exec"
 	"github.com/pufferpanel/pufferd/logging"
 	"syscall"
+	"github.com/pufferpanel/pufferd/utils"
 )
 
 const SYSTEMD = `
@@ -30,7 +31,7 @@ Description=pufferd daemon service
 [Service]
 Type=simple
 WorkingDirectory=/srv/pufferd
-ExecStart=/srv/pufferd/pufferd
+ExecStart=/srv/pufferd/pufferd --config ${configpath}
 User=pufferd
 Group=pufferd
 
@@ -38,7 +39,7 @@ Group=pufferd
 WantedBy=multi-user.target
 `
 
-func InstallService() {
+func InstallService(configPath string) {
 	cmd := exec.Command("useradd", "--system", "--no-create-home", "--user-group", "--home", "/srv/pufferd/data", "pufferd")
 
 	err := cmd.Run()
@@ -59,7 +60,10 @@ func InstallService() {
 		}
 	}
 
-	err = ioutil.WriteFile("/etc/systemd/system/pufferd.service", []byte(SYSTEMD), 0664)
+	updates := make(map[string]interface{})
+	updates["configpath"] = configPath
+
+	err = ioutil.WriteFile("/etc/systemd/system/pufferd.service", []byte(utils.ReplaceTokens(SYSTEMD, updates)), 0664)
 	if err != nil {
 		logging.Error("Cannot write systemd file, will not install service", err)
 		return

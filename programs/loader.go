@@ -31,11 +31,12 @@ import (
 	"github.com/pufferpanel/pufferd/programs/install"
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/utils"
+	"github.com/pufferpanel/pufferd/config"
 )
 
 var (
 	programs     []Program = make([]Program, 0)
-	ServerFolder string    = utils.JoinPath("data", "servers")
+	ServerFolder string    = config.GetOrDefault("serverfolder", utils.JoinPath("data", "servers"))
 )
 
 func LoadFromFolder() {

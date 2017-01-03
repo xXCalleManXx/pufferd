@@ -53,22 +53,24 @@ var (
 
 func main() {
 	var loggingLevel string
-	var webport int
-	var webhost string
+	var webPort int
+	var webHost string
 	var authRoot string
 	var authToken string
 	var runInstaller bool
 	var version bool
 	var license bool
 	var migrate bool
+	var configPath string
 	flag.StringVar(&loggingLevel, "logging", "INFO", "Lowest logging level to display")
-	flag.IntVar(&webport, "webport", 5656, "Port to run web service on")
+	flag.IntVar(&webPort, "webport", 5656, "Port to run web service on")
 	flag.StringVar(&authRoot, "auth", "", "Base URL to the authorization server")
 	flag.StringVar(&authToken, "token", "", "Authorization token")
 	flag.BoolVar(&runInstaller, "install", false, "If installing instead of running")
 	flag.BoolVar(&version, "version", false, "Get the version")
 	flag.BoolVar(&license, "license", false, "View license")
 	flag.BoolVar(&migrate, "migrate", false, "Migrate Scales data to pufferd")
+	flag.StringVar(&configPath, "config", "config.json", "Path to pufferd config.json")
 	flag.Parse()
 
 	versionString := fmt.Sprintf("pufferd %s (%s %s)", MAJORVERSION, BUILDDATE, GITHASH)
@@ -113,13 +115,13 @@ func main() {
 		replacements := make(map[string]interface{})
 		replacements["authurl"] = strings.TrimSuffix(authRoot, "/")
 		replacements["authtoken"] = authToken
-		replacements["webport"] = webport
+		replacements["webport"] = webPort
 
 		configData := []byte(utils.ReplaceTokens(config, replacements))
 
 		var prettyJson bytes.Buffer
 		json.Indent(&prettyJson, configData, "", "  ")
-		err := ioutil.WriteFile("config.json", prettyJson.Bytes(), 0664)
+		err := ioutil.WriteFile(configPath, prettyJson.Bytes(), 0664)
 
 		if err != nil {
 			logging.Error("Error writing new config")
@@ -129,12 +131,12 @@ func main() {
 		logging.Info("Config saved")
 
 		logging.Info("Attempting to install service")
-		install.InstallService()
+		install.InstallService(configPath)
 
 		os.Exit(0)
 	}
 
-	config.Load()
+	config.Load(configPath)
 
 	if _, err := os.Stat(templates.Folder); os.IsNotExist(err) {
 		logging.Info("No template directory found, creating")
@@ -211,15 +213,15 @@ func main() {
 		}()
 	}
 
-	webhost = config.GetOrDefault("webhost", "0.0.0.0")
-	webport, _ = strconv.Atoi(config.GetOrDefault("webport", "5656"))
+	webHost = config.GetOrDefault("webhost", "0.0.0.0")
+	webPort, _ = strconv.Atoi(config.GetOrDefault("webport", "5656"))
 
-	logging.Infof("Starting web access on %s:%n", webhost, webport)
+	logging.Infof("Starting web access on %s:%n", webHost, webPort)
 	var err error
 	if useHttps {
-		err = manners.ListenAndServeTLS(webhost+":"+strconv.FormatInt(int64(webport), 10), filepath.Join("data", "https.pem"), filepath.Join("data", "https.key"), r)
+		err = manners.ListenAndServeTLS(webHost+":"+strconv.FormatInt(int64(webPort), 10), filepath.Join("data", "https.pem"), filepath.Join("data", "https.key"), r)
 	} else {
-		err = manners.ListenAndServe(webhost+":"+strconv.FormatInt(int64(webport), 10), r)
+		err = manners.ListenAndServe(webHost+":"+strconv.FormatInt(int64(webPort), 10), r)
 	}
 	if err != nil {
 		logging.Error("Error starting web service", err)

@@ -27,8 +27,8 @@ import (
 
 var config map[string]interface{}
 
-func Load() {
-	data, err := ioutil.ReadFile("config.json")
+func Load(path string) {
+	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		logging.Error("Error loading config", err)
 		config = make(map[string]interface{})
