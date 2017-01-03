@@ -216,7 +216,7 @@ const CraftbukkitBySpigot = `{
       "eula": {
         "value": "false",
         "required": true,
-        "desc": "Do you agree to the Minecraft EULA?",
+        "desc": "Do you (or the server owner) agree to the <a href="https://account.mojang.com/documents/minecraft_eula">Minecraft EULA?</a>",
         "display": "EULA Agreement (true/false)",
         "internal": false
       }
@@ -293,7 +293,7 @@ const Vanilla = `{
       "eula": {
         "value": "false",
         "required": true,
-        "desc": "Do you agree to the Minecraft EULA?",
+        "desc": "Do you (or the server owner) agree to the <a href="https://account.mojang.com/documents/minecraft_eula">Minecraft EULA?</a>",
         "display": "EULA Agreement (true/false)",
         "internal": false
       }
@@ -369,14 +369,14 @@ const Forge = `{
       "eula": {
         "value": "false",
         "required": true,
-        "desc": "Do you agree to the Minecraft EULA?",
+        "desc": "Do you (or the server owner) agree to the <a href='https://account.mojang.com/documents/minecraft_eula'>Minecraft EULA?</a>",
         "display": "EULA Agreement (true/false)",
         "internal": false
       },
       "version": {
-      	"value": "1.10.2-12.18.1.2011",
+      	"value": "1.10.2 - 12.18.3.2202",
       	"required": true,
-      	"desc": "Version of Forge to install",
+      	"desc": "Version of Forge to install (may be located <a href='http://files.minecraftforge.net/#Downloads'>here</a>",
       	"display": "Version",
       	"internal": false
       }
@@ -464,24 +464,24 @@ const Sponge = `{
       "eula": {
         "value": "false",
         "required": true,
-        "desc": "Do you agree to the Minecraft EULA?",
+        "desc": "Do you (or the server owner) agree to the <a href="https://account.mojang.com/documents/minecraft_eula">Minecraft EULA?</a>",
         "display": "EULA Agreement (true/false)",
         "internal": false
       },
-      "forgeversion": {
-      	"value": "1.10.2-12.18.1.2011",
+      "spongeversion": {
+      	"value": "1.10.2-2202-5.1.0-BETA-2014",
       	"required": true,
-      	"desc": "Version of Forge to install",
+      	"desc": "Version of Sponge to install (may be located <a href='https://www.spongepowered.org/downloads/spongeforge/stable/'>here</a>",
+      	"display": "Sponge Version",
+      	"internal": false
+      },
+      "forgeversion": {
+      	"value": "1.10.2 - 12.18.3.2202",
+      	"required": true,
+      	"desc": "Version of Forge to install (use version specified by Sponge)",
       	"display": "Forge Version",
       	"internal": false
       },
-      "spongeversion": {
-      	"value": "1.8.9-1890-4.2.0-BETA-1653",
-      	"required": true,
-      	"desc": "Version of Sponge to install",
-      	"display": "Sponge Version",
-      	"internal": false
-      }
     }
   }
 }`
