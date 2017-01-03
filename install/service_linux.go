@@ -40,7 +40,7 @@ WantedBy=multi-user.target
 `
 
 func InstallService(configPath string) {
-	cmd := exec.Command("useradd", "--system", "--no-create-home", "--user-group", "--home", "/srv/pufferd/data", "pufferd")
+	cmd := exec.Command("useradd", "--system", "--no-create-home", "--user-group", "pufferd")
 
 	err := cmd.Run()
 	if err != nil {
@@ -68,6 +68,7 @@ func InstallService(configPath string) {
 		logging.Error("Cannot write systemd file, will not install service", err)
 		return
 	}
+
 	cmd = exec.Command("systemctl", "enable", "pufferd")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
