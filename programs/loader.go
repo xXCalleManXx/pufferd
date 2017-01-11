@@ -267,7 +267,11 @@ func GetPlugins() map[string]interface{} {
 		templateData, _ := ioutil.ReadFile(utils.JoinPath(templates.Folder, name+".json"))
 
 		var templateJson map[string]interface{}
-		json.Unmarshal(templateData, &templateJson)
+		err := json.Unmarshal(templateData, &templateJson)
+		if (err != nil) {
+			logging.Error("Malformed json for program " + element.Name(), err)
+			continue
+		}
 		segment := utils.GetMapOrNull(templateJson, "pufferd")
 		dataSec := make(map[string]interface{})
 		dataSec["variables"] = segment["data"].(map[string]interface{})
