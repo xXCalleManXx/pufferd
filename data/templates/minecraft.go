@@ -216,7 +216,7 @@ const CraftbukkitBySpigot = `{
       "eula": {
         "value": "false",
         "required": true,
-        "desc": "Do you (or the server owner) agree to the <a href="https://account.mojang.com/documents/minecraft_eula">Minecraft EULA?</a>",
+        "desc": "Do you (or the server owner) agree to the <a href='https://account.mojang.com/documents/minecraft_eula'>Minecraft EULA?</a>",
         "display": "EULA Agreement (true/false)",
         "internal": false
       }
@@ -293,7 +293,7 @@ const Vanilla = `{
       "eula": {
         "value": "false",
         "required": true,
-        "desc": "Do you (or the server owner) agree to the <a href="https://account.mojang.com/documents/minecraft_eula">Minecraft EULA?</a>",
+        "desc": "Do you (or the server owner) agree to the <a href='https://account.mojang.com/documents/minecraft_eula'>Minecraft EULA?</a>",
         "display": "EULA Agreement (true/false)",
         "internal": false
       }
@@ -464,7 +464,7 @@ const Sponge = `{
       "eula": {
         "value": "false",
         "required": true,
-        "desc": "Do you (or the server owner) agree to the <a href="https://account.mojang.com/documents/minecraft_eula">Minecraft EULA?</a>",
+        "desc": "Do you (or the server owner) agree to the <a href='https://account.mojang.com/documents/minecraft_eula'>Minecraft EULA?</a>",
         "display": "EULA Agreement (true/false)",
         "internal": false
       },
