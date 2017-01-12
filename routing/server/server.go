@@ -110,16 +110,6 @@ func StopServer(c *gin.Context) {
 
 func CreateServer(c *gin.Context) {
 	serverId := c.Param("id")
-	data := make(map[string]interface{}, 0)
-	err := json.NewDecoder(c.Request.Body).Decode(&data)
-	serverType := data["type"].(string)
-
-	if err != nil {
-		logging.Error("Error decoding JSON body", err)
-		c.AbortWithError(400, err)
-		return
-	}
-
 	handleInitialCallServer(c, "server.create", false)
 
 	existing := programs.GetFromCache(serverId)
@@ -128,6 +118,17 @@ func CreateServer(c *gin.Context) {
 		c.AbortWithStatus(409)
 		return
 	}
+
+	data := make(map[string]interface{}, 0)
+	err := json.NewDecoder(c.Request.Body).Decode(&data)
+
+	if err != nil {
+		logging.Error("Error decoding JSON body", err)
+		c.AbortWithError(400, err)
+		return
+	}
+
+	serverType := data["type"].(string)
 
 	if !programs.Create(serverId, serverType, data) {
 		c.AbortWithStatus(500)
