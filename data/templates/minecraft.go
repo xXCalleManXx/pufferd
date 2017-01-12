@@ -481,7 +481,7 @@ const Sponge = `{
       	"desc": "Version of Forge to install (use version specified by Sponge)",
       	"display": "Forge Version",
       	"internal": false
-      },
+      }
     }
   }
 }`

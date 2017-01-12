@@ -216,7 +216,7 @@ func main() {
 	webHost = config.GetOrDefault("webhost", "0.0.0.0")
 	webPort, _ = strconv.Atoi(config.GetOrDefault("webport", "5656"))
 
-	logging.Infof("Starting web access on %s:%n", webHost, webPort)
+	logging.Infof("Starting web access on %s:%d", webHost, webPort)
 	var err error
 	if useHttps {
 		err = manners.ListenAndServeTLS(webHost+":"+strconv.FormatInt(int64(webPort), 10), filepath.Join("data", "https.pem"), filepath.Join("data", "https.key"), r)
