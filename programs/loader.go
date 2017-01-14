@@ -25,7 +25,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/linkosmos/mapop"
 	"github.com/pufferpanel/pufferd/data/templates"
 	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/pufferd/programs/install"
@@ -158,16 +157,16 @@ func Create(id string, serverType string, data map[string]interface{}) bool {
 		var mapper map[string]interface{}
 		mapper = segment["data"].(map[string]interface{})
 		for k, v := range data {
-			newMap := make(map[string]interface{})
-			newMap["value"] = v
-			newMap["desc"] = "No description"
-			newMap["display"] = k
-			newMap["required"] = false
-			newMap["internal"] = true
 			if mapper[k] == nil {
+				newMap := make(map[string]interface{})
+				newMap["value"] = v
+				newMap["desc"] = "No description"
+				newMap["display"] = k
+				newMap["required"] = false
+				newMap["internal"] = true
 				mapper[k] = newMap
 			} else {
-				mapper[k] = mapop.Merge(newMap, mapper[k].(map[string]interface{}))
+				mapper[k]["value"] = v;
 			}
 		}
 		segment["data"] = mapper
