@@ -176,8 +176,19 @@ func Create(id string, serverType string, data map[string]interface{}) bool {
 		segment["data"] = mapper
 	}
 
-	templateData, _ = json.MarshalIndent(templateJson, "", "  ")
-	err = ioutil.WriteFile(utils.JoinPath(ServerFolder, id+".json"), templateData, 0644)
+	f, err := os.Create(utils.JoinPath(ServerFolder, id+".json"))
+
+	if err != nil {
+		logging.Error("Error writing server file", err)
+		return false
+	}
+
+	defer f.Close()
+
+	encoder := json.NewEncoder(f)
+	encoder.SetEscapeHTML(false)
+	encoder.SetIndent("", "  ")
+	err = encoder.Encode(templateJson)
 
 	if err != nil {
 		logging.Error("Error writing server file", err)
