@@ -54,7 +54,7 @@ func runServer() error {
 		},
 	}
 
-	serverKeyFile := configuration.GetOrDefault("datafolder", path.Join("data", "server.key"))
+	serverKeyFile := path.Join(configuration.GetOrDefault("datafolder", "data"), "server.key")
 
 	_, e := os.Stat(serverKeyFile)
 
