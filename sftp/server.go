@@ -54,7 +54,9 @@ func runServer() error {
 		},
 	}
 
-	_, e := os.Stat(path.Join("data", "server.key"))
+	serverKeyFile := configuration.GetOrDefault("datafolder", path.Join("data", "server.key"))
+
+	_, e := os.Stat(serverKeyFile)
 
 	if e != nil && os.IsNotExist(e) {
 		logging.Debug("Generating new key")
@@ -70,7 +72,7 @@ func runServer() error {
 			Headers: nil,
 			Bytes:   data,
 		}
-		ioutil.WriteFile(path.Join("data", "server.key"), pem.EncodeToMemory(&block), 0700)
+		ioutil.WriteFile(serverKeyFile, pem.EncodeToMemory(&block), 0700)
 		if e != nil {
 			return e
 		}
@@ -80,7 +82,7 @@ func runServer() error {
 
 	logging.Debug("Loading existing key")
 	var data []byte
-	data, e = ioutil.ReadFile(path.Join("data", "server.key"))
+	data, e = ioutil.ReadFile(serverKeyFile)
 	if e != nil {
 		return e
 	}

@@ -27,5 +27,6 @@ const CONFIG = `{
 	"sftp": "0.0.0.0:5657",
 	"update-check": true,
 	"serverfolder": "data/servers",
-	"templatefolder": "data/templates"
+	"templatefolder": "data/templates",
+	"datafolder": "data"
 }`

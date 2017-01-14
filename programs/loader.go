@@ -35,8 +35,12 @@ import (
 
 var (
 	programs     []Program = make([]Program, 0)
-	ServerFolder string    = config.GetOrDefault("serverfolder", utils.JoinPath("data", "servers"))
+	ServerFolder string
 )
+
+func Initialize() {
+	ServerFolder = config.GetOrDefault("serverfolder", utils.JoinPath("data", "servers"))
+}
 
 func LoadFromFolder() {
 	os.Mkdir(ServerFolder, 0755)

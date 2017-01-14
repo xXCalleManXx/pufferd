@@ -27,5 +27,6 @@ const CONFIG = `{
 	"sftp": "0.0.0.0:5657",
 	"update-check": true,
 	"serverfolder": "/var/lib/pufferd/servers",
-	"templatefolder": "/var/lib/pufferd/templates"
+	"templatefolder": "/var/lib/pufferd/templates",
+	"datafolder": "/etc/pufferd"
 }`

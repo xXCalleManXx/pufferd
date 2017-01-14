@@ -138,6 +138,9 @@ func main() {
 
 	config.Load(configPath)
 
+	templates.Initialize()
+	programs.Initialize()
+
 	if _, err := os.Stat(templates.Folder); os.IsNotExist(err) {
 		logging.Info("No template directory found, creating")
 		err = os.MkdirAll(templates.Folder, 0755)
