@@ -80,10 +80,14 @@ const Spigot = `{
         },
         {
           "commands": [
-            "java -jar BuildTools.jar --rev ${version}",
-            "echo eula=${eula} > eula.txt"
+            "java -jar BuildTools.jar --rev ${version}"
           ],
           "type": "command"
+        },
+        {
+          "type": "writefile",
+          "text": "eula=${eula}",
+          "target": "eula.txt"
         },
         {
           "source": "spigot-*.jar",
@@ -158,10 +162,14 @@ const CraftbukkitBySpigot = `{
         },
         {
           "commands": [
-            "java -jar BuildTools.jar --rev ${version}",
-            "echo eula=${eula} > eula.txt"
+            "java -jar BuildTools.jar --rev ${version}"
           ],
           "type": "command"
+        },
+        {
+          "type": "writefile",
+          "text": "eula=${eula}",
+          "target": "eula.txt"
         },
         {
           "source": "craftbukkit-*.jar",
@@ -240,10 +248,9 @@ const Vanilla = `{
           "type": "move"
         },
         {
-          "commands": [
-            "echo eula=${eula} > eula.txt"
-          ],
-          "type": "command"
+          "type": "writefile",
+          "text": "eula=${eula}",
+          "target": "eula.txt"
         }
       ]
     },
@@ -318,10 +325,14 @@ const Forge = `{
         },
         {
           "commands": [
-            "java -jar installer.jar --installServer",
-            "echo eula=${eula} > eula.txt"
+            "java -jar installer.jar --installServer"
           ],
           "type": "command"
+        },
+        {
+          "type": "writefile",
+          "text": "eula=${eula}",
+          "target": "eula.txt"
         },
         {
           "source": "forge-*-universal.jar",
@@ -413,10 +424,14 @@ const Sponge = `{
         },
         {
           "commands": [
-            "java -jar installer.jar --installServer",
-            "echo eula=${eula} > eula.txt"
+            "java -jar installer.jar --installServer"
           ],
           "type": "command"
+        },
+        {
+          "type": "writefile",
+          "text": "eula=${eula}",
+          "target": "eula.txt"
         },
         {
           "source": "forge-*-universal.jar",

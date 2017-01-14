@@ -96,6 +96,7 @@ type ProgramStruct struct {
 //This includes starting the environment if it is not running.
 func (p *ProgramStruct) Start() (err error) {
 	logging.Debugf("Starting server %s", p.Id())
+	p.Environment.DisplayToConsole("Starting server")
 	data := make(map[string]interface{})
 	for k, v := range p.Data {
 		data[k] = v.(map[string]interface{})["value"]
@@ -121,7 +122,9 @@ func (p *ProgramStruct) Kill() (err error) {
 //Creates any files needed for the program.
 //This includes creating the environment.
 func (p *ProgramStruct) Create() (err error) {
+	p.Environment.DisplayToConsole("Allocating server")
 	err = p.Environment.Create()
+	p.Environment.DisplayToConsole("Server allocated")
 	return
 }
 
@@ -142,6 +145,8 @@ func (p *ProgramStruct) Install() (err error) {
 		p.Stop()
 	}
 
+	p.Environment.DisplayToConsole("Installing server")
+
 	os.MkdirAll(p.Environment.GetRootDirectory(), 0755)
 
 	process := install.GenerateInstallProcess(&p.InstallData, p.Environment, p.Data)
@@ -152,6 +157,7 @@ func (p *ProgramStruct) Install() (err error) {
 			break
 		}
 	}
+	p.Environment.DisplayToConsole("Server installed")
 	return
 }
 

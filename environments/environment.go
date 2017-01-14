@@ -56,4 +56,6 @@ type Environment interface {
 	AddListener(ws *websocket.Conn)
 
 	GetStats() (map[string]interface{}, error)
+
+	DisplayToConsole(msg string)
 }

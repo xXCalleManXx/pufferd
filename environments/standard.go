@@ -180,6 +180,10 @@ func (s *standard) GetStats() (map[string]interface{}, error) {
 	return resultMap, nil
 }
 
+func (s *standard) DisplayToConsole(msg string) {
+	s.ConsoleBuffer.Write([]byte(msg))
+}
+
 func (s *standard) createWrapper() io.Writer {
 	if config.Get("forward") == "true" {
 		return io.MultiWriter(os.Stdout, s.ConsoleBuffer, s.WSManager)

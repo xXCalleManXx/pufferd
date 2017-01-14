@@ -185,6 +185,10 @@ func (s *tty) GetStats() (map[string]interface{}, error) {
 	return resultMap, nil
 }
 
+func (s *tty) DisplayToConsole(msg string) {
+	s.ConsoleBuffer.Write([]byte(msg))
+}
+
 func (s *tty) createWrapper() io.Writer {
 	if config.Get("forward") == "true" {
 		return io.MultiWriter(os.Stdout, s.ConsoleBuffer, s.WSManager)
