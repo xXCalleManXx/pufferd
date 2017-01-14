@@ -170,7 +170,7 @@ func Create(id string, serverType string, data map[string]interface{}) bool {
 				newMap["internal"] = true
 				mapper[k] = newMap
 			} else {
-				mapper[k]["value"] = v;
+				mapper[k].(map[string]interface{})["value"] = v;
 			}
 		}
 		segment["data"] = mapper
