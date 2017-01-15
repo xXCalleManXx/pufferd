@@ -133,7 +133,7 @@ func LoadFromMapping(id string, source map[string]interface{}) (program Program,
 		var program = utils.GetStringOrDefault(runSection, "program", "")
 		runBlock = Runtime{Stop: stop, Pre: pre, Post: post, Arguments: arguments, Enabled: enabled, AutoStart: autostart, Program: program}
 	}
-	program = &ProgramStruct{Data: dataCasted, Identifier: id, RunData: runBlock, InstallData: installSection, Environment: environment}
+	program = &programData{Data: dataCasted, Identifier: id, RunData: runBlock, InstallData: installSection, Environment: environment}
 	return
 }
 

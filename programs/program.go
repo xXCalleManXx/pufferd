@@ -84,7 +84,7 @@ type Program interface {
 	GetNetwork() string
 }
 
-type ProgramStruct struct {
+type programData struct {
 	RunData     Runtime
 	InstallData install.InstallSection
 	Environment environments.Environment
@@ -94,119 +94,142 @@ type ProgramStruct struct {
 
 //Starts the program.
 //This includes starting the environment if it is not running.
-func (p *ProgramStruct) Start() (err error) {
+func (p *programData) Start() (err error) {
 	logging.Debugf("Starting server %s", p.Id())
 	p.Environment.DisplayToConsole("Starting server")
 	data := make(map[string]interface{})
 	for k, v := range p.Data {
 		data[k] = v.(map[string]interface{})["value"]
 	}
-	p.Environment.ExecuteAsync(p.RunData.Program, utils.ReplaceTokensInArr(p.RunData.Arguments, data))
+	err = p.Environment.ExecuteAsync(p.RunData.Program, utils.ReplaceTokensInArr(p.RunData.Arguments, data))
+	if err != nil {
+		p.Environment.DisplayToConsole("Failed to start server\n")
+	} else {
+		//p.Environment.DisplayToConsole("Server started\n")
+	}
 	return
 }
 
 //Stops the program.
 //This will also stop the environment it is ran in.
-func (p *ProgramStruct) Stop() (err error) {
+func (p *programData) Stop() (err error) {
 	err = p.Environment.ExecuteInMainProcess(p.RunData.Stop)
+	if err != nil {
+		p.Environment.DisplayToConsole("Failed to stop server\n")
+	} else {
+		p.Environment.DisplayToConsole("Server stopped\n")
+	}
 	return
 }
 
 //Kills the program.
 //This will also stop the environment it is ran in.
-func (p *ProgramStruct) Kill() (err error) {
+func (p *programData) Kill() (err error) {
 	err = p.Environment.Kill()
+	if err != nil {
+		p.Environment.DisplayToConsole("Failed to kill server\n")
+	} else {
+		p.Environment.DisplayToConsole("Server killed\n")
+	}
 	return
 }
 
 //Creates any files needed for the program.
 //This includes creating the environment.
-func (p *ProgramStruct) Create() (err error) {
-	p.Environment.DisplayToConsole("Allocating server")
+func (p *programData) Create() (err error) {
+	p.Environment.DisplayToConsole("Allocating server\n")
 	err = p.Environment.Create()
-	p.Environment.DisplayToConsole("Server allocated")
+	p.Environment.DisplayToConsole("Server allocated\n")
 	return
 }
 
 //Destroys the server.
 //This will delete the server, environment, and any files related to it.
-func (p *ProgramStruct) Destroy() (err error) {
+func (p *programData) Destroy() (err error) {
 	err = p.Environment.Delete()
 	return
 }
 
-func (p *ProgramStruct) Update() (err error) {
+func (p *programData) Update() (err error) {
 	err = p.Install()
 	return
 }
 
-func (p *ProgramStruct) Install() (err error) {
+func (p *programData) Install() (err error) {
 	if p.IsRunning() {
-		p.Stop()
+		err = p.Stop()
 	}
 
-	p.Environment.DisplayToConsole("Installing server")
+	if err != nil {
+		logging.Error("Error stopping server to install: ", err)
+		p.Environment.DisplayToConsole("Error stopping server\n")
+		return
+	}
+
+	p.Environment.DisplayToConsole("Installing server\n")
 
 	os.MkdirAll(p.Environment.GetRootDirectory(), 0755)
 
 	process := install.GenerateInstallProcess(&p.InstallData, p.Environment, p.Data)
 	for process.HasNext() {
-		err := process.RunNext()
+		err = process.RunNext()
 		if err != nil {
 			logging.Error("Error running installer: ", err)
+			p.Environment.DisplayToConsole("Error installing server\n")
 			break
 		}
 	}
-	p.Environment.DisplayToConsole("Server installed")
+	p.Environment.DisplayToConsole("Server installed\n")
 	return
 }
 
 //Determines if the server is running.
-func (p *ProgramStruct) IsRunning() (isRunning bool) {
+func (p *programData) IsRunning() (isRunning bool) {
 	isRunning = p.Environment.IsRunning()
 	return
 }
 
 //Sends a command to the process
 //If the program supports input, this will send the arguments to that.
-func (p *ProgramStruct) Execute(command string) (err error) {
+func (p *programData) Execute(command string) (err error) {
 	err = p.Environment.ExecuteInMainProcess(command)
 	return
 }
 
-func (p *ProgramStruct) SetEnabled(isEnabled bool) (err error) {
+func (p *programData) SetEnabled(isEnabled bool) (err error) {
 	p.RunData.Enabled = isEnabled
 	return
 }
 
-func (p *ProgramStruct) IsEnabled() (isEnabled bool) {
+func (p *programData) IsEnabled() (isEnabled bool) {
 	isEnabled = p.RunData.Enabled
 	return
 }
 
-func (p *ProgramStruct) SetEnvironment(environment environments.Environment) (err error) {
+func (p *programData) SetEnvironment(environment environments.Environment) (err error) {
 	p.Environment = environment
 	return
 }
 
-func (p *ProgramStruct) Id() string {
+func (p *programData) Id() string {
 	return p.Identifier
 }
 
-func (p *ProgramStruct) GetEnvironment() environments.Environment {
+func (p *programData) GetEnvironment() environments.Environment {
 	return p.Environment
 }
 
-func (p *ProgramStruct) SetAutoStart(isAutoStart bool) (err error) {
+func (p *programData) SetAutoStart(isAutoStart bool) (err error) {
 	p.RunData.AutoStart = isAutoStart
 	return
 }
 
-func (p *ProgramStruct) IsAutoStart() (isAutoStart bool) {
-	return p.RunData.AutoStart
+func (p *programData) IsAutoStart() (isAutoStart bool) {
+	isAutoStart = p.RunData.AutoStart
+	return
 }
 
-func (p *ProgramStruct) Save(file string) (err error) {
+func (p *programData) Save(file string) (err error) {
 	result := make(map[string]interface{})
 	result["data"] = p.Data
 	result["install"] = p.InstallData
@@ -224,29 +247,29 @@ func (p *ProgramStruct) Save(file string) (err error) {
 	return
 }
 
-func (p *ProgramStruct) Edit(data map[string]interface{}) (err error) {
+func (p *programData) Edit(data map[string]interface{}) (err error) {
 	for k, v := range data {
 		if v == nil || v == "" {
 			delete(p.Data, k)
 		}
 		p.Data[k] = v
 	}
-	Save(p.Id())
+	err = Save(p.Id())
 	return
 }
 
-func (p *ProgramStruct) Reload(data Program) {
-	replacement := data.(*ProgramStruct)
+func (p *programData) Reload(data Program) {
+	replacement := data.(*programData)
 	p.Data = replacement.Data
 	p.InstallData = replacement.InstallData
 	p.RunData = replacement.RunData
 }
 
-func (p *ProgramStruct) GetData() map[string]interface{} {
+func (p *programData) GetData() map[string]interface{} {
 	return p.Data
 }
 
-func (p *ProgramStruct) GetNetwork() string {
+func (p *programData) GetNetwork() string {
 	data := p.GetData()
 	ip := "0.0.0.0"
 	port := "0"
