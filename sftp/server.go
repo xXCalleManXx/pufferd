@@ -186,13 +186,13 @@ func validateSSH(username string, password string) (*ssh.Permissions, error) {
 	response, err := client.Do(request)
 	if err != nil {
 		logging.Error("Error talking to auth server", err)
-		return nil, err
+		return nil, errors.New("Invalid response from authorization server")
 	}
 
 	//we should only get a 200 or 400 back, if we get any others, we have a problem
 	if response.StatusCode != 200 && response.StatusCode != 400 {
 		logging.Error("Error talking to auth server", response.StatusCode)
-		return nil, errors.New("Unexpected HTTP status code " + strconv.Itoa(response.StatusCode))
+		return nil, errors.New("Invalid response from authorization server")
 	}
 	var respArr map[string]interface{}
 	json.NewDecoder(response.Body).Decode(&respArr)
@@ -201,46 +201,15 @@ func validateSSH(username string, password string) (*ssh.Permissions, error) {
 	}
 	sshPerms := &ssh.Permissions{}
 	scopes := strings.Split(respArr["scope"].(string), " ")
+	if len(scopes) != 2 {
+		return nil, errors.New("Invalid response from authorization server")
+	}
 	for _, v := range scopes {
-		if v == "sftp" {
-			serverId := getServerIdFromToken(respArr["access_token"].(string))
-			if serverId == "" {
-				return nil, errors.New("Incorrect username or password")
-			}
+		if v != "sftp" {
 			sshPerms.Extensions = make(map[string]string)
-			sshPerms.Extensions["server_id"] = serverId
+			sshPerms.Extensions["server_id"] = v
 			return sshPerms, nil
 		}
 	}
 	return nil, errors.New("Incorrect username or password")
-}
-
-func getServerIdFromToken(accessToken string) string {
-	authUrl := configuration.Get("infoserver")
-	token := configuration.Get("authtoken")
-	client := &http.Client{}
-	data := url.Values{}
-	data.Set("token", accessToken)
-	request, _ := http.NewRequest("POST", authUrl, bytes.NewBufferString(data.Encode()))
-	request.Header.Add("Authorization", "Bearer"+token)
-	request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	request.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
-	response, err := client.Do(request)
-	if err != nil {
-		logging.Error("Error talking to auth server", err)
-		return ""
-	}
-	if response.StatusCode != 200 {
-		logging.Error("Error talking to auth server", response.StatusCode)
-		return ""
-	}
-	var respArr map[string]interface{}
-	json.NewDecoder(response.Body).Decode(&respArr)
-	if respArr["error"] != nil {
-		return ""
-	}
-	if respArr["active"].(bool) == false {
-		return ""
-	}
-	return respArr["server_id"].(string)
 }
