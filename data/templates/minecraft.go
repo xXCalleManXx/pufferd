@@ -90,6 +90,11 @@ const Spigot = `{
           "target": "eula.txt"
         },
         {
+          "type": "writefile",
+          "text": "server-ip=${ip}\nserver-port=${port}\n",
+          "target": "server.properties"
+        },
+        {
           "source": "spigot-*.jar",
           "target": "server.jar",
           "type": "move"
@@ -172,6 +177,11 @@ const CraftbukkitBySpigot = `{
           "target": "eula.txt"
         },
         {
+          "type": "writefile",
+          "text": "server-ip=${ip}\nserver-port=${port}\n",
+          "target": "server.properties"
+        },
+        {
           "source": "craftbukkit-*.jar",
           "target": "server.jar",
           "type": "move"
@@ -246,6 +256,11 @@ const Vanilla = `{
           "source": "minecraft_server.*.jar",
           "target": "server.jar",
           "type": "move"
+        },
+        {
+          "type": "writefile",
+          "text": "server-ip=${ip}\nserver-port=${port}\n",
+          "target": "server.properties"
         },
         {
           "type": "writefile",
@@ -328,6 +343,11 @@ const Forge = `{
             "java -jar installer.jar --installServer"
           ],
           "type": "command"
+        },
+        {
+          "type": "writefile",
+          "text": "server-ip=${ip}\nserver-port=${port}\n",
+          "target": "server.properties"
         },
         {
           "type": "writefile",
@@ -432,6 +452,11 @@ const Sponge = `{
           "type": "writefile",
           "text": "eula=${eula}",
           "target": "eula.txt"
+        },
+        {
+          "type": "writefile",
+          "text": "server-ip=${ip}\nserver-port=${port}\n",
+          "target": "server.properties"
         },
         {
           "source": "forge-*-universal.jar",

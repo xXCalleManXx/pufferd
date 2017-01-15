@@ -37,7 +37,6 @@ func CopyTemplates() {
 
 	data := Spigot
 	writeFile("spigot", data)
-	writeFile("minecraft", data)
 
 	data = Bungeecord
 	writeFile("bungeecord", data)
@@ -46,7 +45,7 @@ func CopyTemplates() {
 	writeFile("fakecraftbukkit", data)
 
 	data = Vanilla
-	writeFile("vanilla", data)
+	writeFile("vanillaminecraft", data)
 
 	data = Forge
 	writeFile("forge", data)
