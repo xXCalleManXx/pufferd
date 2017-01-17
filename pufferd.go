@@ -84,6 +84,9 @@ func main() {
 	}
 
 	if migrate {
+		config.Load(configPath)
+		templates.Initialize()
+		programs.Initialize()
 		migration.MigrateFromScales()
 	}
 
@@ -135,8 +138,6 @@ func main() {
 
 		os.Exit(0)
 	}
-
-	config.Load(configPath)
 
 	templates.Initialize()
 	programs.Initialize()
