@@ -70,6 +70,7 @@ func MigrateFromScales() {
 		}
 		programs.Create(scales.Name, scales.Plugin, serverData)
 	}
+	logging.Info("Migration complete, please restart pufferd to have it recognize the changes");
 }
 
 type scalesServer struct {

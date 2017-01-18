@@ -46,6 +46,7 @@ import (
 )
 
 var (
+	VERSION      = "nightly"
 	MAJORVERSION = "nightly"
 	BUILDDATE    = "unknown"
 	GITHASH      = "unknown"
@@ -73,7 +74,7 @@ func main() {
 	flag.StringVar(&configPath, "config", "config.json", "Path to pufferd config.json")
 	flag.Parse()
 
-	versionString := fmt.Sprintf("pufferd %s (%s %s)", MAJORVERSION, BUILDDATE, GITHASH)
+	versionString := fmt.Sprintf("pufferd %s (%s %s)", VERSION, BUILDDATE, GITHASH)
 
 	if version {
 		os.Stdout.WriteString(versionString + "\r\n")
