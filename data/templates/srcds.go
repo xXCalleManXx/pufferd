@@ -79,7 +79,7 @@ const SRCDS = `{
         "internal": false
       },
       "port": {
-        "value": "25565",
+        "value": "27015",
         "required": true,
         "desc": "What port to bind the server to",
         "display": "Port",
@@ -146,7 +146,7 @@ const TF2 = `{
         "internal": false
       },
       "port": {
-        "value": "25565",
+        "value": "27015",
         "required": true,
         "desc": "What port to bind the server to",
         "display": "Port",
