@@ -95,6 +95,8 @@ func main() {
 		return
 	}
 
+	config.Load(configPath)
+
 	logging.SetLevelByString(loggingLevel)
 	logging.Init()
 	gin.SetMode(gin.ReleaseMode)
@@ -201,7 +203,9 @@ func main() {
 	//check if there's an update
 	if config.GetOrDefault("update-check", "true") == "true" {
 		go func() {
-			resp, err := http.Get("https://dl.pufferpanel.com/pufferd/" + MAJORVERSION + "/version.txt")
+			url := "https://dl.pufferpanel.com/pufferd/" + MAJORVERSION + "/version.txt"
+			logging.Debug("Checking for updates using " + url)
+			resp, err := http.Get(url)
 			if err != nil {
 				return
 			}
@@ -211,9 +215,9 @@ func main() {
 				return
 			}
 			if string(onlineVersion) != GITHASH {
-				logging.Warn("DL server reports a different hash than this version, an update may be available")
-				logging.Warnf("Installed: %s", GITHASH)
-				logging.Warnf("Online: %s", onlineVersion)
+				logging.Infof("DL server reports a different hash than this version, an update may be available")
+				logging.Infof("Installed: %s", GITHASH)
+				logging.Infof("Online: %s", onlineVersion)
 			}
 		}()
 	}
