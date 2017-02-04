@@ -191,10 +191,12 @@ func main() {
 	useHttps = false
 
 	dataFolder := config.GetOrDefault("datafolder", "data")
+	httpsPem := filepath.Join(dataFolder, "https.pem")
+	httpsKey := filepath.Join(dataFolder, "https.key")
 
-	if _, err := os.Stat(filepath.Join(dataFolder, "https.pem")); os.IsNotExist(err) {
+	if _, err := os.Stat(httpsPem); os.IsNotExist(err) {
 		logging.Warn("No HTTPS.PEM found in data folder, will use no http")
-	} else if _, err := os.Stat(filepath.Join(dataFolder, "https.key")); os.IsNotExist(err) {
+	} else if _, err := os.Stat(httpsKey); os.IsNotExist(err) {
 		logging.Warn("No HTTPS.KEY found in data folder, will use no http")
 	} else {
 		useHttps = true
@@ -230,7 +232,7 @@ func main() {
 	logging.Infof("Starting web access on %s:%d", webHost, webPort)
 	var err error
 	if useHttps {
-		err = manners.ListenAndServeTLS(webHost+":"+strconv.FormatInt(int64(webPort), 10), filepath.Join("data", "https.pem"), filepath.Join("data", "https.key"), r)
+		err = manners.ListenAndServeTLS(webHost+":"+strconv.FormatInt(int64(webPort), 10), httpsPem, httpsKey, r)
 	} else {
 		err = manners.ListenAndServe(webHost+":"+strconv.FormatInt(int64(webPort), 10), r)
 	}
