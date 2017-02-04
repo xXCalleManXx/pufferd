@@ -29,7 +29,7 @@ const Bungeecord = `{
       ]
     },
     "run": {
-      "stop": "stop",
+      "stop": "end",
       "pre": [],
       "post": [],
       "arguments": [
