@@ -190,9 +190,11 @@ func main() {
 	var useHttps bool
 	useHttps = false
 
-	if _, err := os.Stat(filepath.Join("data", "https.pem")); os.IsNotExist(err) {
+	dataFolder := config.GetOrDefault("datafolder", "data")
+
+	if _, err := os.Stat(filepath.Join(dataFolder, "https.pem")); os.IsNotExist(err) {
 		logging.Warn("No HTTPS.PEM found in data folder, will use no http")
-	} else if _, err := os.Stat(filepath.Join("data", "https.key")); os.IsNotExist(err) {
+	} else if _, err := os.Stat(filepath.Join(dataFolder, "https.key")); os.IsNotExist(err) {
 		logging.Warn("No HTTPS.KEY found in data folder, will use no http")
 	} else {
 		useHttps = true
