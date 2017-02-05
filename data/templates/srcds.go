@@ -42,12 +42,16 @@ const SRCDS = `{
       "pre": [],
       "post": [],
       "arguments": [
+      	"+ip",
+      	"${ip}",
+      	"+port",
+      	"${port}",
       	"-game ${gametype}",
       	"-console",
         "+map ${map}",
       	"-norestart"
       ],
-      "program": "./srcds_run +ip ${ip} +port ${port}"
+      "program": "./srcds_run"
     },
     "data": {
       "appid": {
