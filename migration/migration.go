@@ -43,7 +43,7 @@ func MigrateFromScales() {
 			continue
 		}
 		newPath := utils.JoinPath(config.GetOrDefault("serverfolder", utils.JoinPath("data", "servers")), scales.Name)
-		err = os.Rename(utils.JoinPath("/home", scales.User), newPath)
+		err = os.Rename(utils.JoinPath("/home", scales.User, "public"), newPath)
 		if err != nil {
 			logging.Error("Error moving folder", err);
 			continue
