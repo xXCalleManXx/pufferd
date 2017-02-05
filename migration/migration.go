@@ -12,6 +12,7 @@ import (
 	"github.com/pufferpanel/pufferd/programs"
 	"github.com/pufferpanel/pufferd/data/templates"
 	"github.com/pufferpanel/pufferd/config"
+	"bytes"
 )
 
 const Scales = "/srv/scales/data"
@@ -19,6 +20,16 @@ const Scales = "/srv/scales/data"
 func MigrateFromScales() {
 	templates.CopyTemplates()
 	os.MkdirAll(programs.ServerFolder, 0755)
+
+	name := "legacyminecraft"
+	data := templates.Vanilla
+	jsonData := []byte(data)
+	var prettyJson bytes.Buffer
+	json.Indent(&prettyJson, jsonData, "", "  ")
+	err := ioutil.WriteFile(utils.JoinPath(templates.Folder, name+".json"), prettyJson.Bytes(), 0664)
+	if err != nil {
+		logging.Error("Error writing template "+name, err)
+	}
 
 	programFiles, err := ioutil.ReadDir(Scales)
 	if err != nil {
@@ -42,8 +53,9 @@ func MigrateFromScales() {
 			logging.Error("Error read server config", err)
 			continue
 		}
+		oldPath := utils.JoinPath("/home", scales.User, "public")
 		newPath := utils.JoinPath(config.GetOrDefault("serverfolder", utils.JoinPath("data", "servers")), scales.Name)
-		err = os.Rename(utils.JoinPath("/home", scales.User, "public"), newPath)
+		err = os.Rename(oldPath, newPath)
 		if err != nil {
 			logging.Error("Error moving folder", err);
 			continue
@@ -63,6 +75,7 @@ func MigrateFromScales() {
 		serverData["ip"] = scales.Gamehost
 		serverData["port"] = scales.Gameport
 		if scales.Plugin == "minecraft" {
+			scales.Plugin = "legacyminecraft"
 			serverData["memory"] = scales.Build.Memory
 		} else if scales.Plugin == "srcds" {
 			serverData["appid"] = scales.Startup.Variables.Build_Params
@@ -71,6 +84,7 @@ func MigrateFromScales() {
 		}
 		programs.Create(scales.Name, scales.Plugin, serverData)
 	}
+	os.Remove(utils.JoinPath(templates.Folder, "legacyminecraft.json"))
 	logging.Info("Migration complete, please restart pufferd to have it recognize the changes");
 }
 
