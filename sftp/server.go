@@ -35,9 +35,8 @@ import (
 	"github.com/pkg/errors"
 	configuration "github.com/pufferpanel/pufferd/config"
 	"github.com/pufferpanel/pufferd/logging"
-	"github.com/pufferpanel/pufferd/programs"
-	"github.com/taruti/sftpd"
 	"golang.org/x/crypto/ssh"
+	"github.com/pufferpanel/sftp"
 )
 
 func Run() {
@@ -133,6 +132,9 @@ func handleConn(conn net.Conn, config *ssh.ServerConfig) error {
 
 	// Service the incoming Channel channel.
 	for newChannel := range chans {
+		// Channels have a type, depending on the application level
+		// protocol intended. In the case of an SFTP session, this is "subsystem"
+		// with a payload string of "<length=4>sftp"
 		if newChannel.ChannelType() != "session" {
 			newChannel.Reject(ssh.UnknownChannelType, "unknown channel type")
 			continue
@@ -142,22 +144,34 @@ func handleConn(conn net.Conn, config *ssh.ServerConfig) error {
 			return err
 		}
 
-		fs := &VirtualFS{Prefix: path.Join(programs.ServerFolder, sc.Permissions.Extensions["server_id"])}
-
+		// Sessions have out-of-band requests such as "shell",
+		// "pty-req" and "env".  Here we handle only the
+		// "subsystem" request.
 		go func(in <-chan *ssh.Request) {
 			for req := range in {
 				ok := false
-				switch {
-				case sftpd.IsSftpRequest(req):
-					ok = true
-					go func() {
-						sftpd.ServeChannel(channel, fs)
-					}()
+				switch req.Type {
+				case "subsystem":
+					if string(req.Payload[4:]) == "sftp" {
+						ok = true
+					}
 				}
 				req.Reply(ok, nil)
 			}
 		}(requests)
 
+		serverOptions := []sftp.ServerOption{}
+
+		server, err := sftp.NewServer(
+			channel,
+			serverOptions...,
+		)
+		if err != nil {
+			return err
+		}
+		if err := server.Serve(); err != nil {
+			return err
+		}
 	}
 	return nil
 }
