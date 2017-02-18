@@ -36,7 +36,8 @@ import (
 	configuration "github.com/pufferpanel/pufferd/config"
 	"github.com/pufferpanel/pufferd/logging"
 	"golang.org/x/crypto/ssh"
-	"github.com/pkg/sftp"
+	"github.com/pufferpanel/sftp"
+	"github.com/pufferpanel/pufferd/programs"
 )
 
 func Run() {
@@ -162,15 +163,16 @@ func handleConn(conn net.Conn, config *ssh.ServerConfig) error {
 			}
 		}(requests)
 
-		serverOptions := []sftp.ServerOption{}
+		fs := CreateVirtualFs(path.Join(programs.ServerFolder, sc.Permissions.Extensions["server_id"]))
 
 		server, err := sftp.NewServer(
 			channel,
-			serverOptions...,
+			sftp.WithFileSystem(fs),
 		)
 		if err != nil {
 			return err
 		}
+
 		if err := server.Serve(); err != nil {
 			return err
 		}

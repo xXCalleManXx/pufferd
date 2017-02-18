@@ -17,178 +17,127 @@
 package sftp
 
 import (
-	"errors"
 	"os"
+	"time"
 	"path/filepath"
-
-	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/utils"
-	"github.com/taruti/sftpd"
+	"github.com/pufferpanel/sftp"
+	"github.com/pkg/errors"
 )
 
-type VirtualFS struct {
-	sftpd.EmptyFS
-	Prefix string
+type PrefixFileSystem struct {
+	sftp.FileSystem
+	prefix string
 }
 
-type vdir struct {
-	d *os.File
+func CreateVirtualFs(prefix string) sftp.FileSystem {
+	return PrefixFileSystem{prefix: prefix}
 }
 
-type vfile struct {
-	sftpd.EmptyFile
-	f *os.File
-}
-
-func (rf vfile) Close() error {
-	return rf.f.Close()
-}
-func (rf vfile) ReadAt(bs []byte, pos int64) (int, error) {
-	i, e := rf.f.ReadAt(bs, pos)
-	if e != nil {
-		logging.Error("Error", e)
+func (fs PrefixFileSystem) Stat(path string) (os.FileInfo, error) {
+	p, err := fs.validate(path)
+	if err != nil {
+		return nil, err
 	}
-	return i, e
+	return os.Stat(p)
 }
 
-func (rf vfile) WriteAt(bs []byte, offset int64) (int, error) {
-	i, e := rf.f.WriteAt(bs, offset)
-	if e != nil {
-		logging.Error("Error", e)
+func (fs PrefixFileSystem) Lstat(path string) (os.FileInfo, error) {
+	p, err := fs.validate(path)
+	if err != nil {
+		return nil, err
 	}
-	return i, e
+	return os.Lstat(p)
 }
 
-func (rf vfile) FStat() (*sftpd.Attr, error) {
-	fis, e := rf.f.Stat()
-	fi := &sftpd.Attr{}
-	fi.FillFrom(fis)
-	return fi, e
-}
-
-func (d vdir) Readdir(count int) ([]sftpd.NamedAttr, error) {
-	fis, e := d.d.Readdir(count)
-	if e != nil {
-		return nil, e
+func (fs PrefixFileSystem) Mkdir(path string, mode os.FileMode) error {
+	p, err := fs.validate(path)
+	if err != nil {
+		return err
 	}
-	rs := make([]sftpd.NamedAttr, len(fis))
-	for i, fi := range fis {
-		rs[i].Name = fi.Name()
-		rs[i].FillFrom(fi)
-	}
-	return rs, nil
-}
-func (d vdir) Close() error {
-	return d.d.Close()
+	return os.Mkdir(p, mode)
 }
 
-func (fs VirtualFS) prefix(path string) (string, error) {
+func (fs PrefixFileSystem) Remove(path string) error {
+	p, err := fs.validate(path)
+	if err != nil {
+		return err
+	}
+	return os.Remove(p)
+}
+
+func (fs PrefixFileSystem) Symlink(target string, link string) error {
+	t, err := fs.validate(target)
+	if err != nil {
+		return err
+	}
+	l, err := fs.validate(link)
+	if err != nil {
+		return err
+	}
+	return os.Symlink(t, l)
+}
+
+func (fs PrefixFileSystem) Readlink(path string) (string, error) {
+	p, err := fs.validate(path)
+	if err != nil {
+		return "", err
+	}
+	return os.Readlink(p)
+}
+
+func (fs PrefixFileSystem) OpenFile(path string, flag int, mode os.FileMode) (*os.File, error) {
+	p, err := fs.validate(path)
+	if err != nil {
+		return nil, err
+	}
+	return os.OpenFile(p, flag, mode)
+}
+
+func (fs PrefixFileSystem) Truncate(path string, size int64) error {
+	p, err := fs.validate(path)
+	if err != nil {
+		return err
+	}
+	return os.Truncate(p, size)
+}
+
+func (fs PrefixFileSystem) Chmod(path string, mode os.FileMode) error {
+	p, err := fs.validate(path)
+	if err != nil {
+		return err
+	}
+	return os.Chmod(p, mode)
+}
+
+func (fs PrefixFileSystem) Chtimes(path string, aTime, mTime time.Time) error {
+	p, err := fs.validate(path)
+	if err != nil {
+		return err
+	}
+	return os.Chtimes(p, aTime, mTime)
+}
+
+func (fs PrefixFileSystem) Chown(path string, uid, gid int) error {
+	return errors.New("Chown not supported");
+}
+
+func (fs PrefixFileSystem) validate(path string) (string, error) {
+	ok, path := fs.tryPrefix(path)
+	if !ok {
+		return "", errors.New("Invalid path provided")
+	}
+	return path, nil
+}
+
+func (fs PrefixFileSystem) tryPrefix(path string) (bool, string) {
 	if len(path) > 0 && path[0] == '/' {
 		path = path[1:]
 	}
-	newPath := filepath.Clean(filepath.Join(fs.Prefix, path))
-	if utils.EnsureAccess(newPath, fs.Prefix) {
-		return newPath, nil
+	newPath := filepath.Clean(filepath.Join(fs.prefix, path))
+	if utils.EnsureAccess(newPath, fs.prefix) {
+		return true, newPath
 	} else {
-		return "<invalid>", errors.New("Invalid path")
+		return false, ""
 	}
-}
-
-func (fs VirtualFS) OpenDir(path string) (sftpd.Dir, error) {
-	p, e := fs.prefix(path)
-	if e != nil {
-		return nil, e
-	}
-	f, e := os.Open(p)
-	if e != nil {
-		return nil, e
-	}
-	return vdir{f}, nil
-}
-
-func (fs VirtualFS) OpenFile(path string, mode uint32, a *sftpd.Attr) (sftpd.File, error) {
-	p, e := fs.prefix(path)
-	if e != nil {
-		return nil, e
-	}
-	f, e := os.OpenFile(p, os.O_RDWR, os.ModeType)
-	if e != nil {
-		if mode == 26 || mode == 58 {
-			logging.Debug("Creating file " + p)
-			f, e = os.Create(p)
-		}
-		if e != nil {
-			logging.Error("Error openning file", e)
-			return nil, e
-		}
-	}
-	return vfile{f: f}, nil
-}
-
-func (fs VirtualFS) Stat(name string, islstat bool) (*sftpd.Attr, error) {
-	p, e := fs.prefix(name)
-	if e != nil {
-		return nil, e
-	}
-	var fi os.FileInfo
-	if islstat {
-		fi, e = os.Lstat(p)
-	} else {
-		fi, e = os.Stat(p)
-	}
-	if e != nil {
-		return nil, e
-	}
-	var a sftpd.Attr
-	e = a.FillFrom(fi)
-
-	return &a, e
-}
-
-func (fs VirtualFS) SetStat(path string, attr *sftpd.Attr) error {
-	return nil
-}
-
-func (fs VirtualFS) Remove(name string) error {
-	p, e := fs.prefix(name)
-	if e != nil {
-		return e
-	}
-	return os.Remove(p)
-}
-
-func (fs VirtualFS) Rename(oldName string, newName string, mode uint32) error {
-	var p1, p2 string
-	var e error
-	p1, e = fs.prefix(oldName)
-	if e != nil {
-		logging.Error("Error renaming file", e)
-		return e
-	}
-	p2, e = fs.prefix(newName)
-	if e != nil {
-		logging.Error("Error renaming file", e)
-		return e
-	}
-	e = os.Rename(p1, p2)
-	if e != nil {
-		logging.Error("Error renaming file", e)
-	}
-	return e
-}
-
-func (fs VirtualFS) Mkdir(name string, attr *sftpd.Attr) error {
-	p, e := fs.prefix(name)
-	if e != nil {
-		return e
-	}
-	return os.Mkdir(p, 0755)
-}
-
-func (fs VirtualFS) Rmdir(name string) error {
-	p, e := fs.prefix(name)
-	if e != nil {
-		return e
-	}
-	return os.Remove(p)
 }
