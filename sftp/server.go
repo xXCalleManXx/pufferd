@@ -36,7 +36,7 @@ import (
 	configuration "github.com/pufferpanel/pufferd/config"
 	"github.com/pufferpanel/pufferd/logging"
 	"golang.org/x/crypto/ssh"
-	"github.com/pufferpanel/sftp"
+	"github.com/pkg/sftp"
 )
 
 func Run() {
@@ -117,7 +117,9 @@ func HandleConn(conn net.Conn, config *ssh.ServerConfig) {
 	defer conn.Close()
 	e := handleConn(conn, config)
 	if e != nil {
-		logging.Error("sftpd connection errored:", e)
+		if e.Error() != "EOF" {
+			logging.Error("sftpd connection errored:", e)
+		}
 	}
 }
 func handleConn(conn net.Conn, config *ssh.ServerConfig) error {
