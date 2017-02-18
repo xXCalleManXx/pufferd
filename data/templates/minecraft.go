@@ -405,7 +405,7 @@ const Forge = `{
         "internal": false
       },
       "version": {
-      	"value": "1.10.2 - 12.18.3.2202",
+      	"value": "1.10.2-12.18.3.2202",
       	"required": true,
       	"desc": "Version of Forge to install (may be located <a href='http://files.minecraftforge.net/#Downloads'>here</a>",
       	"display": "Version",
@@ -516,7 +516,7 @@ const Sponge = `{
       	"internal": false
       },
       "forgeversion": {
-      	"value": "1.10.2 - 12.18.3.2202",
+      	"value": "1.10.2-12.18.3.2202",
       	"required": true,
       	"desc": "Version of Forge to install (use version specified by Sponge)",
       	"display": "Forge Version",
