@@ -28,7 +28,17 @@ import (
 	"github.com/pufferpanel/pufferd/config"
 	"github.com/pufferpanel/pufferd/logging"
 	"fmt"
+	"time"
 )
+
+type oauthCache struct {
+	oauthToken string
+	serverId string
+	scopes []string
+	expireTime int64
+}
+
+var cache = make([]*oauthCache, 20)
 
 func OAuth2Handler(gin *gin.Context) {
 	authHeader := gin.Request.Header.Get("Authorization")
@@ -47,6 +57,11 @@ func OAuth2Handler(gin *gin.Context) {
 		}
 		authToken = authArr[1];
 	}
+
+	if isCachedRequest(authToken) {
+		return
+	}
+
 	validateToken(authToken, gin)
 }
 
@@ -88,6 +103,44 @@ func validateToken(accessToken string, gin *gin.Context) {
 		gin.AbortWithStatus(401)
 		return
 	}
-	gin.Set("server_id", respArr["server_id"].(string))
-	gin.Set("scopes", strings.Split(respArr["scope"].(string), " "))
+
+	serverId := respArr["server_id"].(string)
+	scopes := strings.Split(respArr["scope"].(string), " ")
+
+	cache := &oauthCache{
+		oauthToken: accessToken,
+		serverId: serverId,
+		scopes: scopes,
+	}
+	cacheRequest(cache)
+
+	gin.Set("server_id", serverId)
+	gin.Set("scopes", scopes)
+}
+
+func isCachedRequest(accessToken string) bool {
+	currentTime := time.Now().Unix()
+	for k, v := range cache {
+		if v.oauthToken == accessToken {
+			if v.expireTime < currentTime {
+				return true
+			}
+			copy(cache[k:], cache[k+1:])
+			cache[len(cache)-1] = nil
+			cache = cache[:len(cache)-1]
+			return false
+		}
+	}
+	return false
+}
+
+func cacheRequest(request *oauthCache) {
+	currentTime := time.Now().Unix()
+	request.expireTime = time.Now().Add(time.Minute * 2).Unix()
+	for k, v := range cache {
+		if v == nil || v.expireTime > currentTime {
+			cache[k] = request
+			return
+		}
+	}
 }
