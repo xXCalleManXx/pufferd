@@ -119,7 +119,19 @@ func (fs PrefixFileSystem) Chtimes(path string, aTime, mTime time.Time) error {
 }
 
 func (fs PrefixFileSystem) Chown(path string, uid, gid int) error {
-	return errors.New("Chown not supported");
+	return nil
+}
+
+func (fs PrefixFileSystem) Rename(oldPath string, newPath string) error {
+	path1, err := fs.validate(oldPath)
+	if err != nil {
+		return err
+	}
+	path2, err := fs.validate(newPath)
+	if err != nil {
+		return err
+	}
+	return os.Rename(path1, path2)
 }
 
 func (fs PrefixFileSystem) validate(path string) (string, error) {
