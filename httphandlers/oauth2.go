@@ -58,11 +58,15 @@ func OAuth2Handler(gin *gin.Context) {
 		authToken = authArr[1];
 	}
 
-	if isCachedRequest(authToken) {
-		return
-	}
+	cached := isCachedRequest(authToken)
 
-	validateToken(authToken, gin)
+	if cached != nil {
+		gin.Set("server_id", cached.serverId)
+		gin.Set("scopes", cached.scopes)
+		return
+	} else {
+		validateToken(authToken, gin)
+	}
 }
 
 func validateToken(accessToken string, gin *gin.Context) {
@@ -118,20 +122,20 @@ func validateToken(accessToken string, gin *gin.Context) {
 	gin.Set("scopes", scopes)
 }
 
-func isCachedRequest(accessToken string) bool {
+func isCachedRequest(accessToken string) *oauthCache {
 	currentTime := time.Now().Unix()
 	for k, v := range cache {
 		if v.oauthToken == accessToken {
 			if v.expireTime < currentTime {
-				return true
+				return v
 			}
 			copy(cache[k:], cache[k+1:])
 			cache[len(cache)-1] = nil
 			cache = cache[:len(cache)-1]
-			return false
+			return nil
 		}
 	}
-	return false
+	return nil
 }
 
 func cacheRequest(request *oauthCache) {
