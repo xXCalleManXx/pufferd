@@ -125,6 +125,9 @@ func validateToken(accessToken string, gin *gin.Context) {
 func isCachedRequest(accessToken string) *oauthCache {
 	currentTime := time.Now().Unix()
 	for k, v := range cache {
+		if v == nil {
+			continue;
+		}
 		if v.oauthToken == accessToken {
 			if v.expireTime < currentTime {
 				return v
