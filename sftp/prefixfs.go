@@ -23,6 +23,7 @@ import (
 	"github.com/pufferpanel/pufferd/utils"
 	"github.com/pufferpanel/sftp"
 	"github.com/pkg/errors"
+	"strings"
 )
 
 type PrefixFileSystem struct {
@@ -39,7 +40,11 @@ func (fs PrefixFileSystem) Stat(path string) (os.FileInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	return os.Stat(p)
+	fi, e := os.Stat(p)
+	if e != nil {
+		e = fs.maskError(e)
+	}
+	return fi, e
 }
 
 func (fs PrefixFileSystem) Lstat(path string) (os.FileInfo, error) {
@@ -47,7 +52,11 @@ func (fs PrefixFileSystem) Lstat(path string) (os.FileInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	return os.Lstat(p)
+	fi, e := os.Lstat(p)
+	if e != nil {
+		e = fs.maskError(e)
+	}
+	return fi, e
 }
 
 func (fs PrefixFileSystem) Mkdir(path string, mode os.FileMode) error {
@@ -55,7 +64,11 @@ func (fs PrefixFileSystem) Mkdir(path string, mode os.FileMode) error {
 	if err != nil {
 		return err
 	}
-	return os.Mkdir(p, mode)
+	e := os.Mkdir(p, mode)
+	if e != nil {
+		e = fs.maskError(e)
+	}
+	return e
 }
 
 func (fs PrefixFileSystem) Remove(path string) error {
@@ -63,7 +76,11 @@ func (fs PrefixFileSystem) Remove(path string) error {
 	if err != nil {
 		return err
 	}
-	return os.Remove(p)
+	e := os.Remove(p)
+	if e != nil {
+		e = fs.maskError(e)
+	}
+	return e
 }
 
 func (fs PrefixFileSystem) Symlink(target string, link string) error {
@@ -75,7 +92,11 @@ func (fs PrefixFileSystem) Symlink(target string, link string) error {
 	if err != nil {
 		return err
 	}
-	return os.Symlink(t, l)
+	e := os.Symlink(t, l)
+	if e != nil {
+		e = fs.maskError(e)
+	}
+	return e
 }
 
 func (fs PrefixFileSystem) Readlink(path string) (string, error) {
@@ -107,7 +128,11 @@ func (fs PrefixFileSystem) Chmod(path string, mode os.FileMode) error {
 	if err != nil {
 		return err
 	}
-	return os.Chmod(p, mode)
+	e := os.Chmod(p, mode)
+	if e != nil {
+		e = fs.maskError(e)
+	}
+	return e
 }
 
 func (fs PrefixFileSystem) Chtimes(path string, aTime, mTime time.Time) error {
@@ -115,7 +140,11 @@ func (fs PrefixFileSystem) Chtimes(path string, aTime, mTime time.Time) error {
 	if err != nil {
 		return err
 	}
-	return os.Chtimes(p, aTime, mTime)
+	e := os.Chtimes(p, aTime, mTime)
+	if e != nil {
+		e = fs.maskError(e)
+	}
+	return e
 }
 
 func (fs PrefixFileSystem) Chown(path string, uid, gid int) error {
@@ -131,7 +160,11 @@ func (fs PrefixFileSystem) Rename(oldPath string, newPath string) error {
 	if err != nil {
 		return err
 	}
-	return os.Rename(path1, path2)
+	e := os.Rename(path1, path2)
+	if e != nil {
+		e = fs.maskError(e)
+	}
+	return e
 }
 
 func (fs PrefixFileSystem) validate(path string) (string, error) {
@@ -143,13 +176,14 @@ func (fs PrefixFileSystem) validate(path string) (string, error) {
 }
 
 func (fs PrefixFileSystem) tryPrefix(path string) (bool, string) {
-	if len(path) > 0 && path[0] == '/' {
-		path = path[1:]
-	}
 	newPath := filepath.Clean(filepath.Join(fs.prefix, path))
 	if utils.EnsureAccess(newPath, fs.prefix) {
 		return true, newPath
 	} else {
 		return false, ""
 	}
+}
+
+func (fs PrefixFileSystem) maskError(err error) error{
+	return errors.New(strings.Replace(err.Error(), fs.prefix, "", -1))
 }
