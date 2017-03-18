@@ -197,25 +197,37 @@ func GetFile(c *gin.Context) {
 	}
 
 	if info.IsDir() {
+
+		type FileDesc struct {
+			Name      string    `json:"name"`
+			Modified  time.Time `json:"modifyTime"`
+			Size      int64     `json:"size,omitempty"`
+			File      bool      `json:"isFile"`
+			Extension string    `json:"extension,omitempty"`
+		}
+
 		files, _ := ioutil.ReadDir(targetFile)
 		fileNames := make([]interface{}, 0)
-		for _, file := range files {
-			type FileDesc struct {
-				Name      string    `json:"entry,omitempty"`
-				Modified  time.Time `json:"date,omitempty"`
-				Size      int64     `json:"size,omitempty"`
-				File      bool      `json:"-,omitempty"`
-				Directory string    `json:"directory,omitempty"`
-				Extension string    `json:"extension,omitempty"`
+		if targetFile != "." {
+			newFile := &FileDesc{
+				Name:      "..",
+				File:      false,
 			}
-			fileNames = append(fileNames, &FileDesc{
+			fileNames = append(fileNames, newFile)
+		}
+		for _, file := range files {
+			newFile := &FileDesc{
 				Name:      file.Name(),
-				Size:      file.Size(),
 				File:      !file.IsDir(),
-				Modified:  file.ModTime(),
-				Extension: filepath.Ext(file.Name()),
-				Directory: filepath.Dir(file.Name()),
-			})
+			}
+
+			if newFile.File {
+				newFile.Size = file.Size()
+				newFile.Modified = file.ModTime()
+				newFile.Extension = filepath.Ext(file.Name())
+			}
+
+			fileNames = append(fileNames, newFile)
 		}
 		c.JSON(200, fileNames)
 	} else {
