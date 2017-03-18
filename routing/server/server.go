@@ -231,6 +231,14 @@ func GetFile(c *gin.Context) {
 		}
 		c.JSON(200, fileNames)
 	} else {
+		_, err := os.Open(targetFile)
+		if err != nil {
+			if err == os.ErrNotExist {
+				c.AbortWithStatus(404)
+			} else {
+				c.AbortWithStatus(500)
+			}
+		}
 		c.File(targetFile)
 	}
 }
