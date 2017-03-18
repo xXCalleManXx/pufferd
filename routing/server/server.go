@@ -197,7 +197,6 @@ func GetFile(c *gin.Context) {
 	}
 
 	if info.IsDir() {
-
 		type FileDesc struct {
 			Name      string    `json:"name"`
 			Modified  int64     `json:"modifyTime"`
@@ -208,7 +207,7 @@ func GetFile(c *gin.Context) {
 
 		files, _ := ioutil.ReadDir(targetFile)
 		fileNames := make([]interface{}, 0)
-		if targetFile != "." {
+		if targetPath != "" && targetPath != "." && targetPath != "/" {
 			newFile := &FileDesc{
 				Name:      "..",
 				File:      false,
