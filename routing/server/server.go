@@ -23,7 +23,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -61,6 +60,7 @@ func RegisterRoutes(e *gin.Engine) {
 		l.POST("/:id/install", InstallServer)
 		l.GET("/:id/file/*filename", GetFile)
 		l.PUT("/:id/file/*filename", PutFile)
+		l.DELETE("/:id/file/*filename", DeleteFile)
 		l.POST("/:id/console", PostConsole)
 		l.GET("/:id/stats", GetStats)
 		l.POST("/:id/reload", ReloadServer)
@@ -200,7 +200,7 @@ func GetFile(c *gin.Context) {
 
 		type FileDesc struct {
 			Name      string    `json:"name"`
-			Modified  time.Time `json:"modifyTime"`
+			Modified  int64     `json:"modifyTime"`
 			Size      int64     `json:"size,omitempty"`
 			File      bool      `json:"isFile"`
 			Extension string    `json:"extension,omitempty"`
@@ -223,7 +223,7 @@ func GetFile(c *gin.Context) {
 
 			if newFile.File {
 				newFile.Size = file.Size()
-				newFile.Modified = file.ModTime()
+				newFile.Modified = file.ModTime().Unix()
 				newFile.Extension = filepath.Ext(file.Name())
 			}
 
@@ -274,6 +274,30 @@ func PutFile(c *gin.Context) {
 
 	if err != nil {
 		logging.Error("Error writing file", err)
+	}
+}
+
+func DeleteFile (c *gin.Context) {
+	valid, server := handleInitialCallServer(c, "server.file.delete", true)
+
+	if !valid {
+		return
+	}
+
+	targetPath := c.Param("filename")
+
+	targetFile := utils.JoinPath(server.GetEnvironment().GetRootDirectory(), targetPath)
+
+	if !utils.EnsureAccess(targetFile, server.GetEnvironment().GetRootDirectory()) {
+		return
+	}
+
+	err := os.Remove(targetFile)
+	if err != nil {
+		c.Status(500)
+		logging.Error("Failed to delete file", err)
+	} else {
+		c.Status(204)
 	}
 }
 
