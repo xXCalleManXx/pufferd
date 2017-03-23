@@ -90,7 +90,7 @@ func validateToken(accessToken string, gin *gin.Context) {
 	if response.StatusCode != 200 {
 		logging.Error("Unexpected response code from auth server", response.StatusCode)
 		errMsg := make(map[string]string)
-		errMsg["error"] = fmt.Sprintf("Receieved response %i", response.StatusCode);
+		errMsg["error"] = fmt.Sprintf("Received response %i", response.StatusCode);
 		gin.JSON(500, errMsg);
 		return
 	}
