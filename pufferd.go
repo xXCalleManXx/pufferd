@@ -27,6 +27,9 @@ import (
 
 	"fmt"
 
+	"net/http"
+	"strings"
+
 	"github.com/braintree/manners"
 	"github.com/gin-gonic/gin"
 	"github.com/pufferpanel/pufferd/config"
@@ -41,8 +44,6 @@ import (
 	"github.com/pufferpanel/pufferd/routing/server"
 	"github.com/pufferpanel/pufferd/sftp"
 	"github.com/pufferpanel/pufferd/utils"
-	"net/http"
-	"strings"
 )
 
 var (
@@ -195,9 +196,9 @@ func main() {
 	httpsKey := filepath.Join(dataFolder, "https.key")
 
 	if _, err := os.Stat(httpsPem); os.IsNotExist(err) {
-		logging.Warn("No HTTPS.PEM found in data folder, will use no http")
+		logging.Warn("No HTTPS.PEM found in data folder, will use http instead")
 	} else if _, err := os.Stat(httpsKey); os.IsNotExist(err) {
-		logging.Warn("No HTTPS.KEY found in data folder, will use no http")
+		logging.Warn("No HTTPS.KEY found in data folder, will use http instead")
 	} else {
 		useHttps = true
 	}
