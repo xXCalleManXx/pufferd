@@ -92,6 +92,7 @@ func StopServer(c *gin.Context) {
 	}
 
 	if !valid {
+		c.Status(401)
 		return
 	}
 
@@ -103,9 +104,10 @@ func StopServer(c *gin.Context) {
 	if wait == "true" {
 		err = existing.GetEnvironment().WaitForMainProcess()
 		if err != nil {
-			c.Error(err)
+			c.AbortWithError(500, err)
 		}
 	}
+	c.Status(204)
 }
 
 func CreateServer(c *gin.Context) {
@@ -153,7 +155,7 @@ func InstallServer(c *gin.Context) {
 		return
 	}
 
-	c.Status(200)
+	c.Status(204)
 	go func() {
 		existing.Install()
 	}()
@@ -169,8 +171,8 @@ func EditServer(c *gin.Context) {
 	data := make(map[string]interface{}, 0)
 	json.NewDecoder(c.Request.Body).Decode(&data)
 
-	c.Status(200)
 	existing.Edit(data)
+	c.Status(204)
 }
 
 func GetFile(c *gin.Context) {
@@ -259,20 +261,27 @@ func PutFile(c *gin.Context) {
 	targetFile := utils.JoinPath(server.GetEnvironment().GetRootDirectory(), targetPath)
 
 	if !utils.EnsureAccess(targetFile, server.GetEnvironment().GetRootDirectory()) {
+		c.Status(401)
 		return
 	}
 
 	file, err := os.Create(targetFile)
 
 	if err != nil {
+		c.AbortWithError(500, err)
 		logging.Error("Error writing file", err)
 		return
 	}
 
-	_, err = io.Copy(file, c.Request.Body)
+	c.Request.ParseMultipartForm(32 << 20)
+	sourceFile, _, err := c.Request.FormFile("file")
+	_, err = io.Copy(file, sourceFile)
 
 	if err != nil {
+		c.AbortWithError(500, err)
 		logging.Error("Error writing file", err)
+	} else {
+		c.Status(204)
 	}
 }
 
@@ -309,7 +318,7 @@ func PostConsole(c *gin.Context) {
 	cmd := string(d)
 	err := program.Execute(cmd)
 	if err != nil {
-		c.Error(err)
+		c.AbortWithError(500, err)
 	} else {
 		c.Status(200)
 	}
@@ -358,7 +367,12 @@ func ReloadServer(c *gin.Context) {
 		return
 	}
 
-	programs.Reload(existing.Id())
+	err := programs.Reload(existing.Id())
+	if err != nil {
+		c.AbortWithError(500, err)
+		return
+	}
+	c.Status(204)
 }
 
 func NetworkServer(c *gin.Context) {
