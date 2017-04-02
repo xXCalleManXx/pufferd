@@ -265,6 +265,16 @@ func PutFile(c *gin.Context) {
 		return
 	}
 
+	_, mkFolder := c.GetQuery("folder")
+	if (mkFolder) {
+		err := os.Mkdir(targetFile, 0644)
+		if err != nil {
+			c.AbortWithError(500, err)
+		} else {
+			c.Status(204)
+		}
+		return
+	}
 	file, err := os.Create(targetFile)
 
 	if err != nil {
