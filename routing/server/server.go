@@ -283,8 +283,17 @@ func PutFile(c *gin.Context) {
 		return
 	}
 
-	c.Request.ParseMultipartForm(32 << 20)
-	sourceFile, _, err := c.Request.FormFile("file")
+	_, noform := c.GetQuery("noform")
+
+	var sourceFile io.ReadCloser
+
+	if noform {
+		c.Request.ParseMultipartForm(32 << 20)
+		sourceFile, _, err = c.Request.FormFile("file")
+	} else {
+		sourceFile = c.Request.Body
+	}
+
 	_, err = io.Copy(file, sourceFile)
 
 	if err != nil {
