@@ -29,7 +29,7 @@ import (
 func RegisterRoutes(e *gin.Engine) {
 	e.Use(httphandlers.Recovery())
 	e.GET("", func(c *gin.Context) {
-		http.Respond(c).Message("pufferd is running")
+		http.Respond(c).Message("pufferd is running").Send()
 	})
 	e.GET("/templates", GetTemplates)
 	e.GET("/_shutdown", httphandlers.OAuth2Handler, Shutdown)
@@ -52,7 +52,7 @@ func Shutdown(c *gin.Context) {
 }
 
 func GetTemplates(c *gin.Context) {
-	http.Respond(c).Data(programs.GetPlugins())
+	http.Respond(c).Data(programs.GetPlugins()).Send()
 }
 
 func hasScope(gin *gin.Context, scope string) bool {
