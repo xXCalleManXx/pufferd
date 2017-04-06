@@ -23,27 +23,28 @@ import (
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/programs"
 	"github.com/pufferpanel/pufferd/utils"
+	"github.com/pufferpanel/pufferd/http"
 )
 
 func RegisterRoutes(e *gin.Engine) {
 	e.Use(httphandlers.Recovery())
 	e.GET("", func(c *gin.Context) {
-		c.String(200, "pufferd is running")
+		http.Respond(c).Message("pufferd is running")
 	})
 	e.GET("/templates", GetTemplates)
-	e.GET("_shutdown", httphandlers.OAuth2Handler, Shutdown)
+	e.GET("/_shutdown", httphandlers.OAuth2Handler, Shutdown)
 }
 
 func Shutdown(c *gin.Context) {
 	if !hasScope(c, "node.stop") {
-		c.AbortWithStatus(401)
+		http.Respond(c).Fail().Code(403).MessageCode(http.NOTAUTHORIZED).Message("missing scope node.stop").Send()
 		return
 	}
 
 	for _, element := range programs.GetAll() {
 		running := element.IsRunning()
 		if running {
-			logging.Info("Stopping program " + element.Id())
+			logging.Warn("Stopping program " + element.Id())
 			element.Stop()
 		}
 	}
@@ -51,7 +52,7 @@ func Shutdown(c *gin.Context) {
 }
 
 func GetTemplates(c *gin.Context) {
-	c.JSON(200, programs.GetPlugins())
+	http.Respond(c).Data(programs.GetPlugins())
 }
 
 func hasScope(gin *gin.Context, scope string) bool {

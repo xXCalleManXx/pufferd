@@ -20,13 +20,14 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
-	"net/http"
+	gohttp "net/http"
 	"os"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/itsjamie/gin-cors"
+	"github.com/pufferpanel/pufferd/http"
 	"github.com/pufferpanel/pufferd/httphandlers"
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/programs"
@@ -39,7 +40,7 @@ import (
 var wsupgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
-	CheckOrigin: func(r *http.Request) bool {
+	CheckOrigin: func(r *gohttp.Request) bool {
 		return true
 	},
 }
@@ -77,7 +78,7 @@ func StartServer(c *gin.Context) {
 	valid, existing := handleInitialCallServer(c, "server.start", true)
 
 	if !valid {
-		c.Status(404)
+		rejectConnection(c, "server.start", existing)
 		return
 	}
 
@@ -92,32 +93,37 @@ func StopServer(c *gin.Context) {
 	}
 
 	if !valid {
-		c.Status(401)
+		rejectConnection(c, "server.stop", existing)
 		return
 	}
 
 	err := existing.Stop()
 	if err != nil {
-		c.Error(err)
+		errorConnection(c, err)
+		return
 	}
 
 	if wait == "true" {
 		err = existing.GetEnvironment().WaitForMainProcess()
 		if err != nil {
-			c.AbortWithError(500, err)
+			errorConnection(c, err)
+			return
 		}
 	}
-	c.Status(204)
+	http.Respond(c).Send()
 }
 
 func CreateServer(c *gin.Context) {
 	serverId := c.Param("id")
-	handleInitialCallServer(c, "server.create", false)
+	valid, existing := handleInitialCallServer(c, "server.create", false)
 
-	existing := programs.GetFromCache(serverId)
+	if !valid {
+		rejectConnection(c, "server.create", existing)
+		return
+	}
 
 	if existing != nil {
-		c.AbortWithStatus(409)
+		http.Respond(c).Code(409).Message("server already exists").Send()
 		return
 	}
 
@@ -126,14 +132,16 @@ func CreateServer(c *gin.Context) {
 
 	if err != nil {
 		logging.Error("Error decoding JSON body", err)
-		c.AbortWithError(400, err)
+		http.Respond(c).Code(400).Message("error parsing json").Data(err).MessageCode(http.MALFORMEDJSON).Send()
 		return
 	}
 
 	serverType := data["type"].(string)
 
 	if !programs.Create(serverId, serverType, data) {
-		c.AbortWithStatus(500)
+		errorConnection(c, nil)
+	} else {
+		http.Respond(c).Send()
 	}
 }
 
@@ -141,21 +149,23 @@ func DeleteServer(c *gin.Context) {
 	valid, existing := handleInitialCallServer(c, "server.delete", true)
 
 	if !valid {
+		rejectConnection(c, "server.delete", existing)
 		return
 	}
 
 	programs.Delete(existing.Id())
-	c.Status(204)
+	http.Respond(c).Send()
 }
 
 func InstallServer(c *gin.Context) {
 	valid, existing := handleInitialCallServer(c, "server.install", true)
 
 	if !valid {
+		rejectConnection(c, "server.instal", existing)
 		return
 	}
 
-	c.Status(204)
+	http.Respond(c).Send()
 	go func() {
 		existing.Install()
 	}()
@@ -165,6 +175,7 @@ func EditServer(c *gin.Context) {
 	valid, existing := handleInitialCallServer(c, "server.edit", true)
 
 	if !valid {
+		rejectConnection(c, "server.edit", existing)
 		return
 	}
 
@@ -172,7 +183,7 @@ func EditServer(c *gin.Context) {
 	json.NewDecoder(c.Request.Body).Decode(&data)
 
 	existing.Edit(data)
-	c.Status(204)
+	http.Respond(c).Send()
 }
 
 func GetFile(c *gin.Context) {
@@ -180,6 +191,7 @@ func GetFile(c *gin.Context) {
 	valid, server := handleInitialCallServer(c, "server.file.get", true)
 
 	if !valid {
+		rejectConnection(c, "server.file.get", server)
 		return
 	}
 
@@ -188,13 +200,14 @@ func GetFile(c *gin.Context) {
 	targetFile := utils.JoinPath(server.GetEnvironment().GetRootDirectory(), targetPath)
 
 	if !utils.EnsureAccess(targetFile, server.GetEnvironment().GetRootDirectory()) {
+		http.Respond(c).Code(403).Message("invalid file path").Code(http.NOTAUTHORIZED).Send()
 		return
 	}
 
 	info, err := os.Stat(targetFile)
 
 	if os.IsNotExist(err) {
-		c.Status(404)
+		errorConnection(c, err)
 		return
 	}
 
@@ -230,14 +243,14 @@ func GetFile(c *gin.Context) {
 
 			fileNames = append(fileNames, newFile)
 		}
-		c.JSON(200, fileNames)
+		http.Respond(c).Data(fileNames).Send()
 	} else {
 		_, err := os.Open(targetFile)
 		if err != nil {
 			if err == os.ErrNotExist {
-				c.AbortWithStatus(404)
+				http.Respond(c).Code(404).MessageCode(http.NOFILE).Send()
 			} else {
-				c.AbortWithStatus(500)
+				errorConnection(c, err)
 			}
 		}
 		c.File(targetFile)
@@ -248,6 +261,7 @@ func PutFile(c *gin.Context) {
 	valid, server := handleInitialCallServer(c, "server.file.put", true)
 
 	if !valid {
+		rejectConnection(c, "server.file.put", server)
 		return
 	}
 
@@ -261,7 +275,7 @@ func PutFile(c *gin.Context) {
 	targetFile := utils.JoinPath(server.GetEnvironment().GetRootDirectory(), targetPath)
 
 	if !utils.EnsureAccess(targetFile, server.GetEnvironment().GetRootDirectory()) {
-		c.Status(401)
+		http.Respond(c).Code(403).Message("invalid file path").Code(http.NOTAUTHORIZED).Send()
 		return
 	}
 
@@ -269,16 +283,16 @@ func PutFile(c *gin.Context) {
 	if (mkFolder) {
 		err := os.Mkdir(targetFile, 0644)
 		if err != nil {
-			c.AbortWithError(500, err)
+			errorConnection(c, err)
 		} else {
-			c.Status(204)
+			http.Respond(c).Send()
 		}
 		return
 	}
 	file, err := os.Create(targetFile)
 
 	if err != nil {
-		c.AbortWithError(500, err)
+		errorConnection(c, err)
 		logging.Error("Error writing file", err)
 		return
 	}
@@ -297,10 +311,10 @@ func PutFile(c *gin.Context) {
 	_, err = io.Copy(file, sourceFile)
 
 	if err != nil {
-		c.AbortWithError(500, err)
+		errorConnection(c, err)
 		logging.Error("Error writing file", err)
 	} else {
-		c.Status(204)
+		http.Respond(c).Send()
 	}
 }
 
@@ -308,50 +322,57 @@ func DeleteFile (c *gin.Context) {
 	valid, server := handleInitialCallServer(c, "server.file.delete", true)
 
 	if !valid {
+		rejectConnection(c, "server.file.delete", server)
 		return
 	}
+
 
 	targetPath := c.Param("filename")
 
 	targetFile := utils.JoinPath(server.GetEnvironment().GetRootDirectory(), targetPath)
 
 	if !utils.EnsureAccess(targetFile, server.GetEnvironment().GetRootDirectory()) {
+		http.Respond(c).Code(403).Message("invalid file path").Code(http.NOTAUTHORIZED).Send()
 		return
 	}
 
 	err := os.Remove(targetFile)
 	if err != nil {
-		c.Status(500)
+		errorConnection(c, err)
 		logging.Error("Failed to delete file", err)
 	} else {
-		c.Status(204)
+		http.Respond(c).Send()
 	}
 }
 
 func PostConsole(c *gin.Context) {
 	valid, program := handleInitialCallServer(c, "server.console.send", true)
 	if !valid {
+		rejectConnection(c, "server.console.send", program)
 		return
 	}
+
 	d, _ := ioutil.ReadAll(c.Request.Body)
 	cmd := string(d)
 	err := program.Execute(cmd)
 	if err != nil {
-		c.AbortWithError(500, err)
+		errorConnection(c, err)
 	} else {
-		c.Status(200)
+		http.Respond(c).Send()
 	}
 }
 
 func GetConsole(c *gin.Context) {
 	valid, program := handleInitialCallServer(c, "server.console", true)
 	if !valid {
+		rejectConnection(c, "server.console", program)
 		return
 	}
+
 	conn, err := wsupgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		logging.Error("Error creating websocket", err)
-		c.AbortWithError(500, err)
+		errorConnection(c, err)
 		return
 	}
 	console, _ := program.GetEnvironment().GetConsole()
@@ -365,6 +386,7 @@ func GetStats(c *gin.Context) {
 	valid, server := handleInitialCallServer(c, "server.stats", true)
 
 	if !valid {
+		rejectConnection(c, "server.stats", server)
 		return
 	}
 
@@ -372,9 +394,9 @@ func GetStats(c *gin.Context) {
 	if err != nil {
 		result := make(map[string]interface{})
 		result["error"] = err.Error()
-		c.JSON(200, result)
+		http.Respond(c).Data(result).Code(500).Send()
 	} else {
-		c.JSON(200, results)
+		http.Respond(c).Data(results).Send()
 	}
 }
 
@@ -382,16 +404,16 @@ func ReloadServer(c *gin.Context) {
 	valid, existing := handleInitialCallServer(c, "server.reload", true)
 
 	if !valid {
-		c.Status(404)
+		rejectConnection(c, "server.reload", existing)
 		return
 	}
 
 	err := programs.Reload(existing.Id())
 	if err != nil {
-		c.AbortWithError(500, err)
+		errorConnection(c, err)
 		return
 	}
-	c.Status(204)
+	http.Respond(c).Send()
 }
 
 func NetworkServer(c *gin.Context) {
@@ -404,13 +426,13 @@ func NetworkServer(c *gin.Context) {
 		}
 	}
 	if !valid {
-		c.AbortWithStatus(401)
+		http.Respond(c).Code(403).MessageCode(http.NOTAUTHORIZED).Message("missing scope server.network").Send()
 		return
 	}
 
 	servers := c.DefaultQuery("ids", "")
 	if servers == "" {
-		c.AbortWithError(400, errors.New("Server ids required"))
+		http.Respond(c).Code(400).MessageCode(http.NOSERVERID).Message("no server ids provided").Send()
 		return
 	}
 	serverIds := strings.Split(servers, ",")
@@ -422,12 +444,13 @@ func NetworkServer(c *gin.Context) {
 		}
 		result[program.Id()] = program.GetNetwork()
 	}
-	c.JSON(200, result)
+	http.Respond(c).Data(result).Send()
 }
 
 func GetLogs (c *gin.Context) {
 	valid, program := handleInitialCallServer(c, "server.console", true)
 	if !valid {
+		rejectConnection(c, "server.console", program)
 		return
 	}
 
@@ -443,12 +466,12 @@ func GetLogs (c *gin.Context) {
 	console, epoch := program.GetEnvironment().GetConsoleFrom(castedTime)
 	msg := ""
 	for _, k := range console {
-		msg += k + "\n"
+		msg += k
 	}
 	result := make(map[string]interface{})
 	result["epoch"] = epoch
 	result["logs"] = msg;
-	c.JSON(200, result)
+	http.Respond(c).Data(result).Send()
 }
 
 func handleInitialCallServer(c *gin.Context, perm string, requireServer bool) (valid bool, program programs.Program) {
@@ -459,21 +482,17 @@ func handleInitialCallServer(c *gin.Context, perm string, requireServer bool) (v
 
 	accessId := canAccessId.(string)
 
-	if accessId != serverId && accessId != "*" {
-		c.AbortWithStatus(401)
-		return
-	}
-
 	if accessId == "*" {
 		program, _ = programs.Get(serverId)
 	} else {
 		program, _ = programs.Get(accessId)
 	}
 
+	if accessId != serverId && accessId != "*" {
+		return
+	}
 
 	if requireServer && program == nil {
-		c.AbortWithStatus(404)
-		valid = false
 		return
 	}
 
@@ -484,8 +503,19 @@ func handleInitialCallServer(c *gin.Context, perm string, requireServer bool) (v
 			valid = true
 		}
 	}
-
-	valid = true
-
 	return
+}
+
+func rejectConnection(c *gin.Context, scope string, server programs.Program) {
+	builder := http.Respond(c)
+	if server != nil {
+		builder.Code(403).MessageCode(http.NOTAUTHORIZED).Message("missing scope " + scope)
+	} else {
+		builder.Code(404).MessageCode(http.NOSERVER).Message("no server with id " + c.Param("id"))
+	}
+	builder.Send()
+}
+
+func errorConnection(c *gin.Context, err error) {
+	http.Respond(c).Code(500).MessageCode(http.UNKNOWN).Data(err).Message("error handling request").Send()
 }
