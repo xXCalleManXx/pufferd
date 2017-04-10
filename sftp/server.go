@@ -35,9 +35,9 @@ import (
 	"github.com/pkg/errors"
 	configuration "github.com/pufferpanel/pufferd/config"
 	"github.com/pufferpanel/pufferd/logging"
-	"golang.org/x/crypto/ssh"
-	"github.com/pufferpanel/sftp"
 	"github.com/pufferpanel/pufferd/programs"
+	"github.com/pufferpanel/sftp"
+	"golang.org/x/crypto/ssh"
 )
 
 func Run() {

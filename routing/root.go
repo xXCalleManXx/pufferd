@@ -19,15 +19,16 @@ package routing
 import (
 	"github.com/braintree/manners"
 	"github.com/gin-gonic/gin"
+	"github.com/pufferpanel/pufferd/http"
 	"github.com/pufferpanel/pufferd/httphandlers"
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/programs"
 	"github.com/pufferpanel/pufferd/utils"
-	"github.com/pufferpanel/pufferd/http"
 )
 
 func RegisterRoutes(e *gin.Engine) {
 	e.Use(httphandlers.Recovery())
+	e.Use(httphandlers.ApiLoggingHandler)
 	e.GET("", func(c *gin.Context) {
 		http.Respond(c).Message("pufferd is running").Send()
 	})

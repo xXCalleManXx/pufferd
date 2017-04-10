@@ -4,7 +4,7 @@ import "github.com/gin-gonic/gin"
 
 type responseBuilder struct {
 	response response
-	context *gin.Context
+	context  *gin.Context
 }
 
 type Builder interface {
@@ -30,8 +30,8 @@ type Builder interface {
 func Respond(c *gin.Context) Builder {
 	return responseBuilder{
 		response: response{
-			Success: true,
-			Code: 200,
+			Success:     true,
+			Code:        200,
 			MessageCode: SUCCESS,
 		},
 		context: c,
@@ -45,7 +45,7 @@ func (rb responseBuilder) Code(code int) Builder {
 func (rb responseBuilder) WithCode(code int) Builder {
 	rb.response.Code = code
 	if code > 299 || code < 200 {
-		rb.Fail()
+		return rb.Fail()
 	}
 	return rb
 }

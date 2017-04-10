@@ -28,6 +28,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/pufferpanel/pufferd/config"
+	ppError "github.com/pufferpanel/pufferd/errors"
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/utils"
 	"github.com/shirou/gopsutil/process"
@@ -43,6 +44,7 @@ type standard struct {
 }
 
 func (s *standard) Execute(cmd string, args []string) (stdOut []byte, err error) {
+	stdOut = make([]byte, 0)
 	err = s.ExecuteAsync(cmd, args)
 	if err != nil {
 		return
@@ -100,13 +102,12 @@ func (s *standard) Kill() (err error) {
 	return
 }
 
-func (s *standard) Create() (err error) {
-	os.Mkdir(s.RootDirectory, 0755)
-	return
+func (s *standard) Create() error {
+	return os.Mkdir(s.RootDirectory, 0755)
 }
 
-func (s *standard) Update () (err error) {
-	return
+func (s *standard) Update() error {
+	return nil
 }
 
 func (s *standard) Delete() (err error) {
@@ -127,7 +128,7 @@ func (s *standard) IsRunning() (isRunning bool) {
 	return
 }
 
-func (s *standard) WaitForMainProcess() (err error) {
+func (s *standard) WaitForMainProcess() error {
 	return s.WaitForMainProcessFor(0)
 }
 
@@ -166,7 +167,7 @@ func (s *standard) AddListener(ws *websocket.Conn) {
 
 func (s *standard) GetStats() (map[string]interface{}, error) {
 	if !s.IsRunning() {
-		return nil, errors.New("Server not running")
+		return nil, ppError.NewServerOffline()
 	}
 	process, err := process.NewProcess(int32(s.mainProcess.Process.Pid))
 	if err != nil {

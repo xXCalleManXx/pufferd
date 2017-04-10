@@ -2,8 +2,8 @@ package httphandlers
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/http"
+	"github.com/pufferpanel/pufferd/logging"
 	"runtime/debug"
 )
 
@@ -16,6 +16,6 @@ func Recovery() gin.HandlerFunc {
 			}
 		}()
 
-		c.Next();
+		c.Next()
 	}
 }

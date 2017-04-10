@@ -25,12 +25,12 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/pufferpanel/pufferd/config"
 	"github.com/pufferpanel/pufferd/data/templates"
 	"github.com/pufferpanel/pufferd/environments"
-	"github.com/pufferpanel/pufferd/programs/install"
 	"github.com/pufferpanel/pufferd/logging"
+	"github.com/pufferpanel/pufferd/programs/install"
 	"github.com/pufferpanel/pufferd/utils"
-	"github.com/pufferpanel/pufferd/config"
 )
 
 var (
@@ -170,7 +170,7 @@ func Create(id string, serverType string, data map[string]interface{}) bool {
 				newMap["internal"] = true
 				mapper[k] = newMap
 			} else {
-				mapper[k].(map[string]interface{})["value"] = v;
+				mapper[k].(map[string]interface{})["value"] = v
 			}
 		}
 		segment["data"] = mapper
@@ -282,8 +282,8 @@ func GetPlugins() map[string]interface{} {
 
 		var templateJson map[string]interface{}
 		err := json.Unmarshal(templateData, &templateJson)
-		if (err != nil) {
-			logging.Error("Malformed json for program " + element.Name(), err)
+		if err != nil {
+			logging.Error("Malformed json for program "+element.Name(), err)
 			continue
 		}
 		segment := utils.GetMapOrNull(templateJson, "pufferd")
@@ -298,6 +298,6 @@ func GetPlugins() map[string]interface{} {
 
 func getInstallSection(mapping map[string]interface{}) install.InstallSection {
 	return install.InstallSection{
-		Commands:  utils.GetObjectArrayOrNull(mapping, "commands"),
+		Commands: utils.GetObjectArrayOrNull(mapping, "commands"),
 	}
 }

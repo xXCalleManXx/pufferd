@@ -31,6 +31,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/kr/pty"
 	"github.com/pufferpanel/pufferd/config"
+	ppErrors "github.com/pufferpanel/pufferd/errors"
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/utils"
 	"github.com/shirou/gopsutil/process"
@@ -46,6 +47,7 @@ type tty struct {
 }
 
 func (s *tty) Execute(cmd string, args []string) (stdOut []byte, err error) {
+	stdOut = make([]byte, 0)
 	err = s.ExecuteAsync(cmd, args)
 	if err != nil {
 		return
@@ -61,7 +63,7 @@ func (s *tty) ExecuteAsync(cmd string, args []string) (err error) {
 	}
 	process := exec.Command(cmd, args...)
 	process.Dir = s.RootDirectory
-	process.Env = append(os.Environ(), "HOME=" + s.RootDirectory)
+	process.Env = append(os.Environ(), "HOME="+s.RootDirectory)
 	if err != nil {
 		logging.Error("Error starting process", err)
 	}
@@ -93,7 +95,7 @@ func (s *tty) ExecuteInMainProcess(cmd string) (err error) {
 		return
 	}
 	stdIn := s.stdInWriter
-	_, err = io.WriteString(stdIn, cmd + "\r")
+	_, err = io.WriteString(stdIn, cmd+"\r")
 	return
 }
 
@@ -107,18 +109,16 @@ func (s *tty) Kill() (err error) {
 	return
 }
 
-func (s *tty) Create() (err error) {
-	os.Mkdir(s.RootDirectory, 0755)
-	return
+func (s *tty) Create() error {
+	return os.Mkdir(s.RootDirectory, 0755)
 }
 
-func (s *tty) Update() (err error) {
-	return
+func (s *tty) Update() error {
+	return nil
 }
 
-func (s *tty) Delete() (err error) {
-	err = os.RemoveAll(s.RootDirectory)
-	return
+func (s *tty) Delete() error {
+	return os.RemoveAll(s.RootDirectory)
 }
 
 func (s *tty) IsRunning() (isRunning bool) {
@@ -134,14 +134,14 @@ func (s *tty) IsRunning() (isRunning bool) {
 	return
 }
 
-func (s *tty) WaitForMainProcess() (err error) {
+func (s *tty) WaitForMainProcess() error {
 	return s.WaitForMainProcessFor(0)
 }
 
 func (s *tty) WaitForMainProcessFor(timeout int) (err error) {
 	if s.IsRunning() {
 		if timeout > 0 {
-			var timer = time.AfterFunc(time.Duration(timeout) * time.Millisecond, func() {
+			var timer = time.AfterFunc(time.Duration(timeout)*time.Millisecond, func() {
 				err = s.Kill()
 			})
 			s.wait.Wait()
@@ -157,11 +157,11 @@ func (s *tty) GetRootDirectory() string {
 	return s.RootDirectory
 }
 
-func (s *tty) GetConsole() (console []string, epoch int64) {
+func (s *tty) GetConsole() ([]string, int64) {
 	return s.ConsoleBuffer.Read()
 }
 
-func (s *tty) GetConsoleFrom(time int64) (console []string, epoch int64) {
+func (s *tty) GetConsoleFrom(time int64) ([]string, int64) {
 	return s.ConsoleBuffer.ReadFrom(time)
 }
 
@@ -171,7 +171,7 @@ func (s *tty) AddListener(ws *websocket.Conn) {
 
 func (s *tty) GetStats() (map[string]interface{}, error) {
 	if !s.IsRunning() {
-		return nil, errors.New("Server not running")
+		return nil, ppErrors.NewServerOffline()
 	}
 	process, err := process.NewProcess(int32(s.mainProcess.Process.Pid))
 	if err != nil {

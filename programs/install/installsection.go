@@ -21,7 +21,7 @@ import (
 )
 
 type InstallSection struct {
-	Commands  []interface{} `json:"commands,omitempty"`
+	Commands []interface{} `json:"commands,omitempty"`
 }
 
 func (i *InstallSection) SaveToString() string {

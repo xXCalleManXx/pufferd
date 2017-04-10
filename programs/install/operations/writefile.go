@@ -18,14 +18,14 @@ package operations
 
 import (
 	"github.com/pufferpanel/pufferd/environments"
-	"io/ioutil"
 	"github.com/pufferpanel/pufferd/utils"
+	"io/ioutil"
 )
 
 type WriteFile struct {
 	TargetFile  string
 	Environment environments.Environment
-	Text string
+	Text        string
 }
 
 func (c *WriteFile) Run() error {

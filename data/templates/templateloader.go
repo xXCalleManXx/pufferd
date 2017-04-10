@@ -19,14 +19,14 @@ package templates
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/pufferpanel/pufferd/config"
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/utils"
 	"io/ioutil"
 	"os"
-	"github.com/pufferpanel/pufferd/config"
 )
 
-var Folder string;
+var Folder string
 
 func Initialize() {
 	Folder = config.GetOrDefault("templatefolder", utils.JoinPath("data", "templates"))

@@ -24,17 +24,17 @@ import (
 	"strconv"
 	"strings"
 
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/pufferpanel/pufferd/config"
 	"github.com/pufferpanel/pufferd/logging"
-	"fmt"
 	"time"
 )
 
 type oauthCache struct {
 	oauthToken string
-	serverId string
-	scopes []string
+	serverId   string
+	scopes     []string
 	expireTime int64
 }
 
@@ -42,7 +42,7 @@ var cache = make([]*oauthCache, 20)
 
 func OAuth2Handler(gin *gin.Context) {
 	authHeader := gin.Request.Header.Get("Authorization")
-	var authToken string;
+	var authToken string
 	if authHeader == "" {
 		authToken = gin.Query("accessToken")
 		if authToken == "" {
@@ -55,7 +55,7 @@ func OAuth2Handler(gin *gin.Context) {
 			gin.AbortWithStatus(400)
 			return
 		}
-		authToken = authArr[1];
+		authToken = authArr[1]
 	}
 
 	cached := isCachedRequest(authToken)
@@ -83,15 +83,15 @@ func validateToken(accessToken string, gin *gin.Context) {
 	if err != nil {
 		logging.Error("Error talking to auth server", err)
 		errMsg := make(map[string]string)
-		errMsg["error"] = err.Error();
-		gin.JSON(500, errMsg);
+		errMsg["error"] = err.Error()
+		gin.JSON(500, errMsg)
 		return
 	}
 	if response.StatusCode != 200 {
 		logging.Error("Unexpected response code from auth server", response.StatusCode)
 		errMsg := make(map[string]string)
-		errMsg["error"] = fmt.Sprintf("Received response %i", response.StatusCode);
-		gin.JSON(500, errMsg);
+		errMsg["error"] = fmt.Sprintf("Received response %i", response.StatusCode)
+		gin.JSON(500, errMsg)
 		return
 	}
 	var respArr map[string]interface{}
@@ -99,8 +99,8 @@ func validateToken(accessToken string, gin *gin.Context) {
 	if respArr["error"] != nil {
 		logging.Error("Error parsing response from auth server", err)
 		errMsg := make(map[string]string)
-		errMsg["error"] = "Failed to parse auth server response";
-		gin.JSON(500, errMsg);
+		errMsg["error"] = "Failed to parse auth server response"
+		gin.JSON(500, errMsg)
 		return
 	}
 	if respArr["active"].(bool) == false {
@@ -113,8 +113,8 @@ func validateToken(accessToken string, gin *gin.Context) {
 
 	cache := &oauthCache{
 		oauthToken: accessToken,
-		serverId: serverId,
-		scopes: scopes,
+		serverId:   serverId,
+		scopes:     scopes,
 	}
 	cacheRequest(cache)
 
@@ -126,7 +126,7 @@ func isCachedRequest(accessToken string) *oauthCache {
 	currentTime := time.Now().Unix()
 	for k, v := range cache {
 		if v == nil {
-			continue;
+			continue
 		}
 		if v.oauthToken == accessToken {
 			if v.expireTime < currentTime {

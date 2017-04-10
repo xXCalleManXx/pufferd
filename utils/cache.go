@@ -73,6 +73,6 @@ func (c *cache) Write(b []byte) (n int, err error) {
 }
 
 type message struct {
-	msg string
+	msg  string
 	time int64
 }

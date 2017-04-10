@@ -22,8 +22,8 @@ import (
 	"os"
 
 	"github.com/pufferpanel/pufferd/environments"
-	"github.com/pufferpanel/pufferd/programs/install"
 	"github.com/pufferpanel/pufferd/logging"
+	"github.com/pufferpanel/pufferd/programs/install"
 	"github.com/pufferpanel/pufferd/utils"
 )
 
@@ -113,6 +113,7 @@ func (p *programData) Start() (err error) {
 //Stops the program.
 //This will also stop the environment it is ran in.
 func (p *programData) Stop() (err error) {
+	logging.Debugf("Stopping server %s", p.Id())
 	err = p.Environment.ExecuteInMainProcess(p.RunData.Stop)
 	if err != nil {
 		p.Environment.DisplayToConsole("Failed to stop server\n")
@@ -125,6 +126,7 @@ func (p *programData) Stop() (err error) {
 //Kills the program.
 //This will also stop the environment it is ran in.
 func (p *programData) Kill() (err error) {
+	logging.Debugf("Killing server %s", p.Id())
 	err = p.Environment.Kill()
 	if err != nil {
 		p.Environment.DisplayToConsole("Failed to kill server\n")
@@ -137,6 +139,7 @@ func (p *programData) Kill() (err error) {
 //Creates any files needed for the program.
 //This includes creating the environment.
 func (p *programData) Create() (err error) {
+	logging.Debugf("Creating server %s", p.Id())
 	p.Environment.DisplayToConsole("Allocating server\n")
 	err = p.Environment.Create()
 	p.Environment.DisplayToConsole("Server allocated\n")
@@ -146,16 +149,19 @@ func (p *programData) Create() (err error) {
 //Destroys the server.
 //This will delete the server, environment, and any files related to it.
 func (p *programData) Destroy() (err error) {
+	logging.Debugf("Destroying server %s", p.Id())
 	err = p.Environment.Delete()
 	return
 }
 
 func (p *programData) Update() (err error) {
+	logging.Debugf("Updating server %s", p.Id())
 	err = p.Install()
 	return
 }
 
 func (p *programData) Install() (err error) {
+	logging.Debugf("Installing server %s", p.Id())
 	if p.IsRunning() {
 		err = p.Stop()
 	}
@@ -230,6 +236,8 @@ func (p *programData) IsAutoStart() (isAutoStart bool) {
 }
 
 func (p *programData) Save(file string) (err error) {
+	logging.Debugf("Saving server %s", p.Id())
+
 	result := make(map[string]interface{})
 	result["data"] = p.Data
 	result["install"] = p.InstallData
@@ -259,6 +267,7 @@ func (p *programData) Edit(data map[string]interface{}) (err error) {
 }
 
 func (p *programData) Reload(data Program) {
+	logging.Debugf("Reloading server %s", p.Id())
 	replacement := data.(*programData)
 	p.Data = replacement.Data
 	p.InstallData = replacement.InstallData

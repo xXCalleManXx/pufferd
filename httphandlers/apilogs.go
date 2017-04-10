@@ -16,8 +16,11 @@
 
 package httphandlers
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/pufferpanel/pufferd/logging"
+)
 
-func ApiLoggingHandler (gin *gin.Context) {
-
+func ApiLoggingHandler(c *gin.Context) {
+	logging.Debugf("[%s] [%s]", c.Request.Method, c.Request.RequestURI)
 }

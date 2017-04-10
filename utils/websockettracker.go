@@ -39,20 +39,16 @@ func (ws *wsManager) Register(conn *websocket.Conn) {
 }
 
 func (ws *wsManager) Write(msg []byte) (n int, e error) {
-	invalid := make([]int, 0)
-	for k, v := range ws.sockets {
-		err := v.WriteMessage(websocket.TextMessage, msg)
+	for i := 0; i < len(ws.sockets); i++ {
+		socket := ws.sockets[i]
+		err := socket.WriteMessage(websocket.TextMessage, msg)
 		if err != nil {
-			invalid = append(invalid, k)
-		}
-	}
-	if len(invalid) > 0 {
-		for b := range invalid {
-			if len(ws.sockets) == 1 {
-				ws.sockets = make([]websocket.Conn, 0)
+			if i+1 == len(ws.sockets) {
+				ws.sockets = ws.sockets[:i]
 			} else {
-				ws.sockets = append(ws.sockets[:b], ws.sockets[b+1:]...)
+				ws.sockets = append(ws.sockets[:i], ws.sockets[i+1:]...)
 			}
+			i--
 		}
 	}
 	n = len(msg)

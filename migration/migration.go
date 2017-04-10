@@ -5,14 +5,14 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/pufferpanel/pufferd/logging"
+	"bytes"
 	"encoding/json"
+	"github.com/pufferpanel/pufferd/config"
+	"github.com/pufferpanel/pufferd/data/templates"
+	"github.com/pufferpanel/pufferd/logging"
+	"github.com/pufferpanel/pufferd/programs"
 	"github.com/pufferpanel/pufferd/utils"
 	"os"
-	"github.com/pufferpanel/pufferd/programs"
-	"github.com/pufferpanel/pufferd/data/templates"
-	"github.com/pufferpanel/pufferd/config"
-	"bytes"
 )
 
 const Scales = "/srv/scales/data"
@@ -57,7 +57,7 @@ func MigrateFromScales() {
 		newPath := utils.JoinPath(config.GetOrDefault("serverfolder", utils.JoinPath("data", "servers")), scales.Name)
 		err = os.Rename(oldPath, newPath)
 		if err != nil {
-			logging.Error("Error moving folder", err);
+			logging.Error("Error moving folder", err)
 			continue
 		}
 
@@ -68,7 +68,7 @@ func MigrateFromScales() {
 			return err
 		})
 		if err != nil {
-			logging.Error("Error changing owner of folder", err);
+			logging.Error("Error changing owner of folder", err)
 			continue
 		}
 		serverData := make(map[string]interface{})
@@ -85,16 +85,16 @@ func MigrateFromScales() {
 		programs.Create(scales.Name, scales.Plugin, serverData)
 	}
 	os.Remove(utils.JoinPath(templates.Folder, "legacyminecraft.json"))
-	logging.Info("Migration complete, please restart pufferd to have it recognize the changes");
+	logging.Info("Migration complete, please restart pufferd to have it recognize the changes")
 }
 
 type scalesServer struct {
-	Name     string            `json:"name,omitempty"`
-	User     string            `json:"user,omitempty"`
-	Build    scalesServerBuild `json:"build,omitempty"`
-	Gameport int               `json:"gameport,omitempty"`
-	Gamehost string            `json:"gamehost,omitempty"`
-	Plugin   string            `json:"plugin,omitempty"`
+	Name     string              `json:"name,omitempty"`
+	User     string              `json:"user,omitempty"`
+	Build    scalesServerBuild   `json:"build,omitempty"`
+	Gameport int                 `json:"gameport,omitempty"`
+	Gamehost string              `json:"gamehost,omitempty"`
+	Plugin   string              `json:"plugin,omitempty"`
 	Startup  scalesServerStartup `json:"startup,omitempty"`
 }
 

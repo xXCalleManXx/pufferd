@@ -27,14 +27,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/itsjamie/gin-cors"
+	"github.com/pkg/errors"
+	ppErrors "github.com/pufferpanel/pufferd/errors"
 	"github.com/pufferpanel/pufferd/http"
 	"github.com/pufferpanel/pufferd/httphandlers"
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/programs"
 	"github.com/pufferpanel/pufferd/utils"
-	"github.com/pkg/errors"
-	"strings"
 	"strconv"
+	"strings"
 )
 
 var wsupgrader = websocket.Upgrader{
@@ -213,26 +214,26 @@ func GetFile(c *gin.Context) {
 
 	if info.IsDir() {
 		type FileDesc struct {
-			Name      string    `json:"name"`
-			Modified  int64     `json:"modifyTime"`
-			Size      int64     `json:"size,omitempty"`
-			File      bool      `json:"isFile"`
-			Extension string    `json:"extension,omitempty"`
+			Name      string `json:"name"`
+			Modified  int64  `json:"modifyTime"`
+			Size      int64  `json:"size,omitempty"`
+			File      bool   `json:"isFile"`
+			Extension string `json:"extension,omitempty"`
 		}
 
 		files, _ := ioutil.ReadDir(targetFile)
 		fileNames := make([]interface{}, 0)
 		if targetPath != "" && targetPath != "." && targetPath != "/" {
 			newFile := &FileDesc{
-				Name:      "..",
-				File:      false,
+				Name: "..",
+				File: false,
 			}
 			fileNames = append(fileNames, newFile)
 		}
 		for _, file := range files {
 			newFile := &FileDesc{
-				Name:      file.Name(),
-				File:      !file.IsDir(),
+				Name: file.Name(),
+				File: !file.IsDir(),
 			}
 
 			if newFile.File {
@@ -280,7 +281,7 @@ func PutFile(c *gin.Context) {
 	}
 
 	_, mkFolder := c.GetQuery("folder")
-	if (mkFolder) {
+	if mkFolder {
 		err := os.Mkdir(targetFile, 0644)
 		if err != nil {
 			errorConnection(c, err)
@@ -318,14 +319,13 @@ func PutFile(c *gin.Context) {
 	}
 }
 
-func DeleteFile (c *gin.Context) {
+func DeleteFile(c *gin.Context) {
 	valid, server := handleInitialCallServer(c, "server.file.delete", true)
 
 	if !valid {
 		rejectConnection(c, "server.file.delete", server)
 		return
 	}
-
 
 	targetPath := c.Param("filename")
 
@@ -394,7 +394,12 @@ func GetStats(c *gin.Context) {
 	if err != nil {
 		result := make(map[string]interface{})
 		result["error"] = err.Error()
-		http.Respond(c).Data(result).Code(500).Send()
+		_, isOffline := err.(ppErrors.ServerOffline)
+		if isOffline {
+			http.Respond(c).Data(result).Code(200).Send()
+		} else {
+			http.Respond(c).Data(result).Code(500).Send()
+		}
 	} else {
 		http.Respond(c).Data(results).Send()
 	}
@@ -421,7 +426,7 @@ func NetworkServer(c *gin.Context) {
 	scopes, _ := c.Get("scopes")
 	valid := false
 	for _, v := range scopes.([]string) {
-		if v == "server.network"{
+		if v == "server.network" {
 			valid = true
 		}
 	}
@@ -447,7 +452,7 @@ func NetworkServer(c *gin.Context) {
 	http.Respond(c).Data(result).Send()
 }
 
-func GetLogs (c *gin.Context) {
+func GetLogs(c *gin.Context) {
 	valid, program := handleInitialCallServer(c, "server.console", true)
 	if !valid {
 		rejectConnection(c, "server.console", program)
@@ -470,7 +475,7 @@ func GetLogs (c *gin.Context) {
 	}
 	result := make(map[string]interface{})
 	result["epoch"] = epoch
-	result["logs"] = msg;
+	result["logs"] = msg
 	http.Respond(c).Data(result).Send()
 }
 

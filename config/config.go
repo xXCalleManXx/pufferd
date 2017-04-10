@@ -20,9 +20,9 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
+	"fmt"
 	"github.com/pufferpanel/pufferd/logging"
 	"strconv"
-	"fmt"
 )
 
 var config map[string]interface{}
@@ -46,7 +46,7 @@ func Get(key string) string {
 		return ""
 	}
 
-	switch  val.(type) {
+	switch val.(type) {
 	case string:
 		return val.(string)
 	case int:

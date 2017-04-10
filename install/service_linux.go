@@ -17,11 +17,11 @@
 package install
 
 import (
+	"github.com/pufferpanel/pufferd/logging"
+	"github.com/pufferpanel/pufferd/utils"
 	"io/ioutil"
 	"os/exec"
-	"github.com/pufferpanel/pufferd/logging"
 	"syscall"
-	"github.com/pufferpanel/pufferd/utils"
 )
 
 const SYSTEMD = `
@@ -40,7 +40,7 @@ WantedBy=multi-user.target
 `
 
 func InstallService(configPath string) {
-	cmd := exec.Command("useradd", "--system", "--home", "/var/lib/pufferd","--user-group", "pufferd")
+	cmd := exec.Command("useradd", "--system", "--home", "/var/lib/pufferd", "--user-group", "pufferd")
 
 	err := cmd.Run()
 	if err != nil {

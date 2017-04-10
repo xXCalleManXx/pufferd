@@ -17,13 +17,13 @@
 package sftp
 
 import (
-	"os"
-	"time"
-	"path/filepath"
+	"github.com/pkg/errors"
 	"github.com/pufferpanel/pufferd/utils"
 	"github.com/pufferpanel/sftp"
-	"github.com/pkg/errors"
+	"os"
+	"path/filepath"
 	"strings"
+	"time"
 )
 
 type PrefixFileSystem struct {
@@ -184,6 +184,6 @@ func (fs PrefixFileSystem) tryPrefix(path string) (bool, string) {
 	}
 }
 
-func (fs PrefixFileSystem) maskError(err error) error{
+func (fs PrefixFileSystem) maskError(err error) error {
 	return errors.New(strings.Replace(err.Error(), fs.prefix, "", -1))
 }

@@ -51,7 +51,7 @@ func GenerateInstallProcess(data *InstallSection, environment environments.Envir
 		case "writefile":
 			text := mapping["text"].(string)
 			target := mapping["target"].(string)
-			ops = append(ops, &operations.WriteFile{TargetFile:target, Environment: environment, Text: utils.ReplaceTokens(text, datamap)})
+			ops = append(ops, &operations.WriteFile{TargetFile: target, Environment: environment, Text: utils.ReplaceTokens(text, datamap)})
 		}
 	}
 	return InstallProcess{processInstructions: ops}
