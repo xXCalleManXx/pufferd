@@ -56,8 +56,6 @@ var (
 
 func main() {
 	var loggingLevel string
-	var webPort int
-	var webHost string
 	var authRoot string
 	var authToken string
 	var runInstaller bool
@@ -67,7 +65,6 @@ func main() {
 	var uninstall bool
 	var configPath string
 	flag.StringVar(&loggingLevel, "logging", "INFO", "Lowest logging level to display")
-	flag.IntVar(&webPort, "webport", 5656, "Port to run web service on")
 	flag.StringVar(&authRoot, "auth", "", "Base URL to the authorization server")
 	flag.StringVar(&authToken, "token", "", "Authorization token")
 	flag.BoolVar(&runInstaller, "install", false, "If installing instead of running")
@@ -154,7 +151,6 @@ func main() {
 		replacements := make(map[string]interface{})
 		replacements["authurl"] = strings.TrimSuffix(authRoot, "/")
 		replacements["authtoken"] = authToken
-		replacements["webport"] = webPort
 
 		configData := []byte(utils.ReplaceTokens(config, replacements))
 
@@ -259,13 +255,16 @@ func main() {
 		}()
 	}
 
-	webHost = config.GetOrDefault("webhost", "0.0.0.0")
-	webPort, _ = strconv.Atoi(config.GetOrDefault("webport", "5656"))
+	web := config.GetOrDefault("web", config.GetOrDefault("webhost", "0.0.0.0") + ":" + config.GetOrDefault("webport", "5656"))
+
+	portIndex := strings.LastIndex(web, ":");
+	webHost := web[:portIndex]
+	webPort := web[portIndex+1:]
 
 	logging.Infof("Starting web access on %s:%d", webHost, webPort)
 	var err error
 	if useHttps {
-		err = manners.ListenAndServeTLS(webHost+":"+strconv.FormatInt(int64(webPort), 10), httpsPem, httpsKey, r)
+		err = manners.ListenAndServeTLS(web, httpsPem, httpsKey, r)
 	} else {
 		err = manners.ListenAndServe(webHost+":"+strconv.FormatInt(int64(webPort), 10), r)
 	}
