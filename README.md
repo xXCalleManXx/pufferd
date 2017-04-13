@@ -1,4 +1,9 @@
 # pufferd
 The PufferPanel daemon
 
-## We are not currently accepting Pull Requests at this time.
+# Coming soon
+Eventually we'll fill the readme in, but not now.
+
+Repositories graciously hosted by [packagecloud](https://packagecloud.io)
+
+![https://packagecloud.io](https://packagecloud.io/images/packagecloud-badge.png)
