@@ -34,16 +34,16 @@ func deleteUser() {
 
 				switch status.ExitStatus() {
 				case 6:
-					logging.Error("The pufferd user don't exist" + err)
+					logging.Error("The pufferd user don't exist", err)
 					flag = true
 				case 8:
-					logging.Error("The pufferd user is logged in" + err)
+					logging.Error("The pufferd user is logged in", err)
 					flag = true
 				case 12:
-					logging.Error("Couldn't remove pufferd directory" + err)
+					logging.Error("Couldn't remove pufferd directory", err)
 					flag = true
 				case 10:
-					logging.Error("Couldn't update group file" + err)
+					logging.Error("Couldn't update group file", err)
 					flag = true
 
 				}

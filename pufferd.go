@@ -259,7 +259,7 @@ func main() {
 
 	portIndex := strings.LastIndex(web, ":");
 	webHost := web[:portIndex]
-	webPort := web[portIndex+1:]
+	webPort, _ := strconv.Atoi(web[portIndex+1:])
 
 	logging.Infof("Starting web access on %s:%d", webHost, webPort)
 	var err error
