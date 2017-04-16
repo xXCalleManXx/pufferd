@@ -186,7 +186,7 @@ func (s *standard) DisplayToConsole(msg string, data ...interface{}) {
 	if len(data) == 0 {
 		fmt.Fprint(s.ConsoleBuffer, msg)
 	} else {
-		fmt.Fprintf(s.ConsoleBuffer, msg, data)
+		fmt.Fprintf(s.ConsoleBuffer, msg, data...)
 	}
 }
 
