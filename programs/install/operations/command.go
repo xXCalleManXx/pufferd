@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"github.com/pufferpanel/pufferd/environments"
+	"github.com/pufferpanel/pufferd/logging"
 )
 
 type Command struct {
@@ -29,7 +30,8 @@ type Command struct {
 }
 
 func (c *Command) Run() error {
-	fmt.Println("Running command: " + c.Command)
+	logging.Debugf("Executing command: %s", c.Command)
+	c.Environment.DisplayToConsole(fmt.Sprintf("Executing: %s\n", c.Command))
 	parts := strings.Split(c.Command, " ")
 	cmd := parts[0]
 	args := parts[1:]

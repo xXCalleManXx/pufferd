@@ -57,5 +57,5 @@ type Environment interface {
 
 	GetStats() (map[string]interface{}, error)
 
-	DisplayToConsole(msg string)
+	DisplayToConsole(msg string, data ...interface{})
 }

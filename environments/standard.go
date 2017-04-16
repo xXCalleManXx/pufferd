@@ -32,6 +32,7 @@ import (
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/utils"
 	"github.com/shirou/gopsutil/process"
+	"fmt"
 )
 
 type standard struct {
@@ -181,8 +182,12 @@ func (s *standard) GetStats() (map[string]interface{}, error) {
 	return resultMap, nil
 }
 
-func (s *standard) DisplayToConsole(msg string) {
-	s.ConsoleBuffer.Write([]byte(msg))
+func (s *standard) DisplayToConsole(msg string, data ...interface{}) {
+	if len(data) == 0 {
+		fmt.Fprint(s.ConsoleBuffer, msg)
+	} else {
+		fmt.Fprintf(s.ConsoleBuffer, msg, data)
+	}
 }
 
 func (s *standard) createWrapper() io.Writer {

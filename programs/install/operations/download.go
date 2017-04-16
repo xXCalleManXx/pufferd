@@ -29,6 +29,7 @@ type Download struct {
 
 func (d *Download) Run() error {
 	logging.Debugf("Download file from %s to %s", d.File, d.Environment.GetRootDirectory())
+	d.Environment.DisplayToConsole("Downloading file %s\n", d.File)
 	_, err := grab.Get(d.Environment.GetRootDirectory(), d.File)
 	return err
 }

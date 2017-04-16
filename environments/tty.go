@@ -35,6 +35,7 @@ import (
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/utils"
 	"github.com/shirou/gopsutil/process"
+	"fmt"
 )
 
 type tty struct {
@@ -185,8 +186,12 @@ func (s *tty) GetStats() (map[string]interface{}, error) {
 	return resultMap, nil
 }
 
-func (s *tty) DisplayToConsole(msg string) {
-	s.ConsoleBuffer.Write([]byte(msg))
+func (s *tty) DisplayToConsole(msg string, data ...interface{}) {
+	if len(data) == 0 {
+		fmt.Fprint(s.ConsoleBuffer, msg)
+	} else {
+		fmt.Fprintf(s.ConsoleBuffer, msg, data)
+	}
 }
 
 func (s *tty) createWrapper() io.Writer {

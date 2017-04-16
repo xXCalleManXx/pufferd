@@ -40,6 +40,7 @@ func (m *Move) Run() error {
 	}
 	for k, v := range result {
 		logging.Debugf("Moving file from %s to %s", source, target)
+		m.Environment.DisplayToConsole("Moving file from %s to %s", m.SourceFile, m.TargetFile)
 		err := os.Rename(k, v)
 		if err != nil {
 			logging.Error("Error moving file", err)

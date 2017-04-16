@@ -96,7 +96,7 @@ type programData struct {
 //This includes starting the environment if it is not running.
 func (p *programData) Start() (err error) {
 	logging.Debugf("Starting server %s", p.Id())
-	p.Environment.DisplayToConsole("Starting server")
+	p.Environment.DisplayToConsole("Starting server\n")
 	data := make(map[string]interface{})
 	for k, v := range p.Data {
 		data[k] = v.(map[string]interface{})["value"]
