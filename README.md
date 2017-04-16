@@ -1,5 +1,7 @@
-# pufferd
+# pufferd 
 The PufferPanel daemon
+
+[![Build Status](https://travis-ci.org/PufferPanel/pufferd.svg?branch=master)](https://travis-ci.org/PufferPanel/pufferd)
 
 # Coming soon
 Eventually we'll fill the readme in, but not now.
