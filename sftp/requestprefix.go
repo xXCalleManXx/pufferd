@@ -57,6 +57,9 @@ func (rp requestPrefix) Filecmd(request sftp.Request) error {
 	case "Symlink": {
 		return nil;
 	}
+	case "Remove": {
+		return os.Remove(sourceName)
+	}
 	default:
 		return errors.New(fmt.Sprint("Unknown request method: %s", request.Method));
 	}
