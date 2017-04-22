@@ -22,12 +22,12 @@ func CreateRequestPrefix(prefix string) sftp.Handlers {
 }
 
 func (rp requestPrefix) Fileread(request sftp.Request) (io.ReaderAt, error) {
-	file, err := rp.getFile(request.Filepath, os.O_RDONLY, 644)
+	file, err := rp.getFile(request.Filepath, os.O_RDONLY, 0644)
 	return file, err
 }
 
 func (rp requestPrefix) Filewrite(request sftp.Request) (io.WriterAt, error) {
-	file, err := rp.getFile(request.Filepath, os.O_WRONLY | os.O_APPEND | os.O_CREATE, 644)
+	file, err := rp.getFile(request.Filepath, os.O_WRONLY | os.O_APPEND | os.O_CREATE, 0644)
 	return file, err
 }
 
