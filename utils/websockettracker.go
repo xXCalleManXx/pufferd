@@ -18,6 +18,7 @@ package utils
 
 import (
 	"github.com/gorilla/websocket"
+	"sync"
 )
 
 type WebSocketManager interface {
@@ -28,10 +29,11 @@ type WebSocketManager interface {
 
 type wsManager struct {
 	sockets []websocket.Conn
+	locker sync.Mutex
 }
 
 func CreateWSManager() WebSocketManager {
-	return &wsManager{sockets: make([]websocket.Conn, 0)}
+	return &wsManager{sockets: make([]websocket.Conn, 0), locker: sync.Mutex{}}
 }
 
 func (ws *wsManager) Register(conn *websocket.Conn) {
@@ -39,18 +41,23 @@ func (ws *wsManager) Register(conn *websocket.Conn) {
 }
 
 func (ws *wsManager) Write(msg []byte) (n int, e error) {
-	for i := 0; i < len(ws.sockets); i++ {
-		socket := ws.sockets[i]
-		err := socket.WriteMessage(websocket.TextMessage, msg)
-		if err != nil {
-			if i+1 == len(ws.sockets) {
-				ws.sockets = ws.sockets[:i]
-			} else {
-				ws.sockets = append(ws.sockets[:i], ws.sockets[i+1:]...)
+	go func() {
+		ws.locker.Lock()
+		for i := 0; i < len(ws.sockets); i++ {
+			socket := ws.sockets[i]
+			e = socket.WriteMessage(websocket.TextMessage, msg)
+			if e != nil {
+				if i+1 == len(ws.sockets) {
+					ws.sockets = ws.sockets[:i]
+				} else {
+					ws.sockets = append(ws.sockets[:i], ws.sockets[i+1:]...)
+				}
+				i--
 			}
-			i--
 		}
-	}
+		ws.locker.Unlock()
+	}()
+
 	n = len(msg)
 	return
 }
