@@ -44,7 +44,7 @@ func (rp requestPrefix) Filecmd(request sftp.Request) error {
 		}
 	}
 	switch (request.Method) {
-	case "SetStat": {
+	case "SetStat", "Setstat": {
 		return nil;
 	}
 	case "Rename": {
@@ -53,6 +53,10 @@ func (rp requestPrefix) Filecmd(request sftp.Request) error {
 	}
 	case "Rmdir": {
 		return os.RemoveAll(sourceName)
+	}
+	case "Mkdir": {
+		err = os.Mkdir(sourceName, 0644)
+		return err
 	}
 	case "Symlink": {
 		return nil;
