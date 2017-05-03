@@ -45,27 +45,25 @@ func (rp requestPrefix) Filecmd(request sftp.Request) error {
 	}
 	switch (request.Method) {
 	case "SetStat", "Setstat": {
-		return nil;
+		return nil
 	}
 	case "Rename": {
-		err = os.Rename(sourceName, targetName)
-		return err
+		return os.Rename(sourceName, targetName)
 	}
 	case "Rmdir": {
 		return os.RemoveAll(sourceName)
 	}
 	case "Mkdir": {
-		err = os.Mkdir(sourceName, 0755)
-		return err
+		return os.Mkdir(sourceName, 0755)
 	}
 	case "Symlink": {
-		return nil;
+		return nil
 	}
 	case "Remove": {
 		return os.Remove(sourceName)
 	}
 	default:
-		return errors.New(fmt.Sprint("Unknown request method: %s", request.Method));
+		return errors.New(fmt.Sprint("Unknown request method: %s", request.Method))
 	}
 }
 
