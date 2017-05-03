@@ -55,7 +55,7 @@ func (rp requestPrefix) Filecmd(request sftp.Request) error {
 		return os.RemoveAll(sourceName)
 	}
 	case "Mkdir": {
-		err = os.Mkdir(sourceName, 0644)
+		err = os.Mkdir(sourceName, 0755)
 		return err
 	}
 	case "Symlink": {
