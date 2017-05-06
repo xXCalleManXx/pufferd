@@ -29,6 +29,9 @@ import (
 	"github.com/pufferpanel/pufferd/config"
 	"github.com/pufferpanel/pufferd/logging"
 	"time"
+	"github.com/pufferpanel/pufferd/utils"
+	pufferdHttp "github.com/pufferpanel/pufferd/http"
+	"github.com/pufferpanel/pufferd/programs"
 )
 
 type oauthCache struct {
@@ -40,32 +43,73 @@ type oauthCache struct {
 
 var cache = make([]*oauthCache, 20)
 
-func OAuth2Handler(gin *gin.Context) {
-	authHeader := gin.Request.Header.Get("Authorization")
-	var authToken string
-	if authHeader == "" {
-		authToken = gin.Query("accessToken")
-		if authToken == "" {
-			gin.AbortWithStatus(401)
-			return
+func OAuth2Handler(scope string, requireServer bool) gin.HandlerFunc {
+	return func(gin *gin.Context) {
+		authHeader := gin.Request.Header.Get("Authorization")
+		var authToken string
+		if authHeader == "" {
+			authToken = gin.Query("accessToken")
+			if authToken == "" {
+				gin.AbortWithStatus(401)
+				return
+			}
+		} else {
+			authArr := strings.SplitN(authHeader, " ", 2)
+			if len(authArr) < 2 || authArr[0] != "Bearer" {
+				gin.AbortWithStatus(400)
+				return
+			}
+			authToken = authArr[1]
 		}
-	} else {
-		authArr := strings.SplitN(authHeader, " ", 2)
-		if len(authArr) < 2 || authArr[0] != "Bearer" {
-			gin.AbortWithStatus(400)
-			return
+
+		cached := isCachedRequest(authToken)
+
+		if cached != nil {
+			gin.Set("server_id", cached.serverId)
+			gin.Set("scopes", cached.scopes)
+		} else {
+			validateToken(authToken, gin)
 		}
-		authToken = authArr[1]
-	}
 
-	cached := isCachedRequest(authToken)
+		rawScopes, _ := gin.Get("scopes")
 
-	if cached != nil {
-		gin.Set("server_id", cached.serverId)
-		gin.Set("scopes", cached.scopes)
-		return
-	} else {
-		validateToken(authToken, gin)
+		if (scope != "") {
+			scopes := rawScopes.([]string)
+			if (!utils.ContainsValue(scopes, scope)) {
+				pufferdHttp.Respond(gin).Fail().Code(403).MessageCode(pufferdHttp.NOTAUTHORIZED).Message("missing scope " + scope).Send()
+				gin.Abort()
+				return
+			}
+		}
+
+		if requireServer {
+			serverId := gin.Param("id")
+			canAccessId, _ := gin.Get("server_id")
+
+			accessId := canAccessId.(string)
+
+			var program programs.Program
+
+			if accessId == "*" {
+				program, _ = programs.Get(serverId)
+			} else {
+				program, _ = programs.Get(accessId)
+			}
+
+			if program == nil {
+				pufferdHttp.Respond(gin).Fail().Code(404).MessageCode(pufferdHttp.NOSERVER).Message("no server with id " + serverId).Send()
+				gin.Abort()
+				return
+			}
+
+			if accessId != program.Id() && accessId != "*" {
+				pufferdHttp.Respond(gin).Fail().Code(403).MessageCode(pufferdHttp.NOTAUTHORIZED).Message("invalid server access").Send()
+				gin.Abort()
+				return
+			}
+
+			gin.Set("program", program)
+		}
 	}
 }
 

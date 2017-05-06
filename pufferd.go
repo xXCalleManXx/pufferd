@@ -35,13 +35,11 @@ import (
 	"github.com/pufferpanel/pufferd/config"
 	"github.com/pufferpanel/pufferd/data"
 	"github.com/pufferpanel/pufferd/data/templates"
-	"github.com/pufferpanel/pufferd/httphandlers"
 	"github.com/pufferpanel/pufferd/install"
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/migration"
 	"github.com/pufferpanel/pufferd/programs"
 	"github.com/pufferpanel/pufferd/routing"
-	"github.com/pufferpanel/pufferd/routing/server"
 	"github.com/pufferpanel/pufferd/sftp"
 	"github.com/pufferpanel/pufferd/uninstaller"
 	"github.com/pufferpanel/pufferd/utils"
@@ -205,16 +203,7 @@ func main() {
 		}
 	}
 
-	r := gin.New()
-	{
-		r.Use(gin.Recovery())
-		routing.RegisterRoutes(r)
-		server.RegisterRoutes(r)
-	}
-
-	if config.GetOrDefault("log.api", "false") == "true" {
-		r.Use(httphandlers.ApiLoggingHandler)
-	}
+	r := routing.ConfigureWeb()
 
 	var useHttps bool
 	useHttps = false

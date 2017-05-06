@@ -49,63 +49,56 @@ var wsupgrader = websocket.Upgrader{
 func RegisterRoutes(e *gin.Engine) {
 	l := e.Group("/server")
 	{
-		e.Handle("CONNECT", "/:id/console", func(c *gin.Context) {
+		l.Handle("CONNECT", "/:id/console", func(c *gin.Context) {
 			c.Header("Access-Control-Allow-Origin", "*")
 			c.Header("Access-Control-Allow-Credentials", "false")
 		})
-		l.Use(httphandlers.OAuth2Handler)
-		l.PUT("/:id", CreateServer)
-		l.DELETE("/:id", DeleteServer)
-		l.POST("/:id", EditServer)
-		l.GET("/:id/start", StartServer)
-		l.GET("/:id/stop", StopServer)
-		l.POST("/:id/install", InstallServer)
-		l.GET("/:id/file/*filename", GetFile)
-		l.PUT("/:id/file/*filename", PutFile)
-		l.DELETE("/:id/file/*filename", DeleteFile)
-		l.POST("/:id/console", PostConsole)
-		l.GET("/:id/stats", GetStats)
-		l.POST("/:id/reload", ReloadServer)
-		l.GET("/:id/console", cors.Middleware(cors.Config{
+		l.PUT("/:id", httphandlers.OAuth2Handler("server.create", false), CreateServer)
+		l.DELETE("/:id", httphandlers.OAuth2Handler("server.delete", true), DeleteServer)
+		l.POST("/:id", httphandlers.OAuth2Handler("server.edit", true), EditServer)
+		l.GET("/:id/start", httphandlers.OAuth2Handler("server.start", true), StartServer)
+		l.GET("/:id/stop", httphandlers.OAuth2Handler("server.stop", true), StopServer)
+		l.POST("/:id/install", httphandlers.OAuth2Handler("server.install", true), InstallServer)
+		l.GET("/:id/file/*filename", httphandlers.OAuth2Handler("server.file.get", true), GetFile)
+		l.PUT("/:id/file/*filename", httphandlers.OAuth2Handler("server.file.put", true), PutFile)
+		l.DELETE("/:id/file/*filename", httphandlers.OAuth2Handler("server.file.delete", true), DeleteFile)
+		l.POST("/:id/console", httphandlers.OAuth2Handler("server.console.send", true), PostConsole)
+		l.GET("/:id/stats", httphandlers.OAuth2Handler("server.stats", true), GetStats)
+		l.POST("/:id/reload", httphandlers.OAuth2Handler("server.reload", true), ReloadServer)
+		l.GET("/:id/console", httphandlers.OAuth2Handler("server.console", true), cors.Middleware(cors.Config{
 			Origins:     "*",
 			Credentials: true,
 		}), GetConsole)
-		l.GET("/:id/logs", GetLogs)
+		l.GET("/:id/logs", httphandlers.OAuth2Handler("server.logs", true), GetLogs)
 	}
-	e.GET("/network", httphandlers.OAuth2Handler, NetworkServer)
+	e.GET("/network", httphandlers.OAuth2Handler("server.network", false), NetworkServer)
 }
 
 func StartServer(c *gin.Context) {
-	valid, existing := handleInitialCallServer(c, "server.start", true)
+	item, _ := c.Get("server")
+	server := item.(programs.Program)
 
-	if !valid {
-		rejectConnection(c, "server.start", existing)
-		return
-	}
-
-	existing.Start()
+	server.Start()
+	http.Respond(c).Send()
 }
 
 func StopServer(c *gin.Context) {
-	valid, existing := handleInitialCallServer(c, "server.stop", true)
+	item, _ := c.Get("server")
+	server := item.(programs.Program)
+
 	wait := c.Param("wait")
 	if wait == "" || (wait != "true" && wait != "false") {
 		wait = "true"
 	}
 
-	if !valid {
-		rejectConnection(c, "server.stop", existing)
-		return
-	}
-
-	err := existing.Stop()
+	err := server.Stop()
 	if err != nil {
 		errorConnection(c, err)
 		return
 	}
 
 	if wait == "true" {
-		err = existing.GetEnvironment().WaitForMainProcess()
+		err = server.GetEnvironment().WaitForMainProcess()
 		if err != nil {
 			errorConnection(c, err)
 			return
@@ -116,20 +109,20 @@ func StopServer(c *gin.Context) {
 
 func CreateServer(c *gin.Context) {
 	serverId := c.Param("id")
-	valid, existing := handleInitialCallServer(c, "server.create", false)
+	prg, err := programs.Get(serverId)
 
-	if !valid {
-		rejectConnection(c, "server.create", existing)
-		return
-	}
-
-	if existing != nil {
+	if prg != nil{
 		http.Respond(c).Code(409).Message("server already exists").Send()
 		return
 	}
 
+	if err != nil {
+		http.Respond(c).Code(500).Data(err).Message("error checking if server exists").Send()
+		return
+	}
+
 	data := make(map[string]interface{}, 0)
-	err := json.NewDecoder(c.Request.Body).Decode(&data)
+	err = json.NewDecoder(c.Request.Body).Decode(&data)
 
 	if err != nil {
 		logging.Error("Error decoding JSON body", err)
@@ -147,54 +140,41 @@ func CreateServer(c *gin.Context) {
 }
 
 func DeleteServer(c *gin.Context) {
-	valid, existing := handleInitialCallServer(c, "server.delete", true)
-
-	if !valid {
-		rejectConnection(c, "server.delete", existing)
-		return
+	item, _ := c.Get("server")
+	prg := item.(programs.Program)
+	err := programs.Delete(prg.Id())
+	if err != nil {
+		http.Respond(c).Code(500).Data(err).Message("error deleting server").Send()
+	} else {
+		http.Respond(c).Send()
 	}
-
-	programs.Delete(existing.Id())
-	http.Respond(c).Send()
 }
 
 func InstallServer(c *gin.Context) {
-	valid, existing := handleInitialCallServer(c, "server.install", true)
-
-	if !valid {
-		rejectConnection(c, "server.instal", existing)
-		return
-	}
+	item, _ := c.Get("server")
+	prg := item.(programs.Program)
 
 	http.Respond(c).Send()
 	go func() {
-		existing.Install()
+		prg.Install()
 	}()
 }
 
 func EditServer(c *gin.Context) {
-	valid, existing := handleInitialCallServer(c, "server.edit", true)
-
-	if !valid {
-		rejectConnection(c, "server.edit", existing)
-		return
-	}
+	item, _ := c.Get("server")
+	prg := item.(programs.Program)
 
 	data := make(map[string]interface{}, 0)
 	json.NewDecoder(c.Request.Body).Decode(&data)
 
-	existing.Edit(data)
+	prg.Edit(data)
 	http.Respond(c).Send()
 }
 
 func GetFile(c *gin.Context) {
 
-	valid, server := handleInitialCallServer(c, "server.file.get", true)
-
-	if !valid {
-		rejectConnection(c, "server.file.get", server)
-		return
-	}
+	item, _ := c.Get("server")
+	server := item.(programs.Program)
 
 	targetPath := c.Param("filename")
 
@@ -259,12 +239,8 @@ func GetFile(c *gin.Context) {
 }
 
 func PutFile(c *gin.Context) {
-	valid, server := handleInitialCallServer(c, "server.file.put", true)
-
-	if !valid {
-		rejectConnection(c, "server.file.put", server)
-		return
-	}
+	item, _ := c.Get("server")
+	server := item.(programs.Program)
 
 	targetPath := c.Param("filename")
 
@@ -320,12 +296,8 @@ func PutFile(c *gin.Context) {
 }
 
 func DeleteFile(c *gin.Context) {
-	valid, server := handleInitialCallServer(c, "server.file.delete", true)
-
-	if !valid {
-		rejectConnection(c, "server.file.delete", server)
-		return
-	}
+	item, _ := c.Get("server")
+	server := item.(programs.Program)
 
 	targetPath := c.Param("filename")
 
@@ -346,15 +318,12 @@ func DeleteFile(c *gin.Context) {
 }
 
 func PostConsole(c *gin.Context) {
-	valid, program := handleInitialCallServer(c, "server.console.send", true)
-	if !valid {
-		rejectConnection(c, "server.console.send", program)
-		return
-	}
+	item, _ := c.Get("server")
+	prg := item.(programs.Program)
 
 	d, _ := ioutil.ReadAll(c.Request.Body)
 	cmd := string(d)
-	err := program.Execute(cmd)
+	err := prg.Execute(cmd)
 	if err != nil {
 		errorConnection(c, err)
 	} else {
@@ -363,11 +332,8 @@ func PostConsole(c *gin.Context) {
 }
 
 func GetConsole(c *gin.Context) {
-	valid, program := handleInitialCallServer(c, "server.console", true)
-	if !valid {
-		rejectConnection(c, "server.console", program)
-		return
-	}
+	item, _ := c.Get("server")
+	program := item.(programs.Program)
 
 	conn, err := wsupgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
@@ -383,12 +349,8 @@ func GetConsole(c *gin.Context) {
 }
 
 func GetStats(c *gin.Context) {
-	valid, server := handleInitialCallServer(c, "server.stats", true)
-
-	if !valid {
-		rejectConnection(c, "server.stats", server)
-		return
-	}
+	item, _ := c.Get("server")
+	server := item.(programs.Program)
 
 	results, err := server.GetEnvironment().GetStats()
 	if err != nil {
@@ -406,14 +368,10 @@ func GetStats(c *gin.Context) {
 }
 
 func ReloadServer(c *gin.Context) {
-	valid, existing := handleInitialCallServer(c, "server.reload", true)
+	item, _ := c.Get("server")
+	server := item.(programs.Program)
 
-	if !valid {
-		rejectConnection(c, "server.reload", existing)
-		return
-	}
-
-	err := programs.Reload(existing.Id())
+	err := programs.Reload(server.Id())
 	if err != nil {
 		errorConnection(c, err)
 		return
@@ -422,7 +380,6 @@ func ReloadServer(c *gin.Context) {
 }
 
 func NetworkServer(c *gin.Context) {
-
 	scopes, _ := c.Get("scopes")
 	valid := false
 	for _, v := range scopes.([]string) {
@@ -453,11 +410,8 @@ func NetworkServer(c *gin.Context) {
 }
 
 func GetLogs(c *gin.Context) {
-	valid, program := handleInitialCallServer(c, "server.console", true)
-	if !valid {
-		rejectConnection(c, "server.console", program)
-		return
-	}
+	item, _ := c.Get("server")
+	program := item.(programs.Program)
 
 	time := c.DefaultQuery("time", "0")
 
@@ -477,38 +431,6 @@ func GetLogs(c *gin.Context) {
 	result["epoch"] = epoch
 	result["logs"] = msg
 	http.Respond(c).Data(result).Send()
-}
-
-func handleInitialCallServer(c *gin.Context, perm string, requireServer bool) (valid bool, program programs.Program) {
-	valid = false
-
-	serverId := c.Param("id")
-	canAccessId, _ := c.Get("server_id")
-
-	accessId := canAccessId.(string)
-
-	if accessId == "*" {
-		program, _ = programs.Get(serverId)
-	} else {
-		program, _ = programs.Get(accessId)
-	}
-
-	if accessId != serverId && accessId != "*" {
-		return
-	}
-
-	if requireServer && program == nil {
-		return
-	}
-
-	scopes, _ := c.Get("scopes")
-
-	for _, v := range scopes.([]string) {
-		if v == perm {
-			valid = true
-		}
-	}
-	return
 }
 
 func rejectConnection(c *gin.Context, scope string, server programs.Program) {

@@ -21,6 +21,8 @@ import (
 	"github.com/pufferpanel/pufferd/logging"
 )
 
-func ApiLoggingHandler(c *gin.Context) {
-	logging.Debugf("[%s] [%s]", c.Request.Method, c.Request.RequestURI)
+func ApiLogging() gin.HandlerFunc  {
+	return func(c *gin.Context) {
+		logging.Debugf("[%s] [%s]", c.Request.Method, c.Request.RequestURI)
+	}
 }
