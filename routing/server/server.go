@@ -109,20 +109,15 @@ func StopServer(c *gin.Context) {
 
 func CreateServer(c *gin.Context) {
 	serverId := c.Param("id")
-	prg, err := programs.Get(serverId)
+	prg, _ := programs.Get(serverId)
 
 	if prg != nil{
 		http.Respond(c).Code(409).Message("server already exists").Send()
 		return
 	}
 
-	if err != nil {
-		http.Respond(c).Code(500).Data(err).Message("error checking if server exists").Send()
-		return
-	}
-
 	data := make(map[string]interface{}, 0)
-	err = json.NewDecoder(c.Request.Body).Decode(&data)
+	err := json.NewDecoder(c.Request.Body).Decode(&data)
 
 	if err != nil {
 		logging.Error("Error decoding JSON body", err)
@@ -380,17 +375,6 @@ func ReloadServer(c *gin.Context) {
 }
 
 func NetworkServer(c *gin.Context) {
-	scopes, _ := c.Get("scopes")
-	valid := false
-	for _, v := range scopes.([]string) {
-		if v == "server.network" {
-			valid = true
-		}
-	}
-	if !valid {
-		http.Respond(c).Code(403).MessageCode(http.NOTAUTHORIZED).Message("missing scope server.network").Send()
-		return
-	}
 
 	servers := c.DefaultQuery("ids", "")
 	if servers == "" {
