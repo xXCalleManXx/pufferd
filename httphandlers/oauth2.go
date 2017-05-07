@@ -50,13 +50,15 @@ func OAuth2Handler(scope string, requireServer bool) gin.HandlerFunc {
 		if authHeader == "" {
 			authToken = gin.Query("accessToken")
 			if authToken == "" {
-				gin.AbortWithStatus(401)
+				pufferdHttp.Respond(gin).Fail().MessageCode(pufferdHttp.NOTAUTHORIZED).Code(400).Message("no access token provided");
+				gin.Abort()
 				return
 			}
 		} else {
 			authArr := strings.SplitN(authHeader, " ", 2)
 			if len(authArr) < 2 || authArr[0] != "Bearer" {
-				gin.AbortWithStatus(400)
+				pufferdHttp.Respond(gin).MessageCode(pufferdHttp.NOTAUTHORIZED).Fail().Code(400).Message("invalid access token format");
+				gin.Abort()
 				return
 			}
 			authToken = authArr[1]

@@ -433,16 +433,6 @@ func GetLogs(c *gin.Context) {
 	http.Respond(c).Data(result).Send()
 }
 
-func rejectConnection(c *gin.Context, scope string, server programs.Program) {
-	builder := http.Respond(c)
-	if server != nil {
-		builder.Code(403).MessageCode(http.NOTAUTHORIZED).Message("missing scope " + scope)
-	} else {
-		builder.Code(404).MessageCode(http.NOSERVER).Message("no server with id " + c.Param("id"))
-	}
-	builder.Send()
-}
-
 func errorConnection(c *gin.Context, err error) {
 	http.Respond(c).Code(500).MessageCode(http.UNKNOWN).Data(err).Message("error handling request").Send()
 }

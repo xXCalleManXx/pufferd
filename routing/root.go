@@ -25,6 +25,7 @@ import (
 	"github.com/pufferpanel/pufferd/programs"
 	"github.com/pufferpanel/pufferd/routing/server"
 	"github.com/pufferpanel/pufferd/config"
+	"github.com/pufferpanel/pufferd/routing/template"
 )
 
 func ConfigureWeb() *gin.Engine{
@@ -34,19 +35,20 @@ func ConfigureWeb() *gin.Engine{
 		if config.GetOrDefault("log.api", "false") == "true" {
 			r.Use(httphandlers.ApiLogging())
 		}
+		r.Use(httphandlers.Recovery())
 		RegisterRoutes(r)
 		server.RegisterRoutes(r)
+		template.RegisterRoutes(r)
 	}
 
 	return r
 }
 
 func RegisterRoutes(e *gin.Engine) {
-	e.Use(httphandlers.Recovery())
 	e.GET("", func(c *gin.Context) {
 		http.Respond(c).Message("pufferd is running").Send()
 	})
-	e.GET("/templates", GetTemplates)
+	e.GET("/templates", template.GetTemplates)
 	e.GET("/_shutdown", httphandlers.OAuth2Handler("node.stop", false), Shutdown)
 }
 
@@ -60,8 +62,4 @@ func Shutdown(c *gin.Context) {
 	}
 	http.Respond(c).Message("shutting down").Send()
 	manners.Close()
-}
-
-func GetTemplates(c *gin.Context) {
-	http.Respond(c).Data(programs.GetPlugins()).Send()
 }
