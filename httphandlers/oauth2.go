@@ -110,7 +110,7 @@ func OAuth2Handler(scope string, requireServer bool) gin.HandlerFunc {
 				return
 			}
 
-			gin.Set("program", program)
+			gin.Set("server", program)
 		}
 	}
 }
