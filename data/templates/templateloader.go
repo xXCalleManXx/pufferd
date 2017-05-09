@@ -19,21 +19,15 @@ package templates
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/pufferpanel/pufferd/config"
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/utils"
 	"io/ioutil"
 	"os"
+	"github.com/pufferpanel/pufferd/programs"
 )
 
-var Folder string
-
-func Initialize() {
-	Folder = config.GetOrDefault("templatefolder", utils.JoinPath("data", "templates"))
-}
-
 func CopyTemplates() {
-	os.MkdirAll(Folder, 0755)
+	os.MkdirAll(programs.TemplateFolder, 0755)
 
 	data := Spigot
 	writeFile("spigot", data)
@@ -64,7 +58,7 @@ func writeFile(name string, data string) {
 	jsonData := []byte(data)
 	var prettyJson bytes.Buffer
 	json.Indent(&prettyJson, jsonData, "", "  ")
-	err := ioutil.WriteFile(utils.JoinPath(Folder, name+".json"), prettyJson.Bytes(), 0664)
+	err := ioutil.WriteFile(utils.JoinPath(programs.TemplateFolder, name+".json"), prettyJson.Bytes(), 0664)
 	if err != nil {
 		logging.Error("Error writing template "+name, err)
 	}

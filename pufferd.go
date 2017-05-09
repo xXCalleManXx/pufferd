@@ -17,8 +17,6 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"flag"
 	"io/ioutil"
 	"os"
@@ -42,7 +40,6 @@ import (
 	"github.com/pufferpanel/pufferd/routing"
 	"github.com/pufferpanel/pufferd/sftp"
 	"github.com/pufferpanel/pufferd/uninstaller"
-	"github.com/pufferpanel/pufferd/utils"
 )
 
 var (
@@ -114,8 +111,6 @@ func main() {
 
 	if migrate {
 		config.Load(configPath)
-		templates.Initialize()
-		programs.Initialize()
 		migration.MigrateFromScales()
 	}
 
@@ -133,55 +128,22 @@ func main() {
 	logging.Info("Logging set to " + loggingLevel)
 
 	if runInstaller {
-
-		if authRoot == "" {
-			logging.Error("Authorization server root not passed")
-			os.Exit(1)
-		}
-
-		if authToken == "" {
-			logging.Error("Authorization token not passed")
-			os.Exit(1)
-		}
-
-		config := data.CONFIG
-
-		replacements := make(map[string]interface{})
-		replacements["authurl"] = strings.TrimSuffix(authRoot, "/")
-		replacements["authtoken"] = authToken
-
-		configData := []byte(utils.ReplaceTokens(config, replacements))
-
-		var prettyJson bytes.Buffer
-		json.Indent(&prettyJson, configData, "", "  ")
-		err := ioutil.WriteFile(configPath, prettyJson.Bytes(), 0664)
-
-		if err != nil {
-			logging.Error("Error writing new config")
-			os.Exit(1)
-		}
-
-		logging.Info("Config saved")
-
-		logging.Info("Attempting to install service")
-		install.InstallService(configPath)
-
-		os.Exit(0)
+		install.Install(configPath, authRoot, authToken)
+		return
 	}
 
-	templates.Initialize()
 	programs.Initialize()
 
-	if _, err := os.Stat(templates.Folder); os.IsNotExist(err) {
+	if _, err := os.Stat(programs.TemplateFolder); os.IsNotExist(err) {
 		logging.Info("No template directory found, creating")
-		err = os.MkdirAll(templates.Folder, 0755)
+		err = os.MkdirAll(programs.TemplateFolder, 0755)
 		if err != nil {
 			logging.Error("Error creating template folder", err)
 		}
 
 	}
-	if files, _ := ioutil.ReadDir(templates.Folder); len(files) == 0 {
-		logging.Info("Templates being copied to " + templates.Folder)
+	if files, _ := ioutil.ReadDir(programs.TemplateFolder); len(files) == 0 {
+		logging.Info("Templates being copied to " + programs.TemplateFolder)
 		templates.CopyTemplates()
 	}
 

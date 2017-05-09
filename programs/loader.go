@@ -26,7 +26,6 @@ import (
 	"strings"
 
 	"github.com/pufferpanel/pufferd/config"
-	"github.com/pufferpanel/pufferd/data/templates"
 	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/programs/install"
@@ -36,10 +35,12 @@ import (
 var (
 	programs     []Program = make([]Program, 0)
 	ServerFolder string
+	TemplateFolder string
 )
 
 func Initialize() {
 	ServerFolder = config.GetOrDefault("serverfolder", utils.JoinPath("data", "servers"))
+	TemplateFolder = config.GetOrDefault("templatefolder", utils.JoinPath("data", "templates"))
 }
 
 func LoadFromFolder() {
@@ -142,7 +143,7 @@ func Create(id string, serverType string, data map[string]interface{}) bool {
 		return false
 	}
 
-	templateData, err := ioutil.ReadFile(utils.JoinPath(templates.Folder, serverType+".json"))
+	templateData, err := ioutil.ReadFile(utils.JoinPath(TemplateFolder, serverType+".json"))
 	if err != nil {
 		logging.Error("Error reading template file for type "+serverType, err)
 		return false
@@ -269,7 +270,7 @@ func Reload(id string) error {
 
 func GetPlugins() map[string]interface{} {
 
-	temps, _ := ioutil.ReadDir(templates.Folder)
+	temps, _ := ioutil.ReadDir(TemplateFolder)
 
 	mapping := make(map[string]interface{})
 
@@ -278,22 +279,32 @@ func GetPlugins() map[string]interface{} {
 			continue
 		}
 		name := strings.TrimSuffix(element.Name(), filepath.Ext(element.Name()))
-		templateData, _ := ioutil.ReadFile(utils.JoinPath(templates.Folder, name+".json"))
-
-		var templateJson map[string]interface{}
-		err := json.Unmarshal(templateData, &templateJson)
-		if err != nil {
-			logging.Error("Malformed json for program "+element.Name(), err)
-			continue
+		data, err := GetPlugin(name)
+		if err == nil {
+			mapping[name] = data
 		}
-		segment := utils.GetMapOrNull(templateJson, "pufferd")
-		dataSec := make(map[string]interface{})
-		dataSec["variables"] = segment["data"].(map[string]interface{})
-		dataSec["display"] = segment["display"]
-		mapping[name] = dataSec
 	}
 
 	return mapping
+}
+
+func GetPlugin(name string) (interface{}, error) {
+	templateData, err := ioutil.ReadFile(utils.JoinPath(TemplateFolder, name+".json"))
+	if err != nil {
+		return nil, err
+	}
+
+	var templateJson map[string]interface{}
+	err = json.Unmarshal(templateData, &templateJson)
+	if err != nil {
+		logging.Error("Malformed json for program "+name, err)
+		return nil, err
+	}
+	segment := utils.GetMapOrNull(templateJson, "pufferd")
+	dataSec := make(map[string]interface{})
+	dataSec["variables"] = segment["data"].(map[string]interface{})
+	dataSec["display"] = segment["display"]
+	return dataSec, nil
 }
 
 func getInstallSection(mapping map[string]interface{}) install.InstallSection {

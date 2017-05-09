@@ -18,6 +18,7 @@ import (
 const Scales = "/srv/scales/data"
 
 func MigrateFromScales() {
+	programs.Initialize()
 	templates.CopyTemplates()
 	os.MkdirAll(programs.ServerFolder, 0755)
 
@@ -26,7 +27,7 @@ func MigrateFromScales() {
 	jsonData := []byte(data)
 	var prettyJson bytes.Buffer
 	json.Indent(&prettyJson, jsonData, "", "  ")
-	err := ioutil.WriteFile(utils.JoinPath(templates.Folder, name+".json"), prettyJson.Bytes(), 0664)
+	err := ioutil.WriteFile(utils.JoinPath(programs.TemplateFolder, name+".json"), prettyJson.Bytes(), 0664)
 	if err != nil {
 		logging.Error("Error writing template "+name, err)
 	}
@@ -84,7 +85,7 @@ func MigrateFromScales() {
 		}
 		programs.Create(scales.Name, scales.Plugin, serverData)
 	}
-	os.Remove(utils.JoinPath(templates.Folder, "legacyminecraft.json"))
+	os.Remove(utils.JoinPath(programs.TemplateFolder, "legacyminecraft.json"))
 	logging.Info("Migration complete, please restart pufferd to have it recognize the changes")
 }
 

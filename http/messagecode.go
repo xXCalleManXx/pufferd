@@ -11,5 +11,6 @@ const (
 	NOFILE                       = 404
 	NOSERVERID                   = 405
 	INVALIDTIME                  = 406
+	INVALIDREQUEST		     = 407
 	UNKNOWN                      = 999
 )
