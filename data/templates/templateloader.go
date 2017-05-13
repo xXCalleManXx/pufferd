@@ -19,11 +19,12 @@ package templates
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/pufferpanel/pufferd/logging"
-	"github.com/pufferpanel/pufferd/utils"
 	"io/ioutil"
 	"os"
+
+	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/programs"
+	"github.com/pufferpanel/pufferd/utils"
 )
 
 func CopyTemplates() {
@@ -52,6 +53,9 @@ func CopyTemplates() {
 
 	data = TF2
 	writeFile("tf2", data)
+
+	data = Pocketmine
+	writeFile("pocketmine", data)
 }
 
 func writeFile(name string, data string) {
