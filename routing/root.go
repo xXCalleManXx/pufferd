@@ -17,15 +17,13 @@
 package routing
 
 import (
-	"github.com/braintree/manners"
 	"github.com/gin-gonic/gin"
 	"github.com/pufferpanel/pufferd/http"
 	"github.com/pufferpanel/pufferd/httphandlers"
-	"github.com/pufferpanel/pufferd/logging"
-	"github.com/pufferpanel/pufferd/programs"
 	"github.com/pufferpanel/pufferd/routing/server"
 	"github.com/pufferpanel/pufferd/config"
 	"github.com/pufferpanel/pufferd/routing/template"
+	"github.com/pufferpanel/pufferd/shutdown"
 )
 
 func ConfigureWeb() *gin.Engine{
@@ -53,13 +51,8 @@ func RegisterRoutes(e *gin.Engine) {
 }
 
 func Shutdown(c *gin.Context) {
-	for _, element := range programs.GetAll() {
-		running := element.IsRunning()
-		if running {
-			logging.Warn("Stopping program " + element.Id())
-			element.Stop()
-		}
-	}
 	http.Respond(c).Message("shutting down").Send()
-	manners.Close()
+	go func() {
+		shutdown.CompleteShutdown()
+	}()
 }

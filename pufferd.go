@@ -40,6 +40,7 @@ import (
 	"github.com/pufferpanel/pufferd/routing"
 	"github.com/pufferpanel/pufferd/sftp"
 	"github.com/pufferpanel/pufferd/uninstaller"
+	"github.com/pufferpanel/pufferd/shutdown"
 )
 
 var (
@@ -212,6 +213,8 @@ func main() {
 	webHost := web[:portIndex]
 	webPort, _ := strconv.Atoi(web[portIndex+1:])
 
+	shutdown.CreateHook()
+
 	logging.Infof("Starting web access on %s:%d", webHost, webPort)
 	var err error
 	if useHttps {
@@ -222,4 +225,5 @@ func main() {
 	if err != nil {
 		logging.Error("Error starting web service", err)
 	}
+	shutdown.Shutdown()
 }
