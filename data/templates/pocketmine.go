@@ -24,7 +24,7 @@ const Pocketmine = `{
       "commands": [
         {
           "type": "download",
-          "files": "https://raw.githubusercontent.com/PocketMine/php-build-scripts/master/installer.sh"
+          "files": "https://raw.githubusercontent.com/pmmp/php-build-scripts/master/installer.sh"
         },
         {
           "commands": [
