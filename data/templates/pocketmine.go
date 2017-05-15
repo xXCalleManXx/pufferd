@@ -50,7 +50,7 @@ const Pocketmine = `{
       "program": "./start.sh"
     },
     "environment": {
-      "type": "standard"
+      "type": "tty"
     },
     "data": {
       "ip": {
