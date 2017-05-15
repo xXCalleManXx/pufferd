@@ -23,7 +23,7 @@ import (
 	"syscall"
 )
 
-const SYSTEMD = []byte(`
+const SYSTEMD = `
 [Unit]
 Description=pufferd daemon service
 
@@ -39,7 +39,7 @@ SendSIGKILL=no
 
 [Install]
 WantedBy=multi-user.target
-`)
+`
 
 func InstallService(configPath string) {
 	cmd := exec.Command("useradd", "--system", "--home", "/var/lib/pufferd", "--user-group", "pufferd")
@@ -62,7 +62,7 @@ func InstallService(configPath string) {
 		}
 	}
 
-	err = ioutil.WriteFile("/etc/systemd/system/pufferd.service", SYSTEMD, 0664)
+	err = ioutil.WriteFile("/etc/systemd/system/pufferd.service", []byte(SYSTEMD), 0664)
 	if err != nil {
 		logging.Error("Cannot write systemd file, will not install service", err)
 		return
