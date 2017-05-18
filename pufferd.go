@@ -113,6 +113,7 @@ func main() {
 	}
 
 	if regenerate {
+		config.Load(configPath)
 		programs.Initialize()
 
 		if _, err := os.Stat(programs.TemplateFolder); os.IsNotExist(err) {
