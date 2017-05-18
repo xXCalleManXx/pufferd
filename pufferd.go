@@ -113,6 +113,8 @@ func main() {
 	}
 
 	if regenerate {
+		programs.Initialize()
+
 		if _, err := os.Stat(programs.TemplateFolder); os.IsNotExist(err) {
 			logging.Info("No template directory found, creating")
 			err = os.MkdirAll(programs.TemplateFolder, 0755)
