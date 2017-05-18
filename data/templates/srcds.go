@@ -53,6 +53,9 @@ const SRCDS = `{
       ],
       "program": "./srcds_run"
     },
+    "environment": {
+      "type": "tty"
+    },
     "data": {
       "appid": {
         "value": "232250",
@@ -63,7 +66,7 @@ const SRCDS = `{
       },
       "gametype": {
         "value": "tf",
-        "required": true,
+        "required": false,
         "desc": "Game Type",
         "display": "tf, csgo, etc.",
         "internal": false
