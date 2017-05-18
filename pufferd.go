@@ -67,7 +67,7 @@ func main() {
 	flag.BoolVar(&runInstaller, "install", false, "If installing instead of running")
 	flag.BoolVar(&version, "version", false, "Get the version")
 	flag.BoolVar(&license, "license", false, "View license")
-	flag.BoolVar(&regenerate, "rengerate", false, "Regenerate pufferd templates")
+	flag.BoolVar(&regenerate, "regenerate", false, "Regenerate pufferd templates")
 	flag.BoolVar(&migrate, "migrate", false, "Migrate Scales data to pufferd")
 	flag.BoolVar(&uninstall, "uninstall", false, "Uninstall pufferd")
 	flag.StringVar(&configPath, "config", "config.json", "Path to pufferd config.json")
@@ -130,7 +130,7 @@ func main() {
 		migration.MigrateFromScales()
 	}
 
-	if license || version || migrate {
+	if license || version || regenerate || migrate {
 		return
 	}
 
