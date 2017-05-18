@@ -39,8 +39,8 @@ import (
 	"github.com/pufferpanel/pufferd/programs"
 	"github.com/pufferpanel/pufferd/routing"
 	"github.com/pufferpanel/pufferd/sftp"
-	"github.com/pufferpanel/pufferd/uninstaller"
 	"github.com/pufferpanel/pufferd/shutdown"
+	"github.com/pufferpanel/pufferd/uninstaller"
 )
 
 var (
@@ -57,6 +57,7 @@ func main() {
 	var runInstaller bool
 	var version bool
 	var license bool
+	var regenerate bool
 	var migrate bool
 	var uninstall bool
 	var configPath string
@@ -66,6 +67,7 @@ func main() {
 	flag.BoolVar(&runInstaller, "install", false, "If installing instead of running")
 	flag.BoolVar(&version, "version", false, "Get the version")
 	flag.BoolVar(&license, "license", false, "View license")
+	flag.BoolVar(&regenerate, "rengerate", false, "Regenerate pufferd templates")
 	flag.BoolVar(&migrate, "migrate", false, "Migrate Scales data to pufferd")
 	flag.BoolVar(&uninstall, "uninstall", false, "Uninstall pufferd")
 	flag.StringVar(&configPath, "config", "config.json", "Path to pufferd config.json")
@@ -108,6 +110,19 @@ func main() {
 
 	if license {
 		os.Stdout.WriteString(data.LICENSE + "\r\n")
+	}
+
+	if regenerate {
+		if _, err := os.Stat(programs.TemplateFolder); os.IsNotExist(err) {
+			logging.Info("No template directory found, creating")
+			err = os.MkdirAll(programs.TemplateFolder, 0755)
+			if err != nil {
+				logging.Error("Error creating template folder", err)
+			}
+		}
+		// Overwrite existing templates
+		templates.CopyTemplates()
+		logging.Info("Templates regenerated")
 	}
 
 	if migrate {
@@ -207,9 +222,9 @@ func main() {
 		}()
 	}
 
-	web := config.GetOrDefault("web", config.GetOrDefault("webhost", "0.0.0.0") + ":" + config.GetOrDefault("webport", "5656"))
+	web := config.GetOrDefault("web", config.GetOrDefault("webhost", "0.0.0.0")+":"+config.GetOrDefault("webport", "5656"))
 
-	portIndex := strings.LastIndex(web, ":");
+	portIndex := strings.LastIndex(web, ":")
 	webHost := web[:portIndex]
 	webPort, _ := strconv.Atoi(web[portIndex+1:])
 
