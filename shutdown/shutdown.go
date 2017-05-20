@@ -8,6 +8,9 @@ import (
 	"os"
 	"runtime/debug"
 	"sync"
+	"github.com/pkg/errors"
+	"time"
+	"syscall"
 )
 
 func CompleteShutdown() {
@@ -30,11 +33,11 @@ func Shutdown() *sync.WaitGroup {
 	wg.Add(len(prgs))
 	for _, element := range prgs {
 		go func(e programs.Program) {
+			defer wg.Done()
 			defer func() {
 				if err := recover(); err != nil {
 					logging.Errorf("Error: %+v\n%s", err, debug.Stack())
 				}
-				wg.Done()
 			}()
 			logging.Warn("Stopping program " + e.Id())
 			err := e.Stop()
@@ -62,5 +65,57 @@ func CreateHook() {
 		}()
 		<- c
 		CompleteShutdown()
+	}()
+}
+
+func Command(pid int) {
+	proc, err := os.FindProcess(pid);
+	if err != nil || proc == nil {
+		if err == nil && proc == nil {
+			err = errors.New("no process found")
+		}
+		logging.Error("Error shutting down pufferd", err)
+		return
+	}
+	err = proc.Signal(os.Interrupt)
+	if err != nil {
+		logging.Error("Error shutting down pufferd", err)
+		return
+	}
+
+	wait := make(chan error)
+
+	waitForProcess(proc, wait)
+
+	err = <- wait
+
+	if err != nil {
+		logging.Error("Error shutting down pufferd", err)
+		return
+	}
+	err = proc.Release()
+	if err != nil {
+		logging.Error("Error shutting down pufferd", err)
+		return
+	}
+}
+
+func waitForProcess(process *os.Process, c chan error) {
+	var err error
+	timer := time.NewTicker(100 * time.Millisecond)
+	go func() {
+		for range timer.C {
+			err = process.Signal(syscall.Signal(0))
+			if err != nil {
+				if err.Error() == "os: process already finished" {
+					c <- nil
+				} else {
+					c <- err
+				}
+
+				timer.Stop()
+			} else {
+			}
+		}
 	}()
 }

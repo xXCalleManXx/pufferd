@@ -61,6 +61,7 @@ func main() {
 	var migrate bool
 	var uninstall bool
 	var configPath string
+	var pid int
 	flag.StringVar(&loggingLevel, "logging", "INFO", "Lowest logging level to display")
 	flag.StringVar(&authRoot, "auth", "", "Base URL to the authorization server")
 	flag.StringVar(&authToken, "token", "", "Authorization token")
@@ -71,9 +72,16 @@ func main() {
 	flag.BoolVar(&migrate, "migrate", false, "Migrate Scales data to pufferd")
 	flag.BoolVar(&uninstall, "uninstall", false, "Uninstall pufferd")
 	flag.StringVar(&configPath, "config", "config.json", "Path to pufferd config.json")
+	flag.IntVar(&pid, "shutdown", 0, "PID to shut down")
 	flag.Parse()
 
 	versionString := fmt.Sprintf("pufferd %s (%s %s)", VERSION, BUILDDATE, GITHASH)
+
+	if pid != 0 {
+		logging.Info("Shutting down")
+		shutdown.Command(pid)
+		return
+	}
 
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		if _, err := os.Stat("/etc/pufferd/config.json"); err == nil {

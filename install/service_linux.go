@@ -31,10 +31,10 @@ Description=pufferd daemon service
 Type=simple
 WorkingDirectory=/srv/pufferd
 ExecStart=/srv/pufferd/pufferd
+ExecStop=/srv/pufferd/pufferd -shutdown $MAINPID
 User=pufferd
 Group=pufferd
 TimeoutStopSec=2m
-KillSignal=SIGINT
 SendSIGKILL=no
 
 [Install]
