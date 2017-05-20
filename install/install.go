@@ -42,5 +42,5 @@ func Install(configPath string, authRoot string, authToken string) {
 	logging.Info("Config saved")
 
 	logging.Info("Attempting to install service")
-	InstallService(configPath)
+	InstallService()
 }

@@ -21,6 +21,7 @@ import (
 	"io/ioutil"
 	"os/exec"
 	"syscall"
+	"os"
 )
 
 const SYSTEMD = `
@@ -41,7 +42,7 @@ SendSIGKILL=no
 WantedBy=multi-user.target
 `
 
-func InstallService(configPath string) {
+func InstallService() {
 	cmd := exec.Command("useradd", "--system", "--home", "/var/lib/pufferd", "--user-group", "pufferd")
 
 	err := cmd.Run()
@@ -62,6 +63,9 @@ func InstallService(configPath string) {
 		}
 	}
 
+	info, err := os.Stat("/etc/systemd/system/pufferd.service")
+	exists := info != nil
+
 	err = ioutil.WriteFile("/etc/systemd/system/pufferd.service", []byte(SYSTEMD), 0664)
 	if err != nil {
 		logging.Error("Cannot write systemd file, will not install service", err)
@@ -77,5 +81,15 @@ func InstallService(configPath string) {
 	}
 	logging.Info(string(output))
 
+	if exists {
+		cmd = exec.Command("systemctl", "daemon-reload")
+		output, err = cmd.CombinedOutput()
+		if err != nil {
+			logging.Error("Error reloading systemctl", err)
+			logging.Error(string(output))
+			return
+		}
+		logging.Info(string(output))
+	}
 	logging.Info("Service may be started with: systemctl start pufferd")
 }
