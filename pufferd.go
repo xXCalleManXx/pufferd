@@ -84,10 +84,6 @@ func main() {
 		shutdown.Command(pid)
 	}
 
-	if installService {
-		install.InstallService()
-	}
-
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		if _, err := os.Stat("/etc/pufferd/config.json"); err == nil {
 			logging.Info("No config passed, defaulting to /etc/pufferd/config.json")
@@ -146,7 +142,11 @@ func main() {
 		migration.MigrateFromScales()
 	}
 
-	if license || version || regenerate || migrate || installService || pid != 0 {
+	if installService {
+		install.InstallService()
+	}
+
+	if license || version || regenerate || migrate || pid != 0 {
 		return
 	}
 
@@ -161,6 +161,9 @@ func main() {
 
 	if runInstaller {
 		install.Install(configPath, authRoot, authToken)
+	}
+
+	if runInstaller || installService {
 		return
 	}
 
