@@ -27,7 +27,7 @@ func (rp requestPrefix) Fileread(request sftp.Request) (io.ReaderAt, error) {
 }
 
 func (rp requestPrefix) Filewrite(request sftp.Request) (io.WriterAt, error) {
-	file, err := rp.getFile(request.Filepath, os.O_WRONLY | os.O_APPEND | os.O_CREATE, 0644)
+	file, err := rp.getFile(request.Filepath, os.O_WRONLY | os.O_TRUNC | os.O_CREATE, 0644)
 	return file, err
 }
 
