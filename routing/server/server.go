@@ -56,20 +56,31 @@ func RegisterRoutes(e *gin.Engine) {
 		l.PUT("/:id", httphandlers.OAuth2Handler("server.create", false), CreateServer)
 		l.DELETE("/:id", httphandlers.OAuth2Handler("server.delete", true), DeleteServer)
 		l.POST("/:id", httphandlers.OAuth2Handler("server.edit", true), EditServer)
+
 		l.GET("/:id/start", httphandlers.OAuth2Handler("server.start", true), StartServer)
 		l.GET("/:id/stop", httphandlers.OAuth2Handler("server.stop", true), StopServer)
+		l.GET("/:id/kill", httphandlers.OAuth2Handler("server.stop", true), KillServer)
+
+		l.POST("/:id/start", httphandlers.OAuth2Handler("server.start", true), StartServer)
+		l.POST("/:id/stop", httphandlers.OAuth2Handler("server.stop", true), StopServer)
+		l.POST("/:id/kill", httphandlers.OAuth2Handler("server.stop", true), KillServer)
+
 		l.POST("/:id/install", httphandlers.OAuth2Handler("server.install", true), InstallServer)
+
 		l.GET("/:id/file/*filename", httphandlers.OAuth2Handler("server.file.get", true), GetFile)
 		l.PUT("/:id/file/*filename", httphandlers.OAuth2Handler("server.file.put", true), PutFile)
 		l.DELETE("/:id/file/*filename", httphandlers.OAuth2Handler("server.file.delete", true), DeleteFile)
+
 		l.POST("/:id/console", httphandlers.OAuth2Handler("server.console.send", true), PostConsole)
-		l.GET("/:id/stats", httphandlers.OAuth2Handler("server.stats", true), GetStats)
-		l.POST("/:id/reload", httphandlers.OAuth2Handler("server.reload", true), ReloadServer)
 		l.GET("/:id/console", httphandlers.OAuth2Handler("server.console", true), cors.Middleware(cors.Config{
 			Origins:     "*",
 			Credentials: true,
 		}), GetConsole)
 		l.GET("/:id/logs", httphandlers.OAuth2Handler("server.logs", true), GetLogs)
+
+		l.GET("/:id/stats", httphandlers.OAuth2Handler("server.stats", true), GetStats)
+
+		l.POST("/:id/reload", httphandlers.OAuth2Handler("server.reload", true), ReloadServer)
 	}
 	e.GET("/network", httphandlers.OAuth2Handler("server.network", false), NetworkServer)
 }
@@ -104,6 +115,20 @@ func StopServer(c *gin.Context) {
 			return
 		}
 	}
+	http.Respond(c).Send()
+}
+
+func KillServer(c *gin.Context) {
+	item, _ := c.Get("server")
+	server := item.(programs.Program)
+
+
+	err := server.Kill()
+	if err != nil {
+		errorConnection(c, err)
+		return
+	}
+
 	http.Respond(c).Send()
 }
 
