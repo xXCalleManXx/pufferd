@@ -162,3 +162,169 @@ const TF2 = `{
     }
   }
 }`
+
+const CSGO = `{
+  "pufferd": {
+    "type": "srcds",
+    "display": "Counter Strike: Global Offensive",
+    "install": {
+      "commands": [
+        {
+          "files": "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz",
+          "type": "download"
+        },
+        {
+          "commands": [
+            "mkdir steamcmd",
+            "tar --no-same-owner -xzvf steamcmd_linux.tar.gz -C steamcmd",
+            "steamcmd/steamcmd.sh +login anonymous +force_install_dir ${rootdir} +app_update 740 +quit",
+            "mkdir -p .steam/sdk32",
+            "cp steamcmd/linux32/steamclient.so .steam/sdk32/steamclient.so"
+          ],
+          "type": "command"
+        }
+      ]
+    },
+    "run": {
+      "stop": "exit",
+      "pre": [],
+      "post": [],
+      "arguments": [
+        "+ip",
+        "${ip}",
+        "+port",
+        "${port}",
+        "-game",
+        "csgo",
+        "-console",
+        "+map",
+        "${map}",
+        "+maxplayers",
+        "${maxplayers}",
+        "+sv_setsteamaccount",
+        "${gslt}",
+        "-net_port_try 1",
+        "-norestart"
+      ],
+      "program": "./srcds_run"
+    },
+    "environment": {
+      "type": "tty"
+    },
+    "data": {
+      "map": {
+        "value": "de_dust2",
+        "required": true,
+        "desc": "Map to load by default",
+        "display": "Map",
+        "internal": false
+      },
+      "maxplayers": {
+        "value": "20",
+        "required": true,
+        "desc": "Max players allowed on server",
+        "display": "Max Players",
+        "internal": false
+      },
+      "gslt": {
+        "value": "GSLTTOKEN",
+        "required": true,
+        "desc": "It is required to register your server, otherwise it can only be played on LAN. Visit http://steamcommunity.com/dev/managegameservers to get a token",
+        "display": "GSLT Token",
+        "internal": false
+      },
+      "ip": {
+        "value": "0.0.0.0",
+        "required": true,
+        "desc": "What IP to bind the server to",
+        "display": "IP",
+        "internal": false
+      },
+      "port": {
+        "value": "27015",
+        "required": true,
+        "desc": "What port to bind the server to",
+        "display": "Port",
+        "internal": false
+      }
+    }
+  }
+}`
+
+const GMOD = `{
+  "pufferd": {
+    "type": "srcds",
+    "display": "Garry's Mod",
+    "install": {
+      "commands": [
+        {
+          "files": "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz",
+          "type": "download"
+        },
+        {
+          "commands": [
+            "mkdir steamcmd",
+            "tar --no-same-owner -xzvf steamcmd_linux.tar.gz -C steamcmd",
+            "steamcmd/steamcmd.sh +login anonymous +force_install_dir ${rootdir} +app_update 4020 +quit",
+            "mkdir -p .steam/sdk32",
+            "cp steamcmd/linux32/steamclient.so .steam/sdk32/steamclient.so"
+          ],
+          "type": "command"
+        }
+      ]
+    },
+    "run": {
+      "stop": "exit",
+      "pre": [],
+      "post": [],
+      "arguments": [
+        "+ip",
+        "${ip}",
+        "+port",
+        "${port}",
+        "-game",
+        "garrysmod",
+        "-console",
+        "+map",
+        "${map}",
+        "+maxplayers",
+        "${maxplayers}",
+        "-norestart"
+      ],
+      "program": "./srcds_run"
+    },
+    "environment": {
+      "type": "tty"
+    },
+    "data": {
+      "map": {
+        "value": "gm_construct",
+        "required": true,
+        "desc": "Map to load by default",
+        "display": "Map",
+        "internal": false
+      },
+      "maxplayers": {
+        "value": "20",
+        "required": true,
+        "desc": "Max players allowed on server",
+        "display": "Max Players",
+        "internal": false
+      },
+      "ip": {
+        "value": "0.0.0.0",
+        "required": true,
+        "desc": "What IP to bind the server to",
+        "display": "IP",
+        "internal": false
+      },
+      "port": {
+        "value": "27015",
+        "required": true,
+        "desc": "What port to bind the server to",
+        "display": "Port",
+        "internal": false
+      }
+    }
+  }
+}`

@@ -54,6 +54,12 @@ func CopyTemplates() {
 	data = TF2
 	writeFile("tf2", data)
 
+	data = CSGO
+	writeFile("csgo", data)
+
+	data = GMOD
+	writeFile("gmod", data)
+
 	data = Pocketmine
 	writeFile("pocketmine", data)
 }
