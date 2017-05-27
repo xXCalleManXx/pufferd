@@ -254,11 +254,10 @@ func main() {
 	if useHttps {
 		err = manners.ListenAndServeTLS(web, httpsPem, httpsKey, r)
 	} else {
-		err = manners.ListenAndServe(webHost+":"+strconv.FormatInt(int64(webPort), 10), r)
+		err = manners.ListenAndServe(web, r)
 	}
 	if err != nil {
 		logging.Error("Error starting web service", err)
 	}
 	shutdown.Shutdown()
 }
-
