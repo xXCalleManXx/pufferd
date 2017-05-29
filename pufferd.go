@@ -243,13 +243,9 @@ func main() {
 
 	web := config.GetOrDefault("web", config.GetOrDefault("webhost", "0.0.0.0")+":"+config.GetOrDefault("webport", "5656"))
 
-	portIndex := strings.LastIndex(web, ":")
-	webHost := web[:portIndex]
-	webPort, _ := strconv.Atoi(web[portIndex+1:])
-
 	shutdown.CreateHook()
 
-	logging.Infof("Starting web access on %s:%d", webHost, webPort)
+	logging.Infof("Starting web access on %s", web)
 	var err error
 	if useHttps {
 		err = manners.ListenAndServeTLS(web, httpsPem, httpsKey, r)
