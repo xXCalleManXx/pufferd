@@ -192,10 +192,6 @@ func main() {
 		if element.IsEnabled() {
 			logging.Info("Starting server " + element.Id())
 			element.Start()
-			err := programs.Save(element.Id())
-			if err != nil {
-				logging.Error("Error saving server file", err)
-			}
 		}
 	}
 
