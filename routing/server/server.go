@@ -77,7 +77,7 @@ func RegisterRoutes(e *gin.Engine) {
 			Origins:     "*",
 			Credentials: true,
 		}), GetConsole)
-		l.GET("/:id/logs", httphandlers.OAuth2Handler("server.logs", true), GetLogs)
+		l.GET("/:id/logs", httphandlers.OAuth2Handler("server.log", true), GetLogs)
 
 		l.GET("/:id/stats", httphandlers.OAuth2Handler("server.stats", true), GetStats)
 
