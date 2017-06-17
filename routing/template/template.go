@@ -2,7 +2,7 @@ package template
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/pufferpanel/pufferd/http"
+	"github.com/pufferpanel/apufferi/http"
 	"github.com/pufferpanel/pufferd/httphandlers"
 	"github.com/pufferpanel/pufferd/programs"
 	"os"

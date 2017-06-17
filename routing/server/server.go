@@ -29,7 +29,7 @@ import (
 	"github.com/itsjamie/gin-cors"
 	"github.com/pkg/errors"
 	ppErrors "github.com/pufferpanel/pufferd/errors"
-	"github.com/pufferpanel/pufferd/http"
+	"github.com/pufferpanel/apufferi/http"
 	"github.com/pufferpanel/pufferd/httphandlers"
 	"github.com/pufferpanel/pufferd/logging"
 	"github.com/pufferpanel/pufferd/programs"
