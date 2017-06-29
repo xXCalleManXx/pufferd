@@ -55,7 +55,7 @@ const FACTORIO = `{
     },
     "data": {
       "version": {
-        "value": "0.15.19",
+        "value": "0.15.25",
         "required": true,
         "desc": "Version",
         "display": "Version to Install",
