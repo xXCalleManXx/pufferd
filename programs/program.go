@@ -143,6 +143,7 @@ func (p *programData) Create() (err error) {
 	p.Environment.DisplayToConsole("Allocating server\n")
 	err = p.Environment.Create()
 	p.Environment.DisplayToConsole("Server allocated\n")
+	p.Environment.DisplayToConsole("Ready to be installed\n")
 	return
 }
 
