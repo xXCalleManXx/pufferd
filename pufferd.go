@@ -189,7 +189,7 @@ func main() {
 	programs.LoadFromFolder()
 
 	for _, element := range programs.GetAll() {
-		if element.IsEnabled() {
+		if element.IsEnabled() && element.IsAutoStart() {
 			logging.Info("Starting server " + element.Id())
 			element.Start()
 		}
