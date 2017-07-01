@@ -14,17 +14,24 @@
  limitations under the License.
 */
 
-package install
+package ops
 
 import (
-	"encoding/json"
+	"os"
+
+	"github.com/pufferpanel/pufferd/environments"
+	"github.com/pufferpanel/pufferd/utils"
+	"github.com/pufferpanel/pufferd/logging"
 )
 
-type InstallSection struct {
-	Commands []interface{} `json:"commands,omitempty"`
+type Mkdir struct {
+	TargetFile  string
+	Environment environments.Environment
 }
 
-func (i *InstallSection) SaveToString() string {
-	str, _ := json.Marshal(i)
-	return string(str)
+func (m *Mkdir) Run() error {
+	logging.Debugf("Making directory: %s\n", m.TargetFile)
+	m.Environment.DisplayToConsole("Creating directory: %s\n", m.TargetFile)
+	target := utils.JoinPath(m.Environment.GetRootDirectory(), m.TargetFile)
+	return os.MkdirAll(target, 0755)
 }

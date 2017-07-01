@@ -17,19 +17,14 @@
 package operations
 
 import (
-	"github.com/cavaliercoder/grab"
-	"github.com/pufferpanel/pufferd/environments"
-	"github.com/pufferpanel/pufferd/logging"
+	"encoding/json"
 )
 
-type Download struct {
-	File        string
-	Environment environments.Environment
+type Process struct {
+	Commands []interface{} `json:"commands,omitempty"`
 }
 
-func (d *Download) Run() error {
-	logging.Debugf("Download file from %s to %s", d.File, d.Environment.GetRootDirectory())
-	d.Environment.DisplayToConsole("Downloading file %s\n", d.File)
-	_, err := grab.Get(d.Environment.GetRootDirectory(), d.File)
-	return err
+func (i *Process) SaveToString() string {
+	str, _ := json.Marshal(i)
+	return string(str)
 }

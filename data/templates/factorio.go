@@ -24,7 +24,7 @@ const FACTORIO = `{
       "commands": [
         {
           "commands": [
-          "curl -L -o factorio.tar.xz https://www.factorio.com/get-download/${version}/headless/linux64",
+            "curl -L -o factorio.tar.xz https://www.factorio.com/get-download/${version}/headless/linux64",
             "mkdir factorio",
             "tar --no-same-owner -xvf factorio.tar.xz",
             "cp factorio/data/server-settings.example.json factorio/data/server-settings.json",

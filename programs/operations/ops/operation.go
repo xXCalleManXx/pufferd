@@ -14,24 +14,8 @@
  limitations under the License.
 */
 
-package operations
+package ops
 
-import (
-	"os"
-
-	"github.com/pufferpanel/pufferd/environments"
-	"github.com/pufferpanel/pufferd/utils"
-	"github.com/pufferpanel/pufferd/logging"
-)
-
-type Mkdir struct {
-	TargetFile  string
-	Environment environments.Environment
-}
-
-func (m *Mkdir) Run() error {
-	logging.Debugf("Making directory: %s\n", m.TargetFile)
-	m.Environment.DisplayToConsole("Creating directory: %s\n", m.TargetFile)
-	target := utils.JoinPath(m.Environment.GetRootDirectory(), m.TargetFile)
-	return os.MkdirAll(target, 0755)
+type Operation interface {
+	Run() error
 }

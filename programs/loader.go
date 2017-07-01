@@ -28,8 +28,8 @@ import (
 	"github.com/pufferpanel/pufferd/config"
 	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/pufferd/logging"
-	"github.com/pufferpanel/pufferd/programs/install"
 	"github.com/pufferpanel/pufferd/utils"
+	"github.com/pufferpanel/pufferd/programs/operations"
 )
 
 var (
@@ -100,7 +100,8 @@ func LoadFromData(id string, source []byte) (program Program, err error) {
 
 func LoadFromMapping(id string, source map[string]interface{}) (program Program, err error) {
 	var pufferdData = utils.GetMapOrNull(source, "pufferd")
-	var installSection = getInstallSection(utils.GetMapOrNull(pufferdData, "install"))
+	var installSection = getProcessSection(utils.GetMapOrNull(pufferdData, "install"))
+	var updateSection = getProcessSection(utils.GetMapOrNull(pufferdData, "update"))
 	var runSection = utils.GetMapOrNull(pufferdData, "run")
 	var environmentSection = utils.GetMapOrNull(pufferdData, "environment")
 	var environment environments.Environment
@@ -126,15 +127,14 @@ func LoadFromMapping(id string, source map[string]interface{}) (program Program,
 		runBlock = Runtime{}
 	} else {
 		var stop = utils.GetStringOrDefault(runSection, "stop", "")
-		var pre = utils.GetStringArrayOrNull(runSection, "pre")
-		var post = utils.GetStringArrayOrNull(runSection, "post")
 		var arguments = utils.GetStringArrayOrNull(runSection, "arguments")
 		var enabled = utils.GetBooleanOrDefault(runSection, "enabled", true)
 		var autostart = utils.GetBooleanOrDefault(runSection, "autostart", true)
 		var program = utils.GetStringOrDefault(runSection, "program", "")
-		runBlock = Runtime{Stop: stop, Pre: pre, Post: post, Arguments: arguments, Enabled: enabled, AutoStart: autostart, Program: program}
+
+		runBlock = Runtime{Stop: stop, Arguments: arguments, Enabled: enabled, AutoStart: autostart, Program: program}
 	}
-	program = &programData{Data: dataCasted, Identifier: id, RunData: runBlock, InstallData: installSection, Environment: environment}
+	program = &programData{Data: dataCasted, Identifier: id, RunData: runBlock, InstallData: installSection, UpdateData: updateSection, Environment: environment}
 	return
 }
 
@@ -307,8 +307,8 @@ func GetPlugin(name string) (interface{}, error) {
 	return dataSec, nil
 }
 
-func getInstallSection(mapping map[string]interface{}) install.InstallSection {
-	return install.InstallSection{
+func getProcessSection(mapping map[string]interface{}) operations.Process {
+	return operations.Process {
 		Commands: utils.GetObjectArrayOrNull(mapping, "commands"),
 	}
 }

@@ -14,27 +14,25 @@
  limitations under the License.
 */
 
-package operations
+package ops
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/pufferpanel/pufferd/environments"
+	"github.com/pufferpanel/pufferd/utils"
+	"io/ioutil"
 	"github.com/pufferpanel/pufferd/logging"
 )
 
-type Command struct {
-	Command     string
+type WriteFile struct {
+	TargetFile  string
 	Environment environments.Environment
+	Text        string
 }
 
-func (c *Command) Run() error {
-	logging.Debugf("Executing command: %s", c.Command)
-	c.Environment.DisplayToConsole(fmt.Sprintf("Executing: %s\n", c.Command))
-	parts := strings.Split(c.Command, " ")
-	cmd := parts[0]
-	args := parts[1:]
-	_, err := c.Environment.Execute(cmd, args)
-	return err
+func (c *WriteFile) Run() error {
+	logging.Debugf("Writing data to file: %s", c.TargetFile)
+	c.Environment.DisplayToConsole("Writing some data to file: %s\n ", c.TargetFile)
+	target := utils.JoinPath(c.Environment.GetRootDirectory(), c.TargetFile)
+	ioutil.WriteFile(target, []byte(c.Text), 0644)
+	return nil
 }

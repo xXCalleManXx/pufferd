@@ -14,60 +14,72 @@
  limitations under the License.
 */
 
-package install
+package operations
 
 import (
 	"github.com/pufferpanel/pufferd/environments"
-	"github.com/pufferpanel/pufferd/programs/install/operations"
 	"github.com/pufferpanel/pufferd/utils"
+	"github.com/pufferpanel/pufferd/programs/operations/ops"
+	"github.com/pufferpanel/pufferd/logging"
 )
 
-func GenerateInstallProcess(data *InstallSection, environment environments.Environment, dataMapping map[string]interface{}) InstallProcess {
+func GenerateProcess(data *Process, environment environments.Environment, dataMapping map[string]interface{}) OperationProcess {
 	var directions = data.Commands
 	datamap := make(map[string]interface{})
 	for k, v := range dataMapping {
 		datamap[k] = v.(map[string]interface{})["value"]
 	}
 	datamap["rootdir"] = environment.GetRootDirectory()
-	ops := make([]operations.Operation, 0)
+	operationList := make([]ops.Operation, 0)
 	for _, element := range directions {
 		var mapping = element.(map[string]interface{})
 		switch mapping["type"] {
 		case "command":
 			for _, element := range utils.ToStringArray(mapping["commands"]) {
-				ops = append(ops, &operations.Command{Command: utils.ReplaceTokens(element, datamap), Environment: environment})
+				operationList = append(operationList, &ops.Command{Command: utils.ReplaceTokens(element, datamap), Environment: environment})
 			}
 		case "download":
 			for _, element := range utils.ToStringArray(mapping["files"]) {
-				ops = append(ops, &operations.Download{File: utils.ReplaceTokens(element, datamap), Environment: environment})
+				operationList = append(operationList, &ops.Download{File: utils.ReplaceTokens(element, datamap), Environment: environment})
 			}
 		case "move":
 			source := mapping["source"].(string)
 			target := mapping["target"].(string)
-			ops = append(ops, &operations.Move{SourceFile: source, TargetFile: target, Environment: environment})
+			operationList = append(operationList, &ops.Move{SourceFile: source, TargetFile: target, Environment: environment})
 		case "mkdir":
 			target := mapping["target"].(string)
-			ops = append(ops, &operations.Mkdir{TargetFile: target, Environment: environment})
+			operationList = append(operationList, &ops.Mkdir{TargetFile: target, Environment: environment})
 		case "writefile":
 			text := mapping["text"].(string)
 			target := mapping["target"].(string)
-			ops = append(ops, &operations.WriteFile{TargetFile: target, Environment: environment, Text: utils.ReplaceTokens(text, datamap)})
+			operationList = append(operationList, &ops.WriteFile{TargetFile: target, Environment: environment, Text: utils.ReplaceTokens(text, datamap)})
 		}
 	}
-	return InstallProcess{processInstructions: ops}
+	return OperationProcess{processInstructions: operationList}
 }
 
-type InstallProcess struct {
-	processInstructions []operations.Operation
+type OperationProcess struct {
+	processInstructions []ops.Operation
 }
 
-func (p *InstallProcess) RunNext() error {
-	var op operations.Operation
+func (p *OperationProcess) Run() (err error) {
+	for p.HasNext() {
+		err = p.RunNext()
+		if err != nil {
+			logging.Error("Error running process: ", err)
+			break
+		}
+	}
+	return
+}
+
+func (p *OperationProcess) RunNext() error {
+	var op ops.Operation
 	op, p.processInstructions = p.processInstructions[0], p.processInstructions[1:]
 	err := op.Run()
 	return err
 }
 
-func (p *InstallProcess) HasNext() bool {
+func (p *OperationProcess) HasNext() bool {
 	return len(p.processInstructions) != 0 && p.processInstructions[0] != nil
 }

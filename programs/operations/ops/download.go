@@ -14,25 +14,22 @@
  limitations under the License.
 */
 
-package operations
+package ops
 
 import (
+	"github.com/cavaliercoder/grab"
 	"github.com/pufferpanel/pufferd/environments"
-	"github.com/pufferpanel/pufferd/utils"
-	"io/ioutil"
 	"github.com/pufferpanel/pufferd/logging"
 )
 
-type WriteFile struct {
-	TargetFile  string
+type Download struct {
+	File        string
 	Environment environments.Environment
-	Text        string
 }
 
-func (c *WriteFile) Run() error {
-	logging.Debugf("Writing data to file: %s", c.TargetFile)
-	c.Environment.DisplayToConsole("Writing some data to file: %s\n ", c.TargetFile)
-	target := utils.JoinPath(c.Environment.GetRootDirectory(), c.TargetFile)
-	ioutil.WriteFile(target, []byte(c.Text), 0644)
-	return nil
+func (d *Download) Run() error {
+	logging.Debugf("Download file from %s to %s", d.File, d.Environment.GetRootDirectory())
+	d.Environment.DisplayToConsole("Downloading file %s\n", d.File)
+	_, err := grab.Get(d.Environment.GetRootDirectory(), d.File)
+	return err
 }

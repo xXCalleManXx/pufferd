@@ -23,7 +23,7 @@ import (
 
 	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/pufferd/logging"
-	"github.com/pufferpanel/pufferd/programs/install"
+	"github.com/pufferpanel/pufferd/programs/operations"
 	"github.com/pufferpanel/pufferd/utils"
 )
 
@@ -86,7 +86,8 @@ type Program interface {
 
 type programData struct {
 	RunData     Runtime
-	InstallData install.InstallSection
+	InstallData operations.Process
+	UpdateData  operations.Process
 	Environment environments.Environment
 	Identifier  string
 	Data        map[string]interface{}
@@ -101,6 +102,7 @@ func (p *programData) Start() (err error) {
 	for k, v := range p.Data {
 		data[k] = v.(map[string]interface{})["value"]
 	}
+
 	err = p.Environment.ExecuteAsync(p.RunData.Program, utils.ReplaceTokensInArr(p.RunData.Arguments, data))
 	if err != nil {
 		p.Environment.DisplayToConsole("Failed to start server\n")
@@ -157,7 +159,13 @@ func (p *programData) Destroy() (err error) {
 
 func (p *programData) Update() (err error) {
 	logging.Debugf("Updating server %s", p.Id())
-	err = p.Install()
+	process := operations.GenerateProcess(&p.UpdateData, p.Environment, p.Data)
+	err = process.Run()
+	if err != nil {
+		p.Environment.DisplayToConsole("Error running updater, check daemon logs")
+	} else {
+		p.Environment.DisplayToConsole("Server updated\n")
+	}
 	return
 }
 
@@ -177,16 +185,13 @@ func (p *programData) Install() (err error) {
 
 	os.MkdirAll(p.Environment.GetRootDirectory(), 0755)
 
-	process := install.GenerateInstallProcess(&p.InstallData, p.Environment, p.Data)
-	for process.HasNext() {
-		err = process.RunNext()
-		if err != nil {
-			logging.Error("Error running installer: ", err)
-			p.Environment.DisplayToConsole("Error installing server\n")
-			break
-		}
+	process := operations.GenerateProcess(&p.InstallData, p.Environment, p.Data)
+	err = process.Run()
+	if err != nil {
+		p.Environment.DisplayToConsole("Error running installer, check daemon logs")
+	} else {
+		p.Environment.DisplayToConsole("Server installed\n")
 	}
-	p.Environment.DisplayToConsole("Server installed\n")
 	return
 }
 
@@ -299,8 +304,8 @@ func (p *programData) GetNetwork() string {
 
 type Runtime struct {
 	Stop      string   `json:"stop"`
-	Pre       []string `json:"pre,omitempty"`
-	Post      []string `json:"post,omitempty"`
+	//Pre       operations.Process `json:"pre,omitempty"`
+	//Post      operations.Process `json:"post,omitempty"`
 	Program   string   `json:"program"`
 	Arguments []string `json:"arguments"`
 	Enabled   bool     `json:"enabled"`

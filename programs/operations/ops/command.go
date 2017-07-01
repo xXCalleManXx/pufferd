@@ -14,8 +14,27 @@
  limitations under the License.
 */
 
-package operations
+package ops
 
-type Operation interface {
-	Run() error
+import (
+	"fmt"
+	"strings"
+
+	"github.com/pufferpanel/pufferd/environments"
+	"github.com/pufferpanel/pufferd/logging"
+)
+
+type Command struct {
+	Command     string
+	Environment environments.Environment
+}
+
+func (c *Command) Run() error {
+	logging.Debugf("Executing command: %s", c.Command)
+	c.Environment.DisplayToConsole(fmt.Sprintf("Executing: %s\n", c.Command))
+	parts := strings.Split(c.Command, " ")
+	cmd := parts[0]
+	args := parts[1:]
+	_, err := c.Environment.Execute(cmd, args)
+	return err
 }
