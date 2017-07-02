@@ -85,12 +85,12 @@ type Program interface {
 }
 
 type programData struct {
-	RunData     Runtime
-	InstallData operations.Process
-	UpdateData  operations.Process
-	Environment environments.Environment
-	Identifier  string
-	Data        map[string]interface{}
+	RunData     Runtime			`json:"run"`
+	InstallData operations.Process		`json:"install"`
+	UpdateData  operations.Process 		`json:"update"`
+	Environment environments.Environment 	`json:"environment"`
+	Identifier  string			`json:"id"`
+	Data        map[string]interface{} 	`json:"data"`
 }
 
 //Starts the program.
@@ -244,13 +244,8 @@ func (p *programData) IsAutoStart() (isAutoStart bool) {
 func (p *programData) Save(file string) (err error) {
 	logging.Debugf("Saving server %s", p.Id())
 
-	result := make(map[string]interface{})
-	result["data"] = p.Data
-	result["install"] = p.InstallData
-	result["run"] = p.RunData
-
 	endResult := make(map[string]interface{})
-	endResult["pufferd"] = result
+	endResult["pufferd"] = p
 
 	data, err := json.MarshalIndent(endResult, "", "  ")
 	if err != nil {
