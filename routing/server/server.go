@@ -222,6 +222,9 @@ func GetFile(c *gin.Context) {
 	info, err := os.Stat(targetFile)
 
 	if os.IsNotExist(err) {
+		http.Respond(c).Status(404).Code(http.NOFILE).Send()
+		return
+	} else {
 		errorConnection(c, err)
 		return
 	}
