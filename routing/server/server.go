@@ -56,6 +56,7 @@ func RegisterRoutes(e *gin.Engine) {
 		})
 		l.PUT("/:id", httphandlers.OAuth2Handler("server.create", false), CreateServer)
 		l.DELETE("/:id", httphandlers.OAuth2Handler("server.delete", true), DeleteServer)
+		l.GET("/:id", httphandlers.OAuth2Handler("server.edit", true), GetServer)
 		l.POST("/:id", httphandlers.OAuth2Handler("server.edit", true), EditServer)
 
 		l.GET("/:id/start", httphandlers.OAuth2Handler("server.start", true), StartServer)
@@ -203,6 +204,17 @@ func EditServer(c *gin.Context) {
 
 	prg.Edit(data)
 	http.Respond(c).Send()
+}
+
+func GetServer(c *gin.Context) {
+	item, _ := c.Get("server")
+	server := item.(programs.Program)
+
+	data := server.GetData()
+	result := make(map[string]interface{}, 0)
+	result["data"] = data
+
+	http.Respond(c).Data(data).Send()
 }
 
 func GetFile(c *gin.Context) {
@@ -415,7 +427,6 @@ func ReloadServer(c *gin.Context) {
 }
 
 func NetworkServer(c *gin.Context) {
-
 	servers := c.DefaultQuery("ids", "")
 	if servers == "" {
 		http.Respond(c).Status(400).Code(http.NOSERVERID).Message("no server ids provided").Send()
