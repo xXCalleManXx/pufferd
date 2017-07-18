@@ -70,7 +70,9 @@ func OAuth2Handler(scope string, requireServer bool) gin.HandlerFunc {
 			gin.Set("server_id", cached.serverId)
 			gin.Set("scopes", cached.scopes)
 		} else {
-			validateToken(authToken, gin)
+			if (!validateToken(authToken, gin)) {
+				return
+			}
 		}
 
 		rawScopes, _ := gin.Get("scopes")
@@ -115,7 +117,7 @@ func OAuth2Handler(scope string, requireServer bool) gin.HandlerFunc {
 	}
 }
 
-func validateToken(accessToken string, gin *gin.Context) {
+func validateToken(accessToken string, gin *gin.Context) bool {
 	authUrl := config.Get("infoserver")
 	token := config.Get("authtoken")
 	client := &http.Client{}
@@ -132,14 +134,14 @@ func validateToken(accessToken string, gin *gin.Context) {
 		errMsg := make(map[string]string)
 		errMsg["error"] = err.Error()
 		gin.JSON(500, errMsg)
-		return
+		return false
 	}
 	if response.StatusCode != 200 {
 		logging.Error("Unexpected response code from auth server", response.StatusCode)
 		errMsg := make(map[string]string)
 		errMsg["error"] = fmt.Sprintf("Received response %i", response.StatusCode)
 		gin.JSON(500, errMsg)
-		return
+		return false
 	}
 	var respArr map[string]interface{}
 	json.NewDecoder(response.Body).Decode(&respArr)
@@ -149,11 +151,11 @@ func validateToken(accessToken string, gin *gin.Context) {
 		errMsg := make(map[string]string)
 		errMsg["error"] = "Failed to parse auth server response"
 		gin.JSON(500, errMsg)
-		return
+		return false
 	}
 	if respArr["active"].(bool) == false {
 		gin.AbortWithStatus(401)
-		return
+		return false
 	}
 
 	serverId := respArr["server_id"].(string)
@@ -168,6 +170,7 @@ func validateToken(accessToken string, gin *gin.Context) {
 
 	gin.Set("server_id", serverId)
 	gin.Set("scopes", scopes)
+	return true
 }
 
 func isCachedRequest(accessToken string) *oauthCache {

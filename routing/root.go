@@ -24,6 +24,7 @@ import (
 	"github.com/pufferpanel/pufferd/config"
 	"github.com/pufferpanel/pufferd/routing/template"
 	"github.com/pufferpanel/pufferd/shutdown"
+	"github.com/pufferpanel/apufferi/http/handler"
 )
 
 func ConfigureWeb() *gin.Engine{
@@ -31,9 +32,9 @@ func ConfigureWeb() *gin.Engine{
 	{
 		r.Use(gin.Recovery())
 		if config.GetOrDefault("log.api", "false") == "true" {
-			r.Use(httphandlers.ApiLogging())
+			r.Use(handler.ApiLogging())
 		}
-		r.Use(httphandlers.Recovery())
+		r.Use(handler.Recovery())
 		RegisterRoutes(r)
 		server.RegisterRoutes(r)
 		template.RegisterRoutes(r)
