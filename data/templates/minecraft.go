@@ -117,7 +117,7 @@ const Spigot = `{
     },
     "data": {
       "version": {
-      	"value": "1.11.2",
+      	"value": "latest",
       	"required": true,
       	"desc": "Version of Minecraft to install",
       	"display": "Version",
@@ -204,7 +204,7 @@ const CraftbukkitBySpigot = `{
     },
     "data": {
       "version": {
-      	"value": "1.11.2",
+      	"value": "latest",
       	"required": true,
       	"desc": "Version of Minecraft to install",
       	"display": "Version",
@@ -285,7 +285,7 @@ const Vanilla = `{
     },
     "data": {
       "version": {
-      	"value": "1.11.2",
+      	"value": "1.12",
       	"required": true,
       	"desc": "Version of Minecraft to install",
       	"display": "Version",
@@ -405,7 +405,7 @@ const Forge = `{
         "internal": false
       },
       "version": {
-      	"value": "1.11.2-13.20.0.2298",
+      	"value": "1.11.2-13.20.1.2393",
       	"required": true,
       	"desc": "Version of Forge to install (may be located <a href='http://files.minecraftforge.net/#Downloads'>here</a>",
       	"display": "Version",
@@ -509,14 +509,14 @@ const Sponge = `{
         "internal": false
       },
       "spongeversion": {
-      	"value": "1.11.2-2282-6.1.0-BETA-2343",
+      	"value": "1.11.2-2393-6.1.0-BETA-2471",
       	"required": true,
       	"desc": "Version of Sponge to install (may be located <a href='https://www.spongepowered.org/downloads/spongeforge/stable/'>here</a>",
       	"display": "Sponge Version",
       	"internal": false
       },
       "forgeversion": {
-      	"value": "1.11.2-13.20.0.2298",
+      	"value": "1.11.2-13.20.1.2393",
       	"required": true,
       	"desc": "Version of Forge to install (use version specified by Sponge)",
       	"display": "Forge Version",
