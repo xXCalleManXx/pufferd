@@ -85,12 +85,12 @@ type Program interface {
 }
 
 type programData struct {
-	RunData     Runtime			`json:"run"`
-	InstallData operations.Process		`json:"install"`
-	UpdateData  operations.Process 		`json:"update"`
-	Environment environments.Environment 	`json:"environment"`
-	Identifier  string			`json:"id"`
-	Data        map[string]interface{} 	`json:"data"`
+	RunData     Runtime                  `json:"run"`
+	InstallData operations.Process       `json:"install"`
+	UpdateData  operations.Process       `json:"update"`
+	Environment environments.Environment `json:"environment"`
+	Identifier  string                   `json:"id"`
+	Data        map[string]interface{}   `json:"data"`
 }
 
 //Starts the program.
@@ -261,7 +261,17 @@ func (p *programData) Edit(data map[string]interface{}) (err error) {
 		if v == nil || v == "" {
 			delete(p.Data, k)
 		}
-		p.Data[k] = v
+
+		var elem map[string]interface{}
+
+		if p.Data[k] == nil {
+			elem = make(map[string]interface{})
+		} else {
+			elem = p.Data[k].(map[string]interface{})
+		}
+		elem["value"] = v
+
+		p.Data[k] = elem
 	}
 	err = Save(p.Id())
 	return
@@ -298,7 +308,7 @@ func (p *programData) GetNetwork() string {
 }
 
 type Runtime struct {
-	Stop      string   `json:"stop"`
+	Stop string `json:"stop"`
 	//Pre       operations.Process `json:"pre,omitempty"`
 	//Post      operations.Process `json:"post,omitempty"`
 	Program   string   `json:"program"`
