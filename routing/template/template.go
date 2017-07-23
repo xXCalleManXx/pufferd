@@ -1,11 +1,12 @@
 package template
 
 import (
+	"os"
+
 	"github.com/gin-gonic/gin"
 	"github.com/pufferpanel/apufferi/http"
 	"github.com/pufferpanel/pufferd/httphandlers"
 	"github.com/pufferpanel/pufferd/programs"
-	"os"
 )
 
 func RegisterRoutes(e *gin.Engine) {

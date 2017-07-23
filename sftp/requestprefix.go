@@ -1,14 +1,15 @@
 package sftp
 
 import (
-	"github.com/pkg/sftp"
-	"path/filepath"
-	utils "github.com/pufferpanel/apufferi/common"
-	"strings"
 	"errors"
+	"fmt"
 	"io"
 	"os"
-	"fmt"
+	"path/filepath"
+	"strings"
+
+	"github.com/pkg/sftp"
+	utils "github.com/pufferpanel/apufferi/common"
 )
 
 type requestPrefix struct {
@@ -27,7 +28,7 @@ func (rp requestPrefix) Fileread(request sftp.Request) (io.ReaderAt, error) {
 }
 
 func (rp requestPrefix) Filewrite(request sftp.Request) (io.WriterAt, error) {
-	file, err := rp.getFile(request.Filepath, os.O_WRONLY | os.O_TRUNC | os.O_CREATE, 0644)
+	file, err := rp.getFile(request.Filepath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	return file, err
 }
 
@@ -37,31 +38,37 @@ func (rp requestPrefix) Filecmd(request sftp.Request) error {
 		return rp.maskError(err)
 	}
 	var targetName string
-	if request.Target != ""	{
+	if request.Target != "" {
 		targetName, err = rp.validate(request.Target)
 		if err != nil {
 			return rp.maskError(err)
 		}
 	}
-	switch (request.Method) {
-	case "SetStat", "Setstat": {
-		return nil
-	}
-	case "Rename": {
-		return os.Rename(sourceName, targetName)
-	}
-	case "Rmdir": {
-		return os.RemoveAll(sourceName)
-	}
-	case "Mkdir": {
-		return os.Mkdir(sourceName, 0755)
-	}
-	case "Symlink": {
-		return nil
-	}
-	case "Remove": {
-		return os.Remove(sourceName)
-	}
+	switch request.Method {
+	case "SetStat", "Setstat":
+		{
+			return nil
+		}
+	case "Rename":
+		{
+			return os.Rename(sourceName, targetName)
+		}
+	case "Rmdir":
+		{
+			return os.RemoveAll(sourceName)
+		}
+	case "Mkdir":
+		{
+			return os.Mkdir(sourceName, 0755)
+		}
+	case "Symlink":
+		{
+			return nil
+		}
+	case "Remove":
+		{
+			return os.Remove(sourceName)
+		}
 	default:
 		return errors.New(fmt.Sprint("Unknown request method: %s", request.Method))
 	}
@@ -72,42 +79,45 @@ func (rp requestPrefix) Fileinfo(request sftp.Request) ([]os.FileInfo, error) {
 	if err != nil {
 		return nil, rp.maskError(err)
 	}
-	switch (request.Method) {
-	case "List": {
-		file, err := os.Open(sourceName)
-		if err != nil {
-			return nil, rp.maskError(err)
+	switch request.Method {
+	case "List":
+		{
+			file, err := os.Open(sourceName)
+			if err != nil {
+				return nil, rp.maskError(err)
+			}
+			return file.Readdir(0)
 		}
-		return file.Readdir(0)
-	}
-	case "Stat": {
-		file, err := os.Open(sourceName)
-		if err != nil {
-			return nil, rp.maskError(err)
+	case "Stat":
+		{
+			file, err := os.Open(sourceName)
+			if err != nil {
+				return nil, rp.maskError(err)
+			}
+			fi, err := file.Stat()
+			if err != nil {
+				return nil, rp.maskError(err)
+			}
+			return []os.FileInfo{fi}, nil
 		}
-		fi, err := file.Stat()
-		if err != nil {
-			return nil, rp.maskError(err)
+	case "Readlink":
+		{
+			target, err := os.Readlink(sourceName)
+			if err != nil {
+				return nil, rp.maskError(err)
+			}
+			file, err := os.Open(target)
+			if err != nil {
+				return nil, rp.maskError(err)
+			}
+			fi, err := file.Stat()
+			if err != nil {
+				return nil, rp.maskError(err)
+			}
+			return []os.FileInfo{fi}, nil
 		}
-		return []os.FileInfo{fi}, nil
-	}
-	case "Readlink": {
-		target, err := os.Readlink(sourceName)
-		if err != nil {
-			return nil, rp.maskError(err)
-		}
-		file, err := os.Open(target)
-		if err != nil {
-			return nil, rp.maskError(err)
-		}
-		fi, err := file.Stat()
-		if err != nil {
-			return nil, rp.maskError(err)
-		}
-		return []os.FileInfo{fi}, nil
-	}
 	default:
-		return nil, errors.New(fmt.Sprint("Unknown request method: %s", request.Method));
+		return nil, errors.New(fmt.Sprint("Unknown request method: %s", request.Method))
 	}
 }
 

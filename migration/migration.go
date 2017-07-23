@@ -7,12 +7,13 @@ import (
 
 	"bytes"
 	"encoding/json"
-	"github.com/pufferpanel/apufferi/config"
-	"github.com/pufferpanel/pufferd/data/templates"
-	"github.com/pufferpanel/apufferi/logging"
-	"github.com/pufferpanel/pufferd/programs"
-	"github.com/pufferpanel/apufferi/common"
 	"os"
+
+	"github.com/pufferpanel/apufferi/common"
+	"github.com/pufferpanel/apufferi/config"
+	"github.com/pufferpanel/apufferi/logging"
+	"github.com/pufferpanel/pufferd/data/templates"
+	"github.com/pufferpanel/pufferd/programs"
 )
 
 const Scales = "/srv/scales/data"

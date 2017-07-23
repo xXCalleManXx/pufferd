@@ -17,10 +17,10 @@
 package operations
 
 import (
-	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/apufferi/common"
-	"github.com/pufferpanel/pufferd/programs/operations/ops"
 	"github.com/pufferpanel/apufferi/logging"
+	"github.com/pufferpanel/pufferd/environments"
+	"github.com/pufferpanel/pufferd/programs/operations/ops"
 )
 
 func GenerateProcess(data *Process, environment environments.Environment, dataMapping map[string]interface{}) OperationProcess {

@@ -1,16 +1,17 @@
 package shutdown
 
 import (
-	"github.com/pufferpanel/pufferd/programs"
-	"github.com/pufferpanel/apufferi/logging"
-	"github.com/braintree/manners"
-	"os/signal"
 	"os"
+	"os/signal"
 	"runtime/debug"
 	"sync"
-	"github.com/pkg/errors"
-	"time"
 	"syscall"
+	"time"
+
+	"github.com/braintree/manners"
+	"github.com/pkg/errors"
+	"github.com/pufferpanel/apufferi/logging"
+	"github.com/pufferpanel/pufferd/programs"
 )
 
 func CompleteShutdown() {
@@ -42,16 +43,16 @@ func Shutdown() *sync.WaitGroup {
 			logging.Warn("Stopping program " + e.Id())
 			err := e.Stop()
 			if err != nil {
-				logging.Error("Error stopping server " + e.Id(), err)
+				logging.Error("Error stopping server "+e.Id(), err)
 			}
 			err = e.GetEnvironment().WaitForMainProcess()
 			if err != nil {
-				logging.Error("Error stopping server " + e.Id(), err)
+				logging.Error("Error stopping server "+e.Id(), err)
 			}
 			logging.Warn("Stopped program " + e.Id())
 		}(element)
 	}
-	return &wg;
+	return &wg
 }
 
 func CreateHook() {
@@ -63,13 +64,13 @@ func CreateHook() {
 				logging.Errorf("Error: %+v\n%s", err, debug.Stack())
 			}
 		}()
-		<- c
+		<-c
 		CompleteShutdown()
 	}()
 }
 
 func Command(pid int) {
-	proc, err := os.FindProcess(pid);
+	proc, err := os.FindProcess(pid)
 	if err != nil || proc == nil {
 		if err == nil && proc == nil {
 			err = errors.New("no process found")
@@ -87,7 +88,7 @@ func Command(pid int) {
 
 	waitForProcess(proc, wait)
 
-	err = <- wait
+	err = <-wait
 
 	if err != nil {
 		logging.Error("Error shutting down pufferd", err)

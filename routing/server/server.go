@@ -25,18 +25,19 @@ import (
 	"os"
 	"path/filepath"
 
+	"strconv"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/itsjamie/gin-cors"
 	"github.com/pkg/errors"
+	"github.com/pufferpanel/apufferi/common"
 	"github.com/pufferpanel/apufferi/http"
+	"github.com/pufferpanel/apufferi/logging"
 	ppErrors "github.com/pufferpanel/pufferd/errors"
 	"github.com/pufferpanel/pufferd/httphandlers"
-	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/pufferd/programs"
-	"github.com/pufferpanel/apufferi/common"
-	"strconv"
-	"strings"
 )
 
 var wsupgrader = websocket.Upgrader{

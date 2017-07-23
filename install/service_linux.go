@@ -17,11 +17,12 @@
 package install
 
 import (
-	"github.com/pufferpanel/apufferi/logging"
 	"io/ioutil"
+	"os"
 	"os/exec"
 	"syscall"
-	"os"
+
+	"github.com/pufferpanel/apufferi/logging"
 )
 
 const SYSTEMD = `

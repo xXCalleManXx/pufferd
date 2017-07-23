@@ -28,15 +28,16 @@ import (
 	"syscall"
 	"time"
 
+	"fmt"
+
 	"github.com/gorilla/websocket"
 	"github.com/kr/pty"
+	"github.com/pufferpanel/apufferi/cache"
 	"github.com/pufferpanel/apufferi/config"
-	ppErrors "github.com/pufferpanel/pufferd/errors"
 	"github.com/pufferpanel/apufferi/logging"
+	ppErrors "github.com/pufferpanel/pufferd/errors"
 	"github.com/pufferpanel/pufferd/utils"
 	"github.com/shirou/gopsutil/process"
-	"fmt"
-	"github.com/pufferpanel/apufferi/cache"
 )
 
 type tty struct {

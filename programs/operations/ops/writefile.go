@@ -17,10 +17,11 @@
 package ops
 
 import (
-	"github.com/pufferpanel/pufferd/environments"
-	"github.com/pufferpanel/apufferi/common"
 	"io/ioutil"
+
+	"github.com/pufferpanel/apufferi/common"
 	"github.com/pufferpanel/apufferi/logging"
+	"github.com/pufferpanel/pufferd/environments"
 )
 
 type WriteFile struct {

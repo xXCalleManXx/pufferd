@@ -22,9 +22,9 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/pufferpanel/apufferi/common"
 	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/pufferd/programs"
-	"github.com/pufferpanel/apufferi/common"
 )
 
 func CopyTemplates() {

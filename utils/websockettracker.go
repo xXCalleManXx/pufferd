@@ -17,8 +17,9 @@
 package utils
 
 import (
-	"github.com/gorilla/websocket"
 	"sync"
+
+	"github.com/gorilla/websocket"
 )
 
 type WebSocketManager interface {
@@ -29,7 +30,7 @@ type WebSocketManager interface {
 
 type wsManager struct {
 	sockets []websocket.Conn
-	locker sync.Mutex
+	locker  sync.Mutex
 }
 
 func CreateWSManager() WebSocketManager {

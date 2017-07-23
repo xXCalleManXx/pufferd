@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/apufferi/logging"
+	"github.com/pufferpanel/pufferd/environments"
 )
 
 type Command struct {

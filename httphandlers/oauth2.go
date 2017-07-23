@@ -25,12 +25,13 @@ import (
 	"strings"
 
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/pufferpanel/apufferi/config"
-	"github.com/pufferpanel/apufferi/logging"
 	"time"
+
+	"github.com/gin-gonic/gin"
 	"github.com/pufferpanel/apufferi/common"
+	"github.com/pufferpanel/apufferi/config"
 	pufferdHttp "github.com/pufferpanel/apufferi/http"
+	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/pufferd/programs"
 )
 
@@ -50,14 +51,14 @@ func OAuth2Handler(scope string, requireServer bool) gin.HandlerFunc {
 		if authHeader == "" {
 			authToken = gin.Query("accessToken")
 			if authToken == "" {
-				pufferdHttp.Respond(gin).Fail().Code(pufferdHttp.NOTAUTHORIZED).Status(400).Message("no access token provided");
+				pufferdHttp.Respond(gin).Fail().Code(pufferdHttp.NOTAUTHORIZED).Status(400).Message("no access token provided")
 				gin.Abort()
 				return
 			}
 		} else {
 			authArr := strings.SplitN(authHeader, " ", 2)
 			if len(authArr) < 2 || authArr[0] != "Bearer" {
-				pufferdHttp.Respond(gin).Code(pufferdHttp.NOTAUTHORIZED).Fail().Status(400).Message("invalid access token format");
+				pufferdHttp.Respond(gin).Code(pufferdHttp.NOTAUTHORIZED).Fail().Status(400).Message("invalid access token format")
 				gin.Abort()
 				return
 			}
@@ -70,16 +71,16 @@ func OAuth2Handler(scope string, requireServer bool) gin.HandlerFunc {
 			gin.Set("server_id", cached.serverId)
 			gin.Set("scopes", cached.scopes)
 		} else {
-			if (!validateToken(authToken, gin)) {
+			if !validateToken(authToken, gin) {
 				return
 			}
 		}
 
 		rawScopes, _ := gin.Get("scopes")
 
-		if (scope != "") {
+		if scope != "" {
 			scopes := rawScopes.([]string)
-			if (!common.ContainsValue(scopes, scope)) {
+			if !common.ContainsValue(scopes, scope) {
 				pufferdHttp.Respond(gin).Fail().Status(403).Code(pufferdHttp.NOTAUTHORIZED).Message("missing scope " + scope).Send()
 				gin.Abort()
 				return

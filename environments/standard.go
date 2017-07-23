@@ -26,14 +26,15 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gorilla/websocket"
-	"github.com/pufferpanel/apufferi/config"
-	ppError "github.com/pufferpanel/pufferd/errors"
-	"github.com/pufferpanel/apufferi/logging"
-	"github.com/shirou/gopsutil/process"
 	"fmt"
+
+	"github.com/gorilla/websocket"
 	"github.com/pufferpanel/apufferi/cache"
+	"github.com/pufferpanel/apufferi/config"
+	"github.com/pufferpanel/apufferi/logging"
+	ppError "github.com/pufferpanel/pufferd/errors"
 	"github.com/pufferpanel/pufferd/utils"
+	"github.com/shirou/gopsutil/process"
 )
 
 type standard struct {

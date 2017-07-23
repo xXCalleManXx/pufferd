@@ -21,10 +21,10 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/pufferpanel/pufferd/environments"
-	"github.com/pufferpanel/apufferi/logging"
-	"github.com/pufferpanel/pufferd/programs/operations"
 	"github.com/pufferpanel/apufferi/common"
+	"github.com/pufferpanel/apufferi/logging"
+	"github.com/pufferpanel/pufferd/environments"
+	"github.com/pufferpanel/pufferd/programs/operations"
 )
 
 type Program interface {

@@ -1,14 +1,15 @@
 package install
 
 import (
-	"github.com/pufferpanel/apufferi/logging"
-	"os"
-	"github.com/pufferpanel/pufferd/data"
-	"strings"
-	"github.com/pufferpanel/apufferi/common"
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
+	"os"
+	"strings"
+
+	"github.com/pufferpanel/apufferi/common"
+	"github.com/pufferpanel/apufferi/logging"
+	"github.com/pufferpanel/pufferd/data"
 )
 
 func Install(configPath string, authRoot string, authToken string) {

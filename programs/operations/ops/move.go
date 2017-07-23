@@ -20,9 +20,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/pufferpanel/pufferd/environments"
-	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/apufferi/common"
+	"github.com/pufferpanel/apufferi/logging"
+	"github.com/pufferpanel/pufferd/environments"
 )
 
 type Move struct {

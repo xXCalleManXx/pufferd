@@ -1,8 +1,8 @@
 package environments
 
 import (
-	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/apufferi/common"
+	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/pufferd/cache"
 	"github.com/pufferpanel/pufferd/utils"
 )

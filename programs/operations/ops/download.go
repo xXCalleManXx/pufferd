@@ -18,8 +18,8 @@ package ops
 
 import (
 	"github.com/cavaliercoder/grab"
-	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/apufferi/logging"
+	"github.com/pufferpanel/pufferd/environments"
 )
 
 type Download struct {

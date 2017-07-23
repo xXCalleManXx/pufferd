@@ -1,8 +1,9 @@
 package cache
 
 import (
-	"github.com/pufferpanel/apufferi/cache"
 	"strconv"
+
+	"github.com/pufferpanel/apufferi/cache"
 	"github.com/pufferpanel/apufferi/config"
 )
 

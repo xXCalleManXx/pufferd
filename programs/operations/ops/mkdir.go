@@ -18,9 +18,10 @@ package ops
 
 import (
 	"os"
-	"github.com/pufferpanel/pufferd/environments"
+
 	"github.com/pufferpanel/apufferi/common"
 	"github.com/pufferpanel/apufferi/logging"
+	"github.com/pufferpanel/pufferd/environments"
 )
 
 type Mkdir struct {

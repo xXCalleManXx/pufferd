@@ -25,16 +25,16 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/pufferpanel/apufferi/config"
-	"github.com/pufferpanel/pufferd/environments"
-	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/apufferi/common"
+	"github.com/pufferpanel/apufferi/config"
+	"github.com/pufferpanel/apufferi/logging"
+	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/pufferd/programs/operations"
 )
 
 var (
-	programs     []Program = make([]Program, 0)
-	ServerFolder string
+	programs       []Program = make([]Program, 0)
+	ServerFolder   string
 	TemplateFolder string
 )
 
@@ -308,7 +308,7 @@ func GetPlugin(name string) (interface{}, error) {
 }
 
 func getProcessSection(mapping map[string]interface{}) operations.Process {
-	return operations.Process {
+	return operations.Process{
 		Commands: common.GetObjectArrayOrNull(mapping, "commands"),
 	}
 }
