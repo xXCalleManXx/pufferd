@@ -2,7 +2,7 @@ package shutdown
 
 import (
 	"github.com/pufferpanel/pufferd/programs"
-	"github.com/pufferpanel/pufferd/logging"
+	"github.com/pufferpanel/apufferi/logging"
 	"github.com/braintree/manners"
 	"os/signal"
 	"os"

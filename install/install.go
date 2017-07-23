@@ -1,11 +1,11 @@
 package install
 
 import (
-	"github.com/pufferpanel/pufferd/logging"
+	"github.com/pufferpanel/apufferi/logging"
 	"os"
 	"github.com/pufferpanel/pufferd/data"
 	"strings"
-	"github.com/pufferpanel/pufferd/utils"
+	"github.com/pufferpanel/apufferi/common"
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
@@ -28,7 +28,7 @@ func Install(configPath string, authRoot string, authToken string) {
 	replacements["authurl"] = strings.TrimSuffix(authRoot, "/")
 	replacements["authtoken"] = authToken
 
-	configData := []byte(utils.ReplaceTokens(config, replacements))
+	configData := []byte(common.ReplaceTokens(config, replacements))
 
 	var prettyJson bytes.Buffer
 	json.Indent(&prettyJson, configData, "", "  ")

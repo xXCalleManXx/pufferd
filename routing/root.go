@@ -20,7 +20,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pufferpanel/apufferi/http"
 	"github.com/pufferpanel/apufferi/http/handler"
-	"github.com/pufferpanel/pufferd/config"
+	"github.com/pufferpanel/apufferi/config"
 	"github.com/pufferpanel/pufferd/httphandlers"
 	"github.com/pufferpanel/pufferd/routing/server"
 	"github.com/pufferpanel/pufferd/routing/template"

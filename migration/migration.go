@@ -7,11 +7,11 @@ import (
 
 	"bytes"
 	"encoding/json"
-	"github.com/pufferpanel/pufferd/config"
+	"github.com/pufferpanel/apufferi/config"
 	"github.com/pufferpanel/pufferd/data/templates"
-	"github.com/pufferpanel/pufferd/logging"
+	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/pufferd/programs"
-	"github.com/pufferpanel/pufferd/utils"
+	"github.com/pufferpanel/apufferi/common"
 	"os"
 )
 
@@ -27,7 +27,7 @@ func MigrateFromScales() {
 	jsonData := []byte(data)
 	var prettyJson bytes.Buffer
 	json.Indent(&prettyJson, jsonData, "", "  ")
-	err := ioutil.WriteFile(utils.JoinPath(programs.TemplateFolder, name+".json"), prettyJson.Bytes(), 0664)
+	err := ioutil.WriteFile(common.JoinPath(programs.TemplateFolder, name+".json"), prettyJson.Bytes(), 0664)
 	if err != nil {
 		logging.Error("Error writing template "+name, err)
 	}
@@ -43,7 +43,7 @@ func MigrateFromScales() {
 		}
 		id := strings.TrimSuffix(element.Name(), filepath.Ext(element.Name()))
 		logging.Infof("Attempting to migrate %s", id)
-		data, err := ioutil.ReadFile(utils.JoinPath(Scales, element.Name()))
+		data, err := ioutil.ReadFile(common.JoinPath(Scales, element.Name()))
 		if err != nil {
 			logging.Error("Error read server config", err)
 			continue
@@ -54,8 +54,8 @@ func MigrateFromScales() {
 			logging.Error("Error read server config", err)
 			continue
 		}
-		oldPath := utils.JoinPath("/home", scales.User, "public")
-		newPath := utils.JoinPath(config.GetOrDefault("serverfolder", utils.JoinPath("data", "servers")), scales.Name)
+		oldPath := common.JoinPath("/home", scales.User, "public")
+		newPath := common.JoinPath(config.GetOrDefault("serverfolder", common.JoinPath("data", "servers")), scales.Name)
 		err = os.Rename(oldPath, newPath)
 		if err != nil {
 			logging.Error("Error moving folder", err)
@@ -85,7 +85,7 @@ func MigrateFromScales() {
 		}
 		programs.Create(scales.Name, scales.Plugin, serverData)
 	}
-	os.Remove(utils.JoinPath(programs.TemplateFolder, "legacyminecraft.json"))
+	os.Remove(common.JoinPath(programs.TemplateFolder, "legacyminecraft.json"))
 	logging.Info("Migration complete, please restart pufferd to have it recognize the changes")
 }
 

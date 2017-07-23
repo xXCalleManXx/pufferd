@@ -22,9 +22,9 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/pufferpanel/pufferd/logging"
+	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/pufferd/programs"
-	"github.com/pufferpanel/pufferd/utils"
+	"github.com/pufferpanel/apufferi/common"
 )
 
 func CopyTemplates() {
@@ -71,7 +71,7 @@ func writeFile(name string, data string) {
 	jsonData := []byte(data)
 	var prettyJson bytes.Buffer
 	json.Indent(&prettyJson, jsonData, "", "  ")
-	err := ioutil.WriteFile(utils.JoinPath(programs.TemplateFolder, name+".json"), prettyJson.Bytes(), 0664)
+	err := ioutil.WriteFile(common.JoinPath(programs.TemplateFolder, name+".json"), prettyJson.Bytes(), 0664)
 	if err != nil {
 		logging.Error("Error writing template "+name, err)
 	}

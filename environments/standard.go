@@ -27,17 +27,18 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/pufferpanel/pufferd/config"
+	"github.com/pufferpanel/apufferi/config"
 	ppError "github.com/pufferpanel/pufferd/errors"
-	"github.com/pufferpanel/pufferd/logging"
-	"github.com/pufferpanel/pufferd/utils"
+	"github.com/pufferpanel/apufferi/logging"
 	"github.com/shirou/gopsutil/process"
 	"fmt"
+	"github.com/pufferpanel/apufferi/cache"
+	"github.com/pufferpanel/pufferd/utils"
 )
 
 type standard struct {
 	RootDirectory string
-	ConsoleBuffer utils.Cache
+	ConsoleBuffer cache.Cache
 	WSManager     utils.WebSocketManager
 	mainProcess   *exec.Cmd
 	stdInWriter   io.Writer

@@ -16,7 +16,7 @@
 
 package install
 
-import "github.com/pufferpanel/pufferd/logging"
+import "github.com/pufferpanel/apufferi/logging"
 
 func InstallService() {
 	logging.Error("No configured service installer for this OS")

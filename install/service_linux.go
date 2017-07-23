@@ -17,7 +17,7 @@
 package install
 
 import (
-	"github.com/pufferpanel/pufferd/logging"
+	"github.com/pufferpanel/apufferi/logging"
 	"io/ioutil"
 	"os/exec"
 	"syscall"

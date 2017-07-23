@@ -3,7 +3,7 @@ package sftp
 import (
 	"github.com/pkg/sftp"
 	"path/filepath"
-	"github.com/pufferpanel/pufferd/utils"
+	utils "github.com/pufferpanel/apufferi/common"
 	"strings"
 	"errors"
 	"io"

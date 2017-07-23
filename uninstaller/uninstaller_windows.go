@@ -1,8 +1,8 @@
 package uninstaller
 
 import (
-	"github.com/pufferpanel/pufferd/config"
-	"github.com/pufferpanel/pufferd/logging"
+	"github.com/pufferpanel/apufferi/config"
+	"github.com/pufferpanel/apufferi/logging"
 	"os"
 )
 

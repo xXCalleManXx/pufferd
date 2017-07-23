@@ -21,7 +21,7 @@ import (
 	"strings"
 
 	"github.com/pufferpanel/pufferd/environments"
-	"github.com/pufferpanel/pufferd/logging"
+	"github.com/pufferpanel/apufferi/logging"
 )
 
 type Command struct {

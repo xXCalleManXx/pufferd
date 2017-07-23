@@ -29,11 +29,11 @@ import (
 
 	"github.com/braintree/manners"
 	"github.com/gin-gonic/gin"
-	"github.com/pufferpanel/pufferd/config"
+	"github.com/pufferpanel/apufferi/config"
 	"github.com/pufferpanel/pufferd/data"
 	"github.com/pufferpanel/pufferd/data/templates"
 	"github.com/pufferpanel/pufferd/install"
-	"github.com/pufferpanel/pufferd/logging"
+	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/pufferd/migration"
 	"github.com/pufferpanel/pufferd/programs"
 	"github.com/pufferpanel/pufferd/routing"

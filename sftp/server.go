@@ -33,8 +33,8 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	configuration "github.com/pufferpanel/pufferd/config"
-	"github.com/pufferpanel/pufferd/logging"
+	configuration "github.com/pufferpanel/apufferi/config"
+	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/pufferd/programs"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"

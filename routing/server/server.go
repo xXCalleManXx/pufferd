@@ -32,9 +32,9 @@ import (
 	"github.com/pufferpanel/apufferi/http"
 	ppErrors "github.com/pufferpanel/pufferd/errors"
 	"github.com/pufferpanel/pufferd/httphandlers"
-	"github.com/pufferpanel/pufferd/logging"
+	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/pufferd/programs"
-	"github.com/pufferpanel/pufferd/utils"
+	"github.com/pufferpanel/apufferi/common"
 	"strconv"
 	"strings"
 )
@@ -224,9 +224,9 @@ func GetFile(c *gin.Context) {
 
 	targetPath := c.Param("filename")
 
-	targetFile := utils.JoinPath(server.GetEnvironment().GetRootDirectory(), targetPath)
+	targetFile := common.JoinPath(server.GetEnvironment().GetRootDirectory(), targetPath)
 
-	if !utils.EnsureAccess(targetFile, server.GetEnvironment().GetRootDirectory()) {
+	if !common.EnsureAccess(targetFile, server.GetEnvironment().GetRootDirectory()) {
 		http.Respond(c).Status(403).Message("invalid file path").Status(http.NOTAUTHORIZED).Send()
 		return
 	}
@@ -298,9 +298,9 @@ func PutFile(c *gin.Context) {
 		return
 	}
 
-	targetFile := utils.JoinPath(server.GetEnvironment().GetRootDirectory(), targetPath)
+	targetFile := common.JoinPath(server.GetEnvironment().GetRootDirectory(), targetPath)
 
-	if !utils.EnsureAccess(targetFile, server.GetEnvironment().GetRootDirectory()) {
+	if !common.EnsureAccess(targetFile, server.GetEnvironment().GetRootDirectory()) {
 		http.Respond(c).Status(403).Message("invalid file path").Status(http.NOTAUTHORIZED).Send()
 		return
 	}
@@ -348,9 +348,9 @@ func DeleteFile(c *gin.Context) {
 
 	targetPath := c.Param("filename")
 
-	targetFile := utils.JoinPath(server.GetEnvironment().GetRootDirectory(), targetPath)
+	targetFile := common.JoinPath(server.GetEnvironment().GetRootDirectory(), targetPath)
 
-	if !utils.EnsureAccess(targetFile, server.GetEnvironment().GetRootDirectory()) {
+	if !common.EnsureAccess(targetFile, server.GetEnvironment().GetRootDirectory()) {
 		http.Respond(c).Status(403).Message("invalid file path").Status(http.NOTAUTHORIZED).Send()
 		return
 	}

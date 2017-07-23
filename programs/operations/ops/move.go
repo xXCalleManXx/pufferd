@@ -21,8 +21,8 @@ import (
 	"path/filepath"
 
 	"github.com/pufferpanel/pufferd/environments"
-	"github.com/pufferpanel/pufferd/logging"
-	"github.com/pufferpanel/pufferd/utils"
+	"github.com/pufferpanel/apufferi/logging"
+	"github.com/pufferpanel/apufferi/common"
 )
 
 type Move struct {
@@ -32,8 +32,8 @@ type Move struct {
 }
 
 func (m *Move) Run() error {
-	source := utils.JoinPath(m.Environment.GetRootDirectory(), m.SourceFile)
-	target := utils.JoinPath(m.Environment.GetRootDirectory(), m.TargetFile)
+	source := common.JoinPath(m.Environment.GetRootDirectory(), m.SourceFile)
+	target := common.JoinPath(m.Environment.GetRootDirectory(), m.TargetFile)
 	result, valid := validateMove(source, target)
 	if !valid {
 		return nil

@@ -18,9 +18,9 @@ package operations
 
 import (
 	"github.com/pufferpanel/pufferd/environments"
-	"github.com/pufferpanel/pufferd/utils"
+	"github.com/pufferpanel/apufferi/common"
 	"github.com/pufferpanel/pufferd/programs/operations/ops"
-	"github.com/pufferpanel/pufferd/logging"
+	"github.com/pufferpanel/apufferi/logging"
 )
 
 func GenerateProcess(data *Process, environment environments.Environment, dataMapping map[string]interface{}) OperationProcess {
@@ -35,12 +35,12 @@ func GenerateProcess(data *Process, environment environments.Environment, dataMa
 		var mapping = element.(map[string]interface{})
 		switch mapping["type"] {
 		case "command":
-			for _, element := range utils.ToStringArray(mapping["commands"]) {
-				operationList = append(operationList, &ops.Command{Command: utils.ReplaceTokens(element, datamap), Environment: environment})
+			for _, element := range common.ToStringArray(mapping["commands"]) {
+				operationList = append(operationList, &ops.Command{Command: common.ReplaceTokens(element, datamap), Environment: environment})
 			}
 		case "download":
-			for _, element := range utils.ToStringArray(mapping["files"]) {
-				operationList = append(operationList, &ops.Download{File: utils.ReplaceTokens(element, datamap), Environment: environment})
+			for _, element := range common.ToStringArray(mapping["files"]) {
+				operationList = append(operationList, &ops.Download{File: common.ReplaceTokens(element, datamap), Environment: environment})
 			}
 		case "move":
 			source := mapping["source"].(string)
@@ -52,7 +52,7 @@ func GenerateProcess(data *Process, environment environments.Environment, dataMa
 		case "writefile":
 			text := mapping["text"].(string)
 			target := mapping["target"].(string)
-			operationList = append(operationList, &ops.WriteFile{TargetFile: target, Environment: environment, Text: utils.ReplaceTokens(text, datamap)})
+			operationList = append(operationList, &ops.WriteFile{TargetFile: target, Environment: environment, Text: common.ReplaceTokens(text, datamap)})
 		}
 	}
 	return OperationProcess{processInstructions: operationList}

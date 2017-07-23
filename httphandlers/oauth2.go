@@ -26,10 +26,10 @@ import (
 
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/pufferpanel/pufferd/config"
-	"github.com/pufferpanel/pufferd/logging"
+	"github.com/pufferpanel/apufferi/config"
+	"github.com/pufferpanel/apufferi/logging"
 	"time"
-	"github.com/pufferpanel/pufferd/utils"
+	"github.com/pufferpanel/apufferi/common"
 	pufferdHttp "github.com/pufferpanel/apufferi/http"
 	"github.com/pufferpanel/pufferd/programs"
 )
@@ -79,7 +79,7 @@ func OAuth2Handler(scope string, requireServer bool) gin.HandlerFunc {
 
 		if (scope != "") {
 			scopes := rawScopes.([]string)
-			if (!utils.ContainsValue(scopes, scope)) {
+			if (!common.ContainsValue(scopes, scope)) {
 				pufferdHttp.Respond(gin).Fail().Status(403).Code(pufferdHttp.NOTAUTHORIZED).Message("missing scope " + scope).Send()
 				gin.Abort()
 				return

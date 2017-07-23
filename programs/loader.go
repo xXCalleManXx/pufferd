@@ -25,10 +25,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/pufferpanel/pufferd/config"
+	"github.com/pufferpanel/apufferi/config"
 	"github.com/pufferpanel/pufferd/environments"
-	"github.com/pufferpanel/pufferd/logging"
-	"github.com/pufferpanel/pufferd/utils"
+	"github.com/pufferpanel/apufferi/logging"
+	"github.com/pufferpanel/apufferi/common"
 	"github.com/pufferpanel/pufferd/programs/operations"
 )
 
@@ -39,8 +39,8 @@ var (
 )
 
 func Initialize() {
-	ServerFolder = config.GetOrDefault("serverfolder", utils.JoinPath("data", "servers"))
-	TemplateFolder = config.GetOrDefault("templatefolder", utils.JoinPath("data", "templates"))
+	ServerFolder = config.GetOrDefault("serverfolder", common.JoinPath("data", "servers"))
+	TemplateFolder = config.GetOrDefault("templatefolder", common.JoinPath("data", "templates"))
 }
 
 func LoadFromFolder() {
@@ -79,7 +79,7 @@ func GetAll() []Program {
 
 func Load(id string) (program Program, err error) {
 	var data []byte
-	data, err = ioutil.ReadFile(utils.JoinPath(ServerFolder, id+".json"))
+	data, err = ioutil.ReadFile(common.JoinPath(ServerFolder, id+".json"))
 	if len(data) == 0 || err != nil {
 		return
 	}
@@ -99,13 +99,13 @@ func LoadFromData(id string, source []byte) (program Program, err error) {
 }
 
 func LoadFromMapping(id string, source map[string]interface{}) (program Program, err error) {
-	var pufferdData = utils.GetMapOrNull(source, "pufferd")
-	var installSection = getProcessSection(utils.GetMapOrNull(pufferdData, "install"))
-	var updateSection = getProcessSection(utils.GetMapOrNull(pufferdData, "update"))
-	var runSection = utils.GetMapOrNull(pufferdData, "run")
-	var environmentSection = utils.GetMapOrNull(pufferdData, "environment")
+	var pufferdData = common.GetMapOrNull(source, "pufferd")
+	var installSection = getProcessSection(common.GetMapOrNull(pufferdData, "install"))
+	var updateSection = getProcessSection(common.GetMapOrNull(pufferdData, "update"))
+	var runSection = common.GetMapOrNull(pufferdData, "run")
+	var environmentSection = common.GetMapOrNull(pufferdData, "environment")
 	var environment environments.Environment
-	var dataSection = utils.GetMapOrNull(pufferdData, "data")
+	var dataSection = common.GetMapOrNull(pufferdData, "data")
 	dataCasted := make(map[string]interface{}, len(dataSection))
 	for key, value := range dataSection {
 		dataCasted[key] = value
@@ -115,7 +115,7 @@ func LoadFromMapping(id string, source map[string]interface{}) (program Program,
 	if environmentSection == nil {
 		environmentType = "standard"
 	} else {
-		environmentType = utils.GetStringOrDefault(environmentSection, "type", "standard")
+		environmentType = common.GetStringOrDefault(environmentSection, "type", "standard")
 	}
 
 	logging.Debugf("Loading server as %s", environmentType)
@@ -126,11 +126,11 @@ func LoadFromMapping(id string, source map[string]interface{}) (program Program,
 	if pufferdData["run"] == nil {
 		runBlock = Runtime{}
 	} else {
-		var stop = utils.GetStringOrDefault(runSection, "stop", "")
-		var arguments = utils.GetStringArrayOrNull(runSection, "arguments")
-		var enabled = utils.GetBooleanOrDefault(runSection, "enabled", true)
-		var autostart = utils.GetBooleanOrDefault(runSection, "autostart", true)
-		var program = utils.GetStringOrDefault(runSection, "program", "")
+		var stop = common.GetStringOrDefault(runSection, "stop", "")
+		var arguments = common.GetStringArrayOrNull(runSection, "arguments")
+		var enabled = common.GetBooleanOrDefault(runSection, "enabled", true)
+		var autostart = common.GetBooleanOrDefault(runSection, "autostart", true)
+		var program = common.GetStringOrDefault(runSection, "program", "")
 
 		runBlock = Runtime{Stop: stop, Arguments: arguments, Enabled: enabled, AutoStart: autostart, Program: program}
 	}
@@ -143,7 +143,7 @@ func Create(id string, serverType string, data map[string]interface{}) bool {
 		return false
 	}
 
-	templateData, err := ioutil.ReadFile(utils.JoinPath(TemplateFolder, serverType+".json"))
+	templateData, err := ioutil.ReadFile(common.JoinPath(TemplateFolder, serverType+".json"))
 	if err != nil {
 		logging.Error("Error reading template file for type "+serverType, err)
 		return false
@@ -151,7 +151,7 @@ func Create(id string, serverType string, data map[string]interface{}) bool {
 
 	var templateJson map[string]interface{}
 	err = json.Unmarshal(templateData, &templateJson)
-	segment := utils.GetMapOrNull(templateJson, "pufferd")
+	segment := common.GetMapOrNull(templateJson, "pufferd")
 
 	if err != nil {
 		logging.Error("Error reading template file for type "+serverType, err)
@@ -177,7 +177,7 @@ func Create(id string, serverType string, data map[string]interface{}) bool {
 		segment["data"] = mapper
 	}
 
-	f, err := os.Create(utils.JoinPath(ServerFolder, id+".json"))
+	f, err := os.Create(common.JoinPath(ServerFolder, id+".json"))
 
 	if err != nil {
 		logging.Error("Error writing server file", err)
@@ -227,7 +227,7 @@ func Delete(id string) (err error) {
 	if err != nil {
 		return err
 	}
-	os.Remove(utils.JoinPath(ServerFolder, program.Id()+".json"))
+	os.Remove(common.JoinPath(ServerFolder, program.Id()+".json"))
 	programs = append(programs[:index], programs[index+1:]...)
 	return
 }
@@ -247,7 +247,7 @@ func Save(id string) (err error) {
 		err = errors.New("No server with given id")
 		return
 	}
-	err = program.Save(utils.JoinPath(ServerFolder, id+".json"))
+	err = program.Save(common.JoinPath(ServerFolder, id+".json"))
 	return
 }
 
@@ -289,7 +289,7 @@ func GetPlugins() map[string]interface{} {
 }
 
 func GetPlugin(name string) (interface{}, error) {
-	templateData, err := ioutil.ReadFile(utils.JoinPath(TemplateFolder, name+".json"))
+	templateData, err := ioutil.ReadFile(common.JoinPath(TemplateFolder, name+".json"))
 	if err != nil {
 		return nil, err
 	}
@@ -300,7 +300,7 @@ func GetPlugin(name string) (interface{}, error) {
 		logging.Error("Malformed json for program "+name, err)
 		return nil, err
 	}
-	segment := utils.GetMapOrNull(templateJson, "pufferd")
+	segment := common.GetMapOrNull(templateJson, "pufferd")
 	dataSec := make(map[string]interface{})
 	dataSec["variables"] = segment["data"].(map[string]interface{})
 	dataSec["display"] = segment["display"]
@@ -309,6 +309,6 @@ func GetPlugin(name string) (interface{}, error) {
 
 func getProcessSection(mapping map[string]interface{}) operations.Process {
 	return operations.Process {
-		Commands: utils.GetObjectArrayOrNull(mapping, "commands"),
+		Commands: common.GetObjectArrayOrNull(mapping, "commands"),
 	}
 }

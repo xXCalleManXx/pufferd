@@ -30,17 +30,18 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/kr/pty"
-	"github.com/pufferpanel/pufferd/config"
+	"github.com/pufferpanel/apufferi/config"
 	ppErrors "github.com/pufferpanel/pufferd/errors"
-	"github.com/pufferpanel/pufferd/logging"
+	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/pufferd/utils"
 	"github.com/shirou/gopsutil/process"
 	"fmt"
+	"github.com/pufferpanel/apufferi/cache"
 )
 
 type tty struct {
 	RootDirectory string
-	ConsoleBuffer utils.Cache
+	ConsoleBuffer cache.Cache
 	WSManager     utils.WebSocketManager
 	mainProcess   *exec.Cmd
 	stdInWriter   io.Writer

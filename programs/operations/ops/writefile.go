@@ -18,9 +18,9 @@ package ops
 
 import (
 	"github.com/pufferpanel/pufferd/environments"
-	"github.com/pufferpanel/pufferd/utils"
+	"github.com/pufferpanel/apufferi/common"
 	"io/ioutil"
-	"github.com/pufferpanel/pufferd/logging"
+	"github.com/pufferpanel/apufferi/logging"
 )
 
 type WriteFile struct {
@@ -32,7 +32,7 @@ type WriteFile struct {
 func (c *WriteFile) Run() error {
 	logging.Debugf("Writing data to file: %s", c.TargetFile)
 	c.Environment.DisplayToConsole("Writing some data to file: %s\n ", c.TargetFile)
-	target := utils.JoinPath(c.Environment.GetRootDirectory(), c.TargetFile)
+	target := common.JoinPath(c.Environment.GetRootDirectory(), c.TargetFile)
 	ioutil.WriteFile(target, []byte(c.Text), 0644)
 	return nil
 }

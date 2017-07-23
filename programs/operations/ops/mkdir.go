@@ -18,10 +18,9 @@ package ops
 
 import (
 	"os"
-
 	"github.com/pufferpanel/pufferd/environments"
-	"github.com/pufferpanel/pufferd/utils"
-	"github.com/pufferpanel/pufferd/logging"
+	"github.com/pufferpanel/apufferi/common"
+	"github.com/pufferpanel/apufferi/logging"
 )
 
 type Mkdir struct {
@@ -32,6 +31,6 @@ type Mkdir struct {
 func (m *Mkdir) Run() error {
 	logging.Debugf("Making directory: %s\n", m.TargetFile)
 	m.Environment.DisplayToConsole("Creating directory: %s\n", m.TargetFile)
-	target := utils.JoinPath(m.Environment.GetRootDirectory(), m.TargetFile)
+	target := common.JoinPath(m.Environment.GetRootDirectory(), m.TargetFile)
 	return os.MkdirAll(target, 0755)
 }

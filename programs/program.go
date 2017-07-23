@@ -22,9 +22,9 @@ import (
 	"os"
 
 	"github.com/pufferpanel/pufferd/environments"
-	"github.com/pufferpanel/pufferd/logging"
+	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/pufferd/programs/operations"
-	"github.com/pufferpanel/pufferd/utils"
+	"github.com/pufferpanel/apufferi/common"
 )
 
 type Program interface {
@@ -103,7 +103,7 @@ func (p *programData) Start() (err error) {
 		data[k] = v.(map[string]interface{})["value"]
 	}
 
-	err = p.Environment.ExecuteAsync(p.RunData.Program, utils.ReplaceTokensInArr(p.RunData.Arguments, data))
+	err = p.Environment.ExecuteAsync(p.RunData.Program, common.ReplaceTokensInArr(p.RunData.Arguments, data))
 	if err != nil {
 		p.Environment.DisplayToConsole("Failed to start server\n")
 	} else {
