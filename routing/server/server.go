@@ -219,11 +219,11 @@ func GetServer(c *gin.Context) {
 }
 
 func GetFile(c *gin.Context) {
-
 	item, _ := c.Get("server")
 	server := item.(programs.Program)
 
 	targetPath := c.Param("filename")
+	logging.Debugf("Getting following file: %s", targetPath)
 
 	targetFile := common.JoinPath(server.GetEnvironment().GetRootDirectory(), targetPath)
 
@@ -234,12 +234,14 @@ func GetFile(c *gin.Context) {
 
 	info, err := os.Stat(targetFile)
 
-	if os.IsNotExist(err) {
-		http.Respond(c).Status(404).Code(http.NOFILE).Send()
-		return
-	} else {
-		errorConnection(c, err)
-		return
+	if err != nil {
+		if os.IsNotExist(err) {
+			http.Respond(c).Status(404).Code(http.NOFILE).Send()
+			return
+		} else {
+			errorConnection(c, err)
+			return
+		}
 	}
 
 	if info.IsDir() {
@@ -470,5 +472,6 @@ func GetLogs(c *gin.Context) {
 }
 
 func errorConnection(c *gin.Context, err error) {
+	logging.Error("error on api call", err)
 	http.Respond(c).Status(500).Code(http.UNKNOWN).Data(err).Message("error handling request").Send()
 }
