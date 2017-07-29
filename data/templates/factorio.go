@@ -16,7 +16,7 @@
 
 package templates
 
-const FACTORIO = `{
+const Factorio = `{
   "pufferd": {
     "type": "factorio",
     "display":"Factorio",
