@@ -76,7 +76,7 @@ const Factorio = `{
         "internal": false
       },
       "port": {
-        "value": "27015",
+        "value": "34197",
         "required": true,
         "desc": "What port to bind the server to",
         "display": "Port",
