@@ -310,7 +310,7 @@ func PutFile(c *gin.Context) {
 
 	_, mkFolder := c.GetQuery("folder")
 	if mkFolder {
-		err := os.Mkdir(targetFile, 0644)
+		err := os.Mkdir(targetFile, 0755)
 		if err != nil {
 			errorConnection(c, err)
 		} else {

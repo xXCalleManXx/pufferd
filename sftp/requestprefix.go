@@ -123,8 +123,15 @@ func (rp requestPrefix) Fileinfo(request sftp.Request) ([]os.FileInfo, error) {
 
 func (rp requestPrefix) getFile(path string, flags int, mode os.FileMode) (*os.File, error) {
 	filePath, err := rp.validate(path)
+	folderPath := filepath.Dir(filePath)
 	if err != nil {
 		return nil, rp.maskError(err)
+	}
+
+	if flags&os.O_CREATE == 1  {
+		if _, err := os.Stat(folderPath); os.IsNotExist(err) {
+			os.MkdirAll(folderPath, 0755)
+		}
 	}
 	file, err := os.OpenFile(filePath, flags, mode)
 	if err != nil {
