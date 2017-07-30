@@ -80,7 +80,8 @@ const Factorio = `{
         "required": true,
         "desc": "What port to bind the server to",
         "display": "Port",
-        "internal": false
+        "internal": false,
+        "type": "integer"
       },
       "server-settings": {
         "value": "factorio/data/server-settings.json",

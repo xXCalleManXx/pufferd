@@ -48,7 +48,8 @@ const Bungeecord = `{
       	"required": true,
       	"desc": "How much memory in MB to allocate to the Java Heap",
       	"display": "Memory (MB)",
-      	"internal": false
+      	"internal": false,
+      	"type": "integer"
       },
       "ip": {
         "value": "0.0.0.0",
@@ -62,7 +63,8 @@ const Bungeecord = `{
         "required": true,
         "desc": "What port to bind the server to",
         "display": "Port",
-        "internal": false
+        "internal": false,
+        "type": "integer"
       }
     }
   }
@@ -128,7 +130,8 @@ const Spigot = `{
       	"required": true,
       	"desc": "How much memory in MB to allocate to the Java Heap",
       	"display": "Memory (MB)",
-      	"internal": false
+      	"internal": false,
+      	"type": "integer"
       },
       "ip": {
         "value": "0.0.0.0",
@@ -142,14 +145,16 @@ const Spigot = `{
         "required": true,
         "desc": "What port to bind the server to",
         "display": "Port",
-        "internal": false
+        "internal": false,
+        "type": "integer"
       },
       "eula": {
         "value": "false",
         "required": true,
         "desc": "Do you agree to the Minecraft EULA?",
         "display": "EULA Agreement (true/false)",
-        "internal": false
+        "internal": false,
+        "type": "boolean"
       }
     }
   }
@@ -215,7 +220,8 @@ const CraftbukkitBySpigot = `{
       	"required": true,
       	"desc": "How much memory in MB to allocate to the Java Heap",
       	"display": "Memory (MB)",
-      	"internal": false
+      	"internal": false,
+      	"type": "integer"
       },
       "ip": {
         "value": "0.0.0.0",
@@ -229,14 +235,16 @@ const CraftbukkitBySpigot = `{
         "required": true,
         "desc": "What port to bind the server to",
         "display": "Port",
-        "internal": false
+        "internal": false,
+        "type": "integer"
       },
       "eula": {
         "value": "false",
         "required": true,
         "desc": "Do you (or the server owner) agree to the <a href='https://account.mojang.com/documents/minecraft_eula'>Minecraft EULA?</a>",
-        "display": "EULA Agreement (true/false)",
-        "internal": false
+        "display": "EULA Agreement",
+        "internal": false,
+        "type": "boolean"
       }
     }
   }
@@ -296,7 +304,8 @@ const Vanilla = `{
       	"required": true,
       	"desc": "How much memory in MB to allocate to the Java Heap",
       	"display": "Memory (MB)",
-      	"internal": false
+      	"internal": false,
+      	"type": "integer"
       },
       "ip": {
         "value": "0.0.0.0",
@@ -316,8 +325,9 @@ const Vanilla = `{
         "value": "false",
         "required": true,
         "desc": "Do you (or the server owner) agree to the <a href='https://account.mojang.com/documents/minecraft_eula'>Minecraft EULA?</a>",
-        "display": "EULA Agreement (true/false)",
-        "internal": false
+        "display": "EULA Agreement",
+        "internal": false,
+        "type": "boolean"
       }
     }
   }
@@ -381,7 +391,8 @@ const Forge = `{
       	"required": true,
       	"desc": "How much memory in MB to allocate to the Java Heap",
       	"display": "Memory (MB)",
-      	"internal": false
+      	"internal": false,
+      	"type": "integer"
       },
       "ip": {
         "value": "0.0.0.0",
@@ -395,14 +406,16 @@ const Forge = `{
         "required": true,
         "desc": "What port to bind the server to",
         "display": "Port",
-        "internal": false
+        "internal": false,
+        "type": "integer"
       },
       "eula": {
         "value": "false",
         "required": true,
         "desc": "Do you (or the server owner) agree to the <a href='https://account.mojang.com/documents/minecraft_eula'>Minecraft EULA?</a>",
         "display": "EULA Agreement (true/false)",
-        "internal": false
+        "internal": false,
+        "type": "boolean"
       },
       "version": {
       	"value": "1.11.2-13.20.1.2393",
@@ -485,7 +498,8 @@ const Sponge = `{
       	"required": true,
       	"desc": "How much memory in MB to allocate to the Java Heap",
       	"display": "Memory (MB)",
-      	"internal": false
+      	"internal": false,
+      	"type": "integer"
       },
       "ip": {
         "value": "0.0.0.0",
@@ -499,14 +513,16 @@ const Sponge = `{
         "required": true,
         "desc": "What port to bind the server to",
         "display": "Port",
-        "internal": false
+        "internal": false,
+        "type": "integer"
       },
       "eula": {
         "value": "false",
         "required": true,
         "desc": "Do you (or the server owner) agree to the <a href='https://account.mojang.com/documents/minecraft_eula'>Minecraft EULA?</a>",
         "display": "EULA Agreement (true/false)",
-        "internal": false
+        "internal": false,
+        "type": "boolean"
       },
       "spongeversion": {
       	"value": "1.11.2-2393-6.1.0-BETA-2471",

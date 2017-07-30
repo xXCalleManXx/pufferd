@@ -62,7 +62,8 @@ const SRCDS = `{
         "required": true,
         "desc": "App ID",
         "display": "Application ID",
-        "internal": false
+        "internal": false,
+        "type": "integer"
       },
       "gametype": {
         "value": "tf",
@@ -90,7 +91,8 @@ const SRCDS = `{
         "required": true,
         "desc": "What port to bind the server to",
         "display": "Port",
-        "internal": false
+        "internal": false,
+        "type": "integer"
       }
     }
   }
@@ -157,7 +159,8 @@ const TF2 = `{
         "required": true,
         "desc": "What port to bind the server to",
         "display": "Port",
-        "internal": false
+        "internal": false,
+        "type": "integer"
       }
     }
   }
@@ -237,7 +240,8 @@ const CSGO = `{
         "required": true,
         "desc": "Max players allowed on server",
         "display": "Max Players",
-        "internal": false
+        "internal": false,
+        "type": "integer"
       },
       "gslt": {
         "value": "GSLTTOKEN",
@@ -258,49 +262,56 @@ const CSGO = `{
         "required": true,
         "desc": "What port to bind the server to",
         "display": "Port",
-        "internal": false
+        "internal": false,
+        "type": "integer"
       },
       "clientport": {
         "value": "27016",
         "required": true,
         "desc": "What port to bind the clientport to",
         "display": "Client Port",
-        "internal": false
+        "internal": false,
+        "type": "integer"
       },
       "tvport": {
         "value": "27017",
         "required": true,
         "desc": "What port to bind the GOTV to",
         "display": "GOTV Port",
-        "internal": false
+        "internal": false,
+        "type": "integer"
       },
       "tickrate": {
         "value": "64",
         "required": true,
         "desc": "Server tick rate",
         "display": "Tickrate",
-        "internal": false
+        "internal": false,
+        "type": "integer"
       },
       "mapgroup": {
         "value": "mg_active",
         "required": true,
         "desc": "(Advanced) Map group",
         "display": "Map group",
-        "internal": false
+        "internal": false,
+        "type": "integer"
       },
       "gamemode": {
         "value": "0",
         "required": true,
         "desc": "(Advanced) Gamemode",
         "display": "Gamemode",
-        "internal": false
+        "internal": false,
+        "type": "integer"
       },
       "gametype": {
         "value": "0",
         "required": true,
         "desc": "(Advanced) Gametype",
         "display": "Gametype",
-        "internal": false
+        "internal": false,
+        "type": "integer"
       }
     }
   }
@@ -364,7 +375,8 @@ const GMOD = `{
         "required": true,
         "desc": "Max players allowed on server",
         "display": "Max Players",
-        "internal": false
+        "internal": false,
+        "type": "integer"
       },
       "ip": {
         "value": "0.0.0.0",
@@ -378,7 +390,8 @@ const GMOD = `{
         "required": true,
         "desc": "What port to bind the server to",
         "display": "Port",
-        "internal": false
+        "internal": false,
+        "type": "integer"
       }
     }
   }
