@@ -93,7 +93,7 @@ const Spigot = `{
         },
         {
           "type": "writefile",
-          "text": "server-ip=${ip}\nserver-port=${port}\n",
+          "text": "server-ip=${ip}\nserver-port=${port}\nmotd=${motd}\n",
           "target": "server.properties"
         },
         {
@@ -155,6 +155,13 @@ const Spigot = `{
         "display": "EULA Agreement (true/false)",
         "internal": false,
         "type": "boolean"
+      },
+      "motd": {
+        "value": "A Minecraft Server\\n\\u00A79 hosted on PufferPanel",
+        "required": true,
+        "desc": "This is the message that is displayed in the server list of the client, below the name. The MOTD does support <a href='https://minecraft.gamepedia.com/Formatting_codes' target='_blank'>color and formatting codes</a>.",
+        "display": "MOTD message of the day",
+        "internal": false
       }
     }
   }
@@ -183,7 +190,7 @@ const CraftbukkitBySpigot = `{
         },
         {
           "type": "writefile",
-          "text": "server-ip=${ip}\nserver-port=${port}\n",
+          "text": "server-ip=${ip}\nserver-port=${port}\nmotd=${motd}\n",
           "target": "server.properties"
         },
         {
@@ -245,6 +252,13 @@ const CraftbukkitBySpigot = `{
         "display": "EULA Agreement",
         "internal": false,
         "type": "boolean"
+      },
+      "motd": {
+        "value": "A Minecraft Server\\n\\u00A79 hosted on PufferPanel",
+        "required": true,
+        "desc": "This is the message that is displayed in the server list of the client, below the name. The MOTD does support <a href='https://minecraft.gamepedia.com/Formatting_codes' target='_blank'>color and formatting codes</a>.",
+        "display": "MOTD message of the day",
+        "internal": false
       }
     }
   }
@@ -267,7 +281,7 @@ const Vanilla = `{
         },
         {
           "type": "writefile",
-          "text": "server-ip=${ip}\nserver-port=${port}\n",
+          "text": "server-ip=${ip}\nserver-port=${port}\nmotd=${motd}\n",
           "target": "server.properties"
         },
         {
@@ -328,6 +342,13 @@ const Vanilla = `{
         "display": "EULA Agreement",
         "internal": false,
         "type": "boolean"
+      },
+      "motd": {
+        "value": "A Minecraft Server\\n\\u00A79 hosted on PufferPanel",
+        "required": true,
+        "desc": "This is the message that is displayed in the server list of the client, below the name. The MOTD does support <a href='https://minecraft.gamepedia.com/Formatting_codes' target='_blank'>color and formatting codes</a>.",
+        "display": "MOTD message of the day",
+        "internal": false
       }
     }
   }
@@ -356,7 +377,7 @@ const Forge = `{
         },
         {
           "type": "writefile",
-          "text": "server-ip=${ip}\nserver-port=${port}\n",
+          "text": "server-ip=${ip}\nserver-port=${port}\nmotd=${motd}\n",
           "target": "server.properties"
         },
         {
@@ -423,6 +444,13 @@ const Forge = `{
       	"desc": "Version of Forge to install (may be located <a href='http://files.minecraftforge.net/#Downloads'>here</a>",
       	"display": "Version",
       	"internal": false
+      },
+      "motd": {
+        "value": "A Minecraft Server\\n\\u00A79 hosted on PufferPanel",
+        "required": true,
+        "desc": "This is the message that is displayed in the server list of the client, below the name. The MOTD does support <a href='https://minecraft.gamepedia.com/Formatting_codes' target='_blank'>color and formatting codes</a>.",
+        "display": "MOTD message of the day",
+        "internal": false
       }
     }
   }
@@ -468,7 +496,7 @@ const Sponge = `{
         },
         {
           "type": "writefile",
-          "text": "server-ip=${ip}\nserver-port=${port}\n",
+          "text": "server-ip=${ip}\nserver-port=${port}\nmotd=${motd}\n",
           "target": "server.properties"
         },
         {
@@ -537,6 +565,13 @@ const Sponge = `{
       	"desc": "Version of Forge to install (use version specified by Sponge)",
       	"display": "Forge Version",
       	"internal": false
+      },
+      "motd": {
+        "value": "A Minecraft Server\\n\\u00A79 hosted on PufferPanel",
+        "required": true,
+        "desc": "This is the message that is displayed in the server list of the client, below the name. The MOTD does support <a href='https://minecraft.gamepedia.com/Formatting_codes' target='_blank'>color and formatting codes</a>.",
+        "display": "MOTD message of the day",
+        "internal": false
       }
     }
   }
