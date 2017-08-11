@@ -307,7 +307,7 @@ const Vanilla = `{
     },
     "data": {
       "version": {
-      	"value": "1.12",
+      	"value": "1.12.1",
       	"required": true,
       	"desc": "Version of Minecraft to install",
       	"display": "Version",
@@ -439,7 +439,7 @@ const Forge = `{
         "type": "boolean"
       },
       "version": {
-      	"value": "1.11.2-13.20.1.2393",
+      	"value": "1.12.1-14.22.0.2452",
       	"required": true,
       	"desc": "Version of Forge to install (may be located <a href='http://files.minecraftforge.net/#Downloads'>here</a>",
       	"display": "Version",
