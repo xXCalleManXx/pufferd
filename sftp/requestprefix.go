@@ -22,17 +22,17 @@ func CreateRequestPrefix(prefix string) sftp.Handlers {
 	return sftp.Handlers{h, h, h, h}
 }
 
-func (rp requestPrefix) Fileread(request sftp.Request) (io.ReaderAt, error) {
+func (rp requestPrefix) Fileread(request *sftp.Request) (io.ReaderAt, error) {
 	file, err := rp.getFile(request.Filepath, os.O_RDONLY, 0644)
 	return file, err
 }
 
-func (rp requestPrefix) Filewrite(request sftp.Request) (io.WriterAt, error) {
+func (rp requestPrefix) Filewrite(request *sftp.Request) (io.WriterAt, error) {
 	file, err := rp.getFile(request.Filepath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	return file, err
 }
 
-func (rp requestPrefix) Filecmd(request sftp.Request) error {
+func (rp requestPrefix) Filecmd(request *sftp.Request) error {
 	sourceName, err := rp.validate(request.Filepath)
 	if err != nil {
 		return rp.maskError(err)
@@ -74,7 +74,7 @@ func (rp requestPrefix) Filecmd(request sftp.Request) error {
 	}
 }
 
-func (rp requestPrefix) Fileinfo(request sftp.Request) ([]os.FileInfo, error) {
+func (rp requestPrefix) Filelist(request *sftp.Request) (sftp.ListerAt, error) {
 	sourceName, err := rp.validate(request.Filepath)
 	if err != nil {
 		return nil, rp.maskError(err)
@@ -86,7 +86,12 @@ func (rp requestPrefix) Fileinfo(request sftp.Request) ([]os.FileInfo, error) {
 			if err != nil {
 				return nil, rp.maskError(err)
 			}
-			return file.Readdir(0)
+			files, err := file.Readdir(0)
+			if err != nil {
+				return nil, err
+			} else {
+				return listerat(files), nil
+			}
 		}
 	case "Stat":
 		{
@@ -98,7 +103,7 @@ func (rp requestPrefix) Fileinfo(request sftp.Request) ([]os.FileInfo, error) {
 			if err != nil {
 				return nil, rp.maskError(err)
 			}
-			return []os.FileInfo{fi}, nil
+			return listerat([]os.FileInfo{fi}), nil
 		}
 	case "Readlink":
 		{
@@ -114,7 +119,7 @@ func (rp requestPrefix) Fileinfo(request sftp.Request) ([]os.FileInfo, error) {
 			if err != nil {
 				return nil, rp.maskError(err)
 			}
-			return []os.FileInfo{fi}, nil
+			return listerat([]os.FileInfo{fi}), nil
 		}
 	default:
 		return nil, errors.New(fmt.Sprint("Unknown request method: %s", request.Method))
@@ -167,4 +172,19 @@ func (rp requestPrefix) stripPrefix(path string) string {
 
 func (rp requestPrefix) maskError(err error) error {
 	return errors.New(rp.stripPrefix(err.Error()))
+}
+
+type listerat []os.FileInfo
+
+// Modeled after strings.Reader's ReadAt() implementation
+func (f listerat) ListAt(ls []os.FileInfo, offset int64) (int, error) {
+	var n int
+	if offset >= int64(len(f)) {
+		return 0, io.EOF
+	}
+	n = copy(ls, f[offset:])
+	if n < len(ls) {
+		return n, io.EOF
+	}
+	return n, nil
 }
