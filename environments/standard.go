@@ -81,8 +81,9 @@ func (s *standard) ExecuteAsync(cmd string, args []string) (err error) {
 	}()
 	if err != nil && err.Error() != "exit status 1" {
 		logging.Error("Error starting process", err)
+	} else {
+		logging.Debug("Process started (" + strconv.Itoa(s.mainProcess.Process.Pid) + ")")
 	}
-	logging.Debug("Process started (" + strconv.Itoa(s.mainProcess.Process.Pid) + ")")
 	return
 }
 
