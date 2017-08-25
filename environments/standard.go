@@ -189,8 +189,10 @@ func (s *standard) GetStats() (map[string]interface{}, error) {
 func (s *standard) DisplayToConsole(msg string, data ...interface{}) {
 	if len(data) == 0 {
 		fmt.Fprint(s.ConsoleBuffer, msg)
+		fmt.Fprint(s.WSManager, msg)
 	} else {
 		fmt.Fprintf(s.ConsoleBuffer, msg, data...)
+		fmt.Fprintf(s.WSManager, msg, data...)
 	}
 }
 
