@@ -94,7 +94,7 @@ func main() {
 	}
 
 	if uninstall {
-		fmt.Println("This option will UNINSTALL pufferd, are you sure? Please enter "yes" to proceed [no]")
+		fmt.Println("This option will UNINSTALL pufferd, are you sure? Please enter \"yes\" to proceed [no]")
 		var response string
 		fmt.Scanln(&response)
 		if strings.ToLower(response) == "yes" || strings.ToLower(response) == "y" {
