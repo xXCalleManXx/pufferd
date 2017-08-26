@@ -30,7 +30,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"github.com/itsjamie/gin-cors"
 	"github.com/pkg/errors"
 	"github.com/pufferpanel/apufferi/common"
 	"github.com/pufferpanel/apufferi/http"
@@ -358,7 +357,7 @@ func DeleteFile(c *gin.Context) {
 		return
 	}
 
-	err := os.Remove(targetFile)
+	err := os.RemoveAll(targetFile)
 	if err != nil {
 		errorConnection(c, err)
 		logging.Error("Failed to delete file", err)
