@@ -103,10 +103,7 @@ func StopServer(c *gin.Context) {
 	item, _ := c.Get("server")
 	server := item.(programs.Program)
 
-	wait := c.Param("wait")
-	if wait == "" || (wait != "true" && wait != "false") {
-		wait = "true"
-	}
+	_, wait := c.GetQuery("wait")
 
 	err := server.Stop()
 	if err != nil {
@@ -114,7 +111,7 @@ func StopServer(c *gin.Context) {
 		return
 	}
 
-	if wait == "true" {
+	if wait {
 		err = server.GetEnvironment().WaitForMainProcess()
 		if err != nil {
 			errorConnection(c, err)
