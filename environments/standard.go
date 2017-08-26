@@ -93,7 +93,7 @@ func (s *standard) ExecuteInMainProcess(cmd string) (err error) {
 		return
 	}
 	stdIn := s.stdInWriter
-	_, err = io.WriteString(stdIn, cmd+"\r")
+	_, err = io.WriteString(stdIn, cmd+"\n")
 	return
 }
 
