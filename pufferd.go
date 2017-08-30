@@ -76,7 +76,7 @@ func main() {
 	flag.BoolVar(&installService, "installService", false, "Installs the pufferd service file")
 	flag.Parse()
 
-	versionString := fmt.Sprintf("pufferd %s (%s %s)", VERSION, BUILDDATE, GITHASH)
+	versionString := fmt.Sprintf("pufferd %s (%s)", VERSION, GITHASH)
 
 	if pid != 0 {
 		logging.Info("Shutting down")
