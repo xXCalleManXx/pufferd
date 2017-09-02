@@ -26,34 +26,16 @@ import (
 	"syscall"
 	"time"
 
-	"fmt"
-
-	"github.com/gorilla/websocket"
-	"github.com/pufferpanel/apufferi/cache"
-	"github.com/pufferpanel/apufferi/config"
 	"github.com/pufferpanel/apufferi/logging"
 	ppError "github.com/pufferpanel/pufferd/errors"
-	"github.com/pufferpanel/pufferd/utils"
 	"github.com/shirou/gopsutil/process"
 )
 
 type standard struct {
-	RootDirectory string
-	ConsoleBuffer cache.Cache
-	WSManager     utils.WebSocketManager
+	*BaseEnvironment
 	mainProcess   *exec.Cmd
 	stdInWriter   io.Writer
-	wait          sync.WaitGroup
-}
 
-func (s *standard) Execute(cmd string, args []string) (stdOut []byte, err error) {
-	stdOut = make([]byte, 0)
-	err = s.ExecuteAsync(cmd, args)
-	if err != nil {
-		return
-	}
-	err = s.WaitForMainProcess()
-	return
 }
 
 func (s *standard) ExecuteAsync(cmd string, args []string) (err error) {
@@ -133,43 +115,6 @@ func (s *standard) IsRunning() (isRunning bool) {
 	return
 }
 
-func (s *standard) WaitForMainProcess() error {
-	return s.WaitForMainProcessFor(0)
-}
-
-func (s *standard) WaitForMainProcessFor(timeout int) (err error) {
-	if s.IsRunning() {
-		if timeout > 0 {
-			var timer = time.AfterFunc(time.Duration(timeout)*time.Millisecond, func() {
-				err = s.Kill()
-			})
-			s.wait.Wait()
-			timer.Stop()
-		} else {
-			s.wait.Wait()
-		}
-	}
-	return
-}
-
-func (s *standard) GetRootDirectory() string {
-	return s.RootDirectory
-}
-
-func (s *standard) GetConsole() (console []string, epoch int64) {
-	console, epoch = s.ConsoleBuffer.Read()
-	return
-}
-
-func (s *standard) GetConsoleFrom(time int64) (console []string, epoch int64) {
-	console, epoch = s.ConsoleBuffer.ReadFrom(time)
-	return
-}
-
-func (s *standard) AddListener(ws *websocket.Conn) {
-	s.WSManager.Register(ws)
-}
-
 func (s *standard) GetStats() (map[string]interface{}, error) {
 	if !s.IsRunning() {
 		return nil, ppError.NewServerOffline()
@@ -184,21 +129,4 @@ func (s *standard) GetStats() (map[string]interface{}, error) {
 	cpu, _ := process.Percent(time.Millisecond * 50)
 	resultMap["cpu"] = cpu
 	return resultMap, nil
-}
-
-func (s *standard) DisplayToConsole(msg string, data ...interface{}) {
-	if len(data) == 0 {
-		fmt.Fprint(s.ConsoleBuffer, msg)
-		fmt.Fprint(s.WSManager, msg)
-	} else {
-		fmt.Fprintf(s.ConsoleBuffer, msg, data...)
-		fmt.Fprintf(s.WSManager, msg, data...)
-	}
-}
-
-func (s *standard) createWrapper() io.Writer {
-	if config.Get("forward") == "true" {
-		return io.MultiWriter(os.Stdout, s.ConsoleBuffer, s.WSManager)
-	}
-	return io.MultiWriter(s.ConsoleBuffer, s.WSManager)
 }

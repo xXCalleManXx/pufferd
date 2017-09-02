@@ -18,6 +18,14 @@ package environments
 
 import (
 	"github.com/gorilla/websocket"
+	"github.com/pufferpanel/apufferi/cache"
+	"github.com/pufferpanel/pufferd/utils"
+	"time"
+	"fmt"
+	"io"
+	"os"
+	"github.com/pufferpanel/apufferi/config"
+	"sync"
 )
 
 type Environment interface {
@@ -58,4 +66,76 @@ type Environment interface {
 	GetStats() (map[string]interface{}, error)
 
 	DisplayToConsole(msg string, data ...interface{})
+}
+
+type BaseEnvironment struct {
+	Environment
+	RootDirectory string
+	ConsoleBuffer cache.Cache
+	WSManager utils.WebSocketManager
+	wait          sync.WaitGroup
+}
+
+func (e *BaseEnvironment) Execute(cmd string, args []string) (stdOut []byte, err error) {
+	stdOut = make([]byte, 0)
+	err = e.ExecuteAsync(cmd, args)
+	if err != nil {
+		return
+	}
+	err = e.WaitForMainProcess()
+	return
+}
+
+func (e *BaseEnvironment) WaitForMainProcess() error {
+	return e.WaitForMainProcessFor(0)
+}
+
+func (e *BaseEnvironment) WaitForMainProcessFor(timeout int) (err error) {
+	if e.IsRunning() {
+		if timeout > 0 {
+			var timer = time.AfterFunc(time.Duration(timeout)*time.Millisecond, func() {
+				err = e.Kill()
+			})
+			e.wait.Wait()
+			timer.Stop()
+		} else {
+			e.wait.Wait()
+		}
+	}
+	return
+}
+
+func (e *BaseEnvironment) GetRootDirectory() string {
+	return e.RootDirectory
+}
+
+func (e *BaseEnvironment) GetConsole() (console []string, epoch int64) {
+	console, epoch = e.ConsoleBuffer.Read()
+	return
+}
+
+func (e *BaseEnvironment) GetConsoleFrom(time int64) (console []string, epoch int64) {
+	console, epoch = e.ConsoleBuffer.ReadFrom(time)
+	return
+}
+
+func (e *BaseEnvironment) AddListener(ws *websocket.Conn) {
+	e.WSManager.Register(ws)
+}
+
+func (e *BaseEnvironment) DisplayToConsole(msg string, data ...interface{}) {
+	if len(data) == 0 {
+		fmt.Fprint(e.ConsoleBuffer, msg)
+		fmt.Fprint(e.WSManager, msg)
+	} else {
+		fmt.Fprintf(e.ConsoleBuffer, msg, data...)
+		fmt.Fprintf(e.WSManager, msg, data...)
+	}
+}
+
+func (e *BaseEnvironment) createWrapper() io.Writer {
+	if config.Get("forward") == "true" {
+		return io.MultiWriter(os.Stdout, e.ConsoleBuffer, e.WSManager)
+	}
+	return io.MultiWriter(e.ConsoleBuffer, e.WSManager)
 }
