@@ -152,6 +152,8 @@ func main() {
 	config.Load(configPath)
 
 	logging.SetLevelByString(loggingLevel)
+	var logPath = config.GetOrDefault("logPath", "logs")
+	logging.SetLogFolder(logPath)
 	logging.Init()
 	gin.SetMode(gin.ReleaseMode)
 
