@@ -15,7 +15,7 @@ func LoadEnvironment(environmentType, folder, id string, environmentSection map[
 	switch environmentType {
 	default:
 		logging.Debugf("Loading server as standard")
-		s := &standard{}
+		s := &standard{BaseEnvironment: &BaseEnvironment{}}
 		s.RootDirectory = rootDirectory
 		s.ConsoleBuffer = cache
 		s.WSManager = wsManager
