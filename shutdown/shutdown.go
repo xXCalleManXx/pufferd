@@ -41,6 +41,9 @@ func Shutdown() *sync.WaitGroup {
 				}
 			}()
 			logging.Warn("Stopping program " + e.Id())
+			if !e.IsRunning() {
+				return
+			}
 			err := e.Stop()
 			if err != nil {
 				logging.Error("Error stopping server "+e.Id(), err)
