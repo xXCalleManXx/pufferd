@@ -89,7 +89,7 @@ func main() {
 			configPath = "/etc/pufferd/config.json"
 		} else {
 			logging.Error("Cannot find a config file!")
-			logging.Warn("pufferd could be unstable")
+			Shutdown.CompleteShutdown()
 		}
 	}
 
