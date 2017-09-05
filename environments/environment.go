@@ -133,6 +133,19 @@ func (e *BaseEnvironment) DisplayToConsole(msg string, data ...interface{}) {
 	}
 }
 
+func (e *BaseEnvironment) Create() error {
+	return os.Mkdir(e.RootDirectory, 0755)
+}
+
+func (e *BaseEnvironment) Update() error {
+	return nil
+}
+
+func (e *BaseEnvironment) Delete() (err error) {
+	err = os.RemoveAll(e.RootDirectory)
+	return
+}
+
 func (e *BaseEnvironment) createWrapper() io.Writer {
 	if config.Get("forward") == "true" {
 		return io.MultiWriter(os.Stdout, e.ConsoleBuffer, e.WSManager)

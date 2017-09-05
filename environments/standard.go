@@ -89,19 +89,6 @@ func (s *standard) Kill() (err error) {
 	return
 }
 
-func (s *standard) Create() error {
-	return os.Mkdir(s.RootDirectory, 0755)
-}
-
-func (s *standard) Update() error {
-	return nil
-}
-
-func (s *standard) Delete() (err error) {
-	err = os.RemoveAll(s.RootDirectory)
-	return
-}
-
 func (s *standard) IsRunning() (isRunning bool) {
 	isRunning = s.mainProcess != nil && s.mainProcess.Process != nil
 	if isRunning {
