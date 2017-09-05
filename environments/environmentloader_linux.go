@@ -15,7 +15,7 @@ func LoadEnvironment(environmentType, folder, id string, environmentSection map[
 	switch environmentType {
 	case "tty":
 		logging.Debugf("Loading server as tty")
-		t := &tty{BaseEnvironment: &BaseEnvironment{}}
+		t := &tty{standard: &standard{BaseEnvironment: &BaseEnvironment{}}}
 		t.RootDirectory = rootDirectory
 		t.ConsoleBuffer = cache
 		t.WSManager = wsManager
