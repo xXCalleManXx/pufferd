@@ -20,13 +20,13 @@ func LoadEnvironment(environmentType, folder, id string, environmentSection map[
 		t.ConsoleBuffer = cache
 		t.WSManager = wsManager
 		return t
-	//case "docker":
-	//	logging.Debugf("Loading server as tty")
-	//	t := &docker{}
-	//	t.RootDirectory = rootDirectory
-	//	t.ConsoleBuffer = cache
-	//	t.WSManager = wsManager
-	//	return t
+	case "docker":
+		logging.Debugf("Loading server as docker")
+		d := &docker{ContainerId: id, ImageName: common.GetStringOrDefault(environmentSection, "image", "ubuntu:16:04")}
+		d.RootDirectory = rootDirectory
+		d.ConsoleBuffer = cache
+		d.WSManager = wsManager
+		return d
 	default:
 		logging.Debugf("Loading server as standard")
 		s := &standard{BaseEnvironment: &BaseEnvironment{}}
