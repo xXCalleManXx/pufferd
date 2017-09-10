@@ -45,7 +45,6 @@ import (
 var (
 	VERSION      = "nightly"
 	MAJORVERSION = "nightly"
-	BUILDDATE    = "unknown"
 	GITHASH      = "unknown"
 )
 
@@ -199,8 +198,7 @@ func main() {
 
 	r := routing.ConfigureWeb()
 
-	var useHttps bool
-	useHttps = false
+	useHttps := false
 
 	dataFolder := config.GetOrDefault("datafolder", "data")
 	httpsPem := filepath.Join(dataFolder, "https.pem")
