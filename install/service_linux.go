@@ -32,7 +32,7 @@ Description=pufferd daemon service
 [Service]
 Type=simple
 WorkingDirectory=/srv/pufferd
-ExecStart=/srv/pufferd/pufferd
+ExecStart=/srv/pufferd/pufferd -daemon
 ExecStop=/srv/pufferd/pufferd -shutdown $MAINPID
 User=pufferd
 Group=pufferd
