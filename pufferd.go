@@ -61,6 +61,7 @@ func main() {
 	var configPath string
 	var pid int
 	var installService bool
+	var runDaemon bool
 	flag.StringVar(&loggingLevel, "logging", "INFO", "Lowest logging level to display")
 	flag.StringVar(&authRoot, "auth", "", "Base URL to the authorization server")
 	flag.StringVar(&authToken, "token", "", "Authorization token")
@@ -73,6 +74,7 @@ func main() {
 	flag.StringVar(&configPath, "config", "config.json", "Path to pufferd config.json")
 	flag.IntVar(&pid, "shutdown", 0, "PID to shut down")
 	flag.BoolVar(&installService, "installService", false, "Installs the pufferd service file")
+	flag.BoolVar(&runDaemon, "daemon", false, "Runs the daemon")
 	flag.Parse()
 
 	versionString := fmt.Sprintf("pufferd %s (%s)", VERSION, GITHASH)
@@ -111,7 +113,7 @@ func main() {
 		return
 	}
 
-	if version {
+	if version || !daemon {
 		os.Stdout.WriteString(versionString + "\r\n")
 	}
 
@@ -163,7 +165,7 @@ func main() {
 		install.Install(configPath, authRoot, authToken)
 	}
 
-	if runInstaller || installService {
+	if runInstaller || installService || !runDaemon {
 		return
 	}
 
