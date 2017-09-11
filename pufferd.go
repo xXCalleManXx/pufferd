@@ -113,7 +113,7 @@ func main() {
 		return
 	}
 
-	if version || !daemon {
+	if version || !runDaemon {
 		os.Stdout.WriteString(versionString + "\r\n")
 	}
 
