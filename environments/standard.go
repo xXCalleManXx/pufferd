@@ -38,7 +38,7 @@ type standard struct {
 
 }
 
-func (s *standard) ExecuteAsync(cmd string, args []string) (err error) {
+func (s *standard) ExecuteAsync(cmd string, args []string, callback func(graceful bool)) (err error) {
 	if s.IsRunning() {
 		err = errors.New("A process is already running (" + strconv.Itoa(s.mainProcess.Process.Pid) + ")")
 		return
@@ -60,6 +60,9 @@ func (s *standard) ExecuteAsync(cmd string, args []string) (err error) {
 	go func() {
 		s.mainProcess.Wait()
 		s.wait.Done()
+		if callback != nil {
+			callback(s.mainProcess.ProcessState.Success())
+		}
 	}()
 	if err != nil && err.Error() != "exit status 1" {
 		logging.Error("Error starting process", err)

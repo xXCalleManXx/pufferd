@@ -103,12 +103,16 @@ func (p *programData) Start() (err error) {
 		data[k] = v.(map[string]interface{})["value"]
 	}
 
-	err = p.Environment.ExecuteAsync(p.RunData.Program, common.ReplaceTokensInArr(p.RunData.Arguments, data))
+	err = p.Environment.ExecuteAsync(p.RunData.Program, common.ReplaceTokensInArr(p.RunData.Arguments, data), func(graceful bool) {
+		if (graceful && p.RunData.AutoRestartFromGraceful) || (!graceful && p.RunData.AutoRestartFromCrash) {
+			p.Start()
+		}
+	})
 	if err != nil {
+		logging.Error("Error starting server", err)
 		p.Environment.DisplayToConsole("Failed to start server\n")
-	} else {
-		//p.Environment.DisplayToConsole("Server started\n")
 	}
+
 	return
 }
 
@@ -315,4 +319,6 @@ type Runtime struct {
 	Arguments []string `json:"arguments"`
 	Enabled   bool     `json:"enabled"`
 	AutoStart bool     `json:"autostart"`
+	AutoRestartFromCrash bool `json:"autorecover"`
+	AutoRestartFromGraceful bool `json:"autorestart"`
 }

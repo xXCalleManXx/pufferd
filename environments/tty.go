@@ -36,7 +36,7 @@ type tty struct {
 	stdInWriter   io.Writer
 }
 
-func (s *tty) ExecuteAsync(cmd string, args []string) (err error) {
+func (s *tty) ExecuteAsync(cmd string, args []string, callback func(graceful bool)) (err error) {
 	if s.IsRunning() {
 		err = errors.New("A process is already running (" + strconv.Itoa(s.mainProcess.Process.Pid) + ")")
 		return
@@ -62,8 +62,11 @@ func (s *tty) ExecuteAsync(cmd string, args []string) (err error) {
 		io.Copy(wrapper, tty)
 		process.Wait()
 		s.wait.Done()
+		if callback != nil {
+			callback(s.mainProcess.ProcessState.Success())
+		}
 	}()
-	if err != nil /*&& err.Error() != "exit status 1"*/ {
+	if err != nil {
 		logging.Error("Error starting process", err)
 	}
 	return

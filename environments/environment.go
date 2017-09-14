@@ -30,10 +30,10 @@ import (
 
 type Environment interface {
 	//Executes a command within the environment.
-	Execute(cmd string, args []string) (stdOut []byte, err error)
+	Execute(cmd string, args []string, callback func(graceful bool)) (stdOut []byte, err error)
 
 	//Executes a command within the environment and immediately return
-	ExecuteAsync(cmd string, args []string) (err error)
+	ExecuteAsync(cmd string, args []string, callback func(graceful bool)) (err error)
 
 	//Sends a string to the StdIn of the main program process
 	ExecuteInMainProcess(cmd string) (err error)
@@ -76,9 +76,9 @@ type BaseEnvironment struct {
 	wait          sync.WaitGroup
 }
 
-func (e *BaseEnvironment) Execute(cmd string, args []string) (stdOut []byte, err error) {
+func (e *BaseEnvironment) Execute(cmd string, args []string, callback func(graceful bool)) (stdOut []byte, err error) {
 	stdOut = make([]byte, 0)
-	err = e.ExecuteAsync(cmd, args)
+	err = e.ExecuteAsync(cmd, args, callback)
 	if err != nil {
 		return
 	}

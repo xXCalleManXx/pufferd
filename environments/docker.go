@@ -32,7 +32,7 @@ type docker struct {
 	BaseEnvironment
 }
 
-func (d *docker) ExecuteAsync(cmd string, args []string) (error) {
+func (d *docker) ExecuteAsync(cmd string, args []string, callback func(graceful bool)) (error) {
 	if d.IsRunning() {
 		err := errors.New("A container is already running")
 		return err
