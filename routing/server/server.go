@@ -69,8 +69,6 @@ func RegisterRoutes(e *gin.Engine) {
 		l.POST("/:id/kill", httphandlers.OAuth2Handler("server.stop", true), KillServer)
 
 		l.POST("/:id/install", httphandlers.OAuth2Handler("server.install", true), InstallServer)
-		l.POST("/:id/update", httphandlers.OAuth2Handler("server.install", true), UpdateServer)
-		//l.POST("/:id/update", httphandlers.OAuth2Handler("server.update", true), UpdateServer)
 
 		l.GET("/:id/file/*filename", httphandlers.OAuth2Handler("server.file.get", true), GetFile)
 		l.PUT("/:id/file/*filename", httphandlers.OAuth2Handler("server.file.put", true), PutFile)
@@ -85,8 +83,6 @@ func RegisterRoutes(e *gin.Engine) {
 		l.GET("/:id/logs", httphandlers.OAuth2Handler("server.log", true), GetLogs)
 
 		l.GET("/:id/stats", httphandlers.OAuth2Handler("server.stats", true), GetStats)
-
-		l.POST("/:id/reload", httphandlers.OAuth2Handler("server.reload", true), ReloadServer)
 	}
 	e.GET("/network", httphandlers.OAuth2Handler("server.network", false), NetworkServer)
 }
@@ -179,17 +175,6 @@ func InstallServer(c *gin.Context) {
 	http.Respond(c).Send()
 	go func() {
 		prg.Install()
-	}()
-}
-
-func UpdateServer(c *gin.Context) {
-	item, _ := c.Get("server")
-	prg := item.(programs.Program)
-
-	http.Respond(c).Status(202).Send()
-
-	go func() {
-		prg.Update()
 	}()
 }
 
@@ -412,18 +397,6 @@ func GetStats(c *gin.Context) {
 	} else {
 		http.Respond(c).Data(results).Send()
 	}
-}
-
-func ReloadServer(c *gin.Context) {
-	item, _ := c.Get("server")
-	server := item.(programs.Program)
-
-	err := programs.Reload(server.Id())
-	if err != nil {
-		errorConnection(c, err)
-		return
-	}
-	http.Respond(c).Send()
 }
 
 func NetworkServer(c *gin.Context) {

@@ -74,7 +74,7 @@ func main() {
 	flag.StringVar(&configPath, "config", "config.json", "Path to pufferd config.json")
 	flag.IntVar(&pid, "shutdown", 0, "PID to shut down")
 	flag.BoolVar(&installService, "installService", false, "Installs the pufferd service file")
-	flag.BoolVar(&runDaemon, "daemon", false, "Runs the daemon")
+	flag.BoolVar(&runDaemon, "run", false, "Runs the daemon")
 	flag.Parse()
 
 	versionString := fmt.Sprintf("pufferd %s (%s)", VERSION, GITHASH)

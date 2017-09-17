@@ -43,7 +43,7 @@ func (d *docker) ExecuteAsync(cmd string, args []string, callback func(graceful 
 
 func (d *docker) ExecuteInMainProcess(cmd string) (err error) {
 	if !d.IsRunning() {
-		err = errors.New("Main process has not been started")
+		err = errors.New("main process has not been started")
 		return
 	}
 	//stdIn := d.stdInWriter

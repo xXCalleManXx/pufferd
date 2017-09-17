@@ -48,8 +48,6 @@ type Program interface {
 	//This will delete the server, environment, and any files related to it.
 	Destroy() (err error)
 
-	Update() (err error)
-
 	Install() (err error)
 
 	//Determines if the server is running.
@@ -77,30 +75,19 @@ type Program interface {
 
 	Edit(data map[string]interface{}) (err error)
 
-	Reload(data Program)
-
-	GetData() map[string]interface{}
+	GetData() map[string]DataObject
 
 	GetNetwork() string
 }
 
-type programData struct {
-	RunData     Runtime                  `json:"run"`
-	InstallData operations.Process       `json:"install"`
-	UpdateData  operations.Process       `json:"update"`
-	Environment environments.Environment `json:"environment"`
-	Identifier  string                   `json:"id"`
-	Data        map[string]interface{}   `json:"data"`
-}
-
 //Starts the program.
 //This includes starting the environment if it is not running.
-func (p *programData) Start() (err error) {
+func (p *ProgramData) Start() (err error) {
 	logging.Debugf("Starting server %s", p.Id())
 	p.Environment.DisplayToConsole("Starting server\n")
 	data := make(map[string]interface{})
 	for k, v := range p.Data {
-		data[k] = v.(map[string]interface{})["value"]
+		data[k] = v.Value
 	}
 
 	err = p.Environment.ExecuteAsync(p.RunData.Program, common.ReplaceTokensInArr(p.RunData.Arguments, data), func(graceful bool) {
@@ -118,7 +105,7 @@ func (p *programData) Start() (err error) {
 
 //Stops the program.
 //This will also stop the environment it is ran in.
-func (p *programData) Stop() (err error) {
+func (p *ProgramData) Stop() (err error) {
 	logging.Debugf("Stopping server %s", p.Id())
 	err = p.Environment.ExecuteInMainProcess(p.RunData.Stop)
 	if err != nil {
@@ -131,7 +118,7 @@ func (p *programData) Stop() (err error) {
 
 //Kills the program.
 //This will also stop the environment it is ran in.
-func (p *programData) Kill() (err error) {
+func (p *ProgramData) Kill() (err error) {
 	logging.Debugf("Killing server %s", p.Id())
 	err = p.Environment.Kill()
 	if err != nil {
@@ -144,7 +131,7 @@ func (p *programData) Kill() (err error) {
 
 //Creates any files needed for the program.
 //This includes creating the environment.
-func (p *programData) Create() (err error) {
+func (p *ProgramData) Create() (err error) {
 	logging.Debugf("Creating server %s", p.Id())
 	p.Environment.DisplayToConsole("Allocating server\n")
 	err = p.Environment.Create()
@@ -155,25 +142,13 @@ func (p *programData) Create() (err error) {
 
 //Destroys the server.
 //This will delete the server, environment, and any files related to it.
-func (p *programData) Destroy() (err error) {
+func (p *ProgramData) Destroy() (err error) {
 	logging.Debugf("Destroying server %s", p.Id())
 	err = p.Environment.Delete()
 	return
 }
 
-func (p *programData) Update() (err error) {
-	logging.Debugf("Updating server %s", p.Id())
-	process := operations.GenerateProcess(&p.UpdateData, p.Environment, p.Data)
-	err = process.Run()
-	if err != nil {
-		p.Environment.DisplayToConsole("Error running updater, check daemon logs")
-	} else {
-		p.Environment.DisplayToConsole("Server updated\n")
-	}
-	return
-}
-
-func (p *programData) Install() (err error) {
+func (p *ProgramData) Install() (err error) {
 	logging.Debugf("Installing server %s", p.Id())
 	if p.IsRunning() {
 		err = p.Stop()
@@ -189,7 +164,7 @@ func (p *programData) Install() (err error) {
 
 	os.MkdirAll(p.Environment.GetRootDirectory(), 0755)
 
-	process := operations.GenerateProcess(&p.InstallData, p.Environment, p.Data)
+	process := operations.GenerateProcess(p.InstallData.Operations, p.Environment, p.DataToMap())
 	err = process.Run()
 	if err != nil {
 		p.Environment.DisplayToConsole("Error running installer, check daemon logs")
@@ -200,52 +175,52 @@ func (p *programData) Install() (err error) {
 }
 
 //Determines if the server is running.
-func (p *programData) IsRunning() (isRunning bool) {
+func (p *ProgramData) IsRunning() (isRunning bool) {
 	isRunning = p.Environment.IsRunning()
 	return
 }
 
 //Sends a command to the process
 //If the program supports input, this will send the arguments to that.
-func (p *programData) Execute(command string) (err error) {
+func (p *ProgramData) Execute(command string) (err error) {
 	err = p.Environment.ExecuteInMainProcess(command)
 	return
 }
 
-func (p *programData) SetEnabled(isEnabled bool) (err error) {
+func (p *ProgramData) SetEnabled(isEnabled bool) (err error) {
 	p.RunData.Enabled = isEnabled
 	return
 }
 
-func (p *programData) IsEnabled() (isEnabled bool) {
+func (p *ProgramData) IsEnabled() (isEnabled bool) {
 	isEnabled = p.RunData.Enabled
 	return
 }
 
-func (p *programData) SetEnvironment(environment environments.Environment) (err error) {
+func (p *ProgramData) SetEnvironment(environment environments.Environment) (err error) {
 	p.Environment = environment
 	return
 }
 
-func (p *programData) Id() string {
+func (p *ProgramData) Id() string {
 	return p.Identifier
 }
 
-func (p *programData) GetEnvironment() environments.Environment {
+func (p *ProgramData) GetEnvironment() environments.Environment {
 	return p.Environment
 }
 
-func (p *programData) SetAutoStart(isAutoStart bool) (err error) {
+func (p *ProgramData) SetAutoStart(isAutoStart bool) (err error) {
 	p.RunData.AutoStart = isAutoStart
 	return
 }
 
-func (p *programData) IsAutoStart() (isAutoStart bool) {
+func (p *ProgramData) IsAutoStart() (isAutoStart bool) {
 	isAutoStart = p.RunData.AutoStart
 	return
 }
 
-func (p *programData) Save(file string) (err error) {
+func (p *ProgramData) Save(file string) (err error) {
 	logging.Debugf("Saving server %s", p.Id())
 
 	endResult := make(map[string]interface{})
@@ -260,20 +235,20 @@ func (p *programData) Save(file string) (err error) {
 	return
 }
 
-func (p *programData) Edit(data map[string]interface{}) (err error) {
+func (p *ProgramData) Edit(data map[string]interface{}) (err error) {
 	for k, v := range data {
 		if v == nil || v == "" {
 			delete(p.Data, k)
 		}
 
-		var elem map[string]interface{}
+		var elem DataObject
 
-		if p.Data[k] == nil {
-			elem = make(map[string]interface{})
+		if _, ok := p.Data[k]; ok {
+			elem = p.Data[k]
 		} else {
-			elem = p.Data[k].(map[string]interface{})
+			elem = DataObject{}
 		}
-		elem["value"] = v
+		elem.Value = v
 
 		p.Data[k] = elem
 	}
@@ -281,44 +256,22 @@ func (p *programData) Edit(data map[string]interface{}) (err error) {
 	return
 }
 
-func (p *programData) Reload(data Program) {
-	logging.Debugf("Reloading server %s", p.Id())
-	replacement := data.(*programData)
-	p.Data = replacement.Data
-	p.InstallData = replacement.InstallData
-	p.RunData = replacement.RunData
-}
-
-func (p *programData) GetData() map[string]interface{} {
+func (p *ProgramData) GetData() map[string]DataObject {
 	return p.Data
 }
 
-func (p *programData) GetNetwork() string {
+func (p *ProgramData) GetNetwork() string {
 	data := p.GetData()
 	ip := "0.0.0.0"
 	port := "0"
 
-	ipData := data["ip"]
-	if ipData != nil {
-		ip = ipData.(map[string]interface{})["value"].(string)
+	if ipData, ok := data["ip"]; ok {
+		ip = ipData.Value.(string)
 	}
 
-	portData := data["port"]
-	if portData != nil {
-		port = portData.(map[string]interface{})["value"].(string)
+	if portData, ok := data["port"]; ok {
+		port = portData.Value.(string)
 	}
 
 	return ip + ":" + port
-}
-
-type Runtime struct {
-	Stop string `json:"stop"`
-	//Pre       operations.Process `json:"pre,omitempty"`
-	//Post      operations.Process `json:"post,omitempty"`
-	Program   string   `json:"program"`
-	Arguments []string `json:"arguments"`
-	Enabled   bool     `json:"enabled"`
-	AutoStart bool     `json:"autostart"`
-	AutoRestartFromCrash bool `json:"autorecover"`
-	AutoRestartFromGraceful bool `json:"autorestart"`
 }

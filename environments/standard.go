@@ -74,7 +74,7 @@ func (s *standard) ExecuteAsync(cmd string, args []string, callback func(gracefu
 
 func (s *standard) ExecuteInMainProcess(cmd string) (err error) {
 	if !s.IsRunning() {
-		err = errors.New("Main process has not been started")
+		err = errors.New("main process has not been started")
 		return
 	}
 	stdIn := s.stdInWriter
