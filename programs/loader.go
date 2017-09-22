@@ -90,6 +90,7 @@ func LoadFromData(id string, source []byte) (program Program, err error) {
 	var data struct {
 		ProgramData ProgramData `json:"pufferd"`
 	}
+	data.ProgramData = CreateProgram()
 	err = json.Unmarshal(source, &data)
 	if err != nil {
 		return

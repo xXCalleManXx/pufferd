@@ -47,3 +47,18 @@ func (p ProgramData) DataToMap() map[string]interface{} {
 
 	return result
 }
+
+func CreateProgram() ProgramData{
+	return ProgramData{
+		RunData: RunObject{
+			Enabled: true,
+			AutoStart: true,
+		},
+		Type: "standard",
+		Data: make(map[string]DataObject, 0),
+		Display: "Unknown server",
+		InstallData: InstallSection{
+			Operations: make([]map[string]interface{}, 0),
+		},
+	}
+}
