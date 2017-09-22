@@ -25,6 +25,7 @@ import (
 	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/pufferd/programs/operations"
+	"errors"
 )
 
 type Program interface {
@@ -83,6 +84,10 @@ type Program interface {
 //Starts the program.
 //This includes starting the environment if it is not running.
 func (p *ProgramData) Start() (err error) {
+	if !p.IsEnabled() {
+		logging.Errorf("Server %s is not enabled, cannot start", p.Id())
+		return errors.New("server not enabled")
+	}
 	logging.Debugf("Starting server %s", p.Id())
 	p.Environment.DisplayToConsole("Starting server\n")
 	data := make(map[string]interface{})
@@ -149,6 +154,11 @@ func (p *ProgramData) Destroy() (err error) {
 }
 
 func (p *ProgramData) Install() (err error) {
+	if !p.IsEnabled() {
+		logging.Errorf("Server %s is not enabled, cannot install", p.Id())
+		return errors.New("server not enabled")
+	}
+
 	logging.Debugf("Installing server %s", p.Id())
 	if p.IsRunning() {
 		err = p.Stop()
