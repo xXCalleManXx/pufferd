@@ -24,6 +24,7 @@ import (
 	"github.com/docker/docker/client"
 	"context"
 	"github.com/pufferpanel/apufferi/logging"
+	"github.com/docker/docker/api/types"
 )
 
 type docker struct {
@@ -33,45 +34,81 @@ type docker struct {
 }
 
 func (d *docker) ExecuteAsync(cmd string, args []string, callback func(graceful bool)) (error) {
-	if d.IsRunning() {
-		err := errors.New("A container is already running")
+	running, err := d.IsRunning()
+	if err != nil {
 		return err
 	}
+	if running {
+		return errors.New("container is already running")
+	}
 
-	return nil
+	client, err := d.getClient()
+	config := types.ContainerAttachOptions{
+		Stdin: true,
+	}
+	ctx := context.Background()
+	response, err := client.ContainerAttach(ctx, d.ContainerId, config)
+
+	defer response.Close()
+
+	response.Conn.Write([]byte(cmd))
+	response.Conn.Write([]byte("\n"))
+
+	return err
 }
 
 func (d *docker) ExecuteInMainProcess(cmd string) (err error) {
-	if !d.IsRunning() {
+	running, err := d.IsRunning()
+	if err != nil {
+		return
+	}
+	if !running {
 		err = errors.New("main process has not been started")
 		return
 	}
-	//stdIn := d.stdInWriter
-	//_, err = io.WriteString(stdIn, cmd+"\n")
+	client, err := d.getClient()
+	config := types.ContainerAttachOptions{
+		Stdin: true,
+	}
+	ctx := context.Background()
+	response, err := client.ContainerAttach(ctx, d.ContainerId, config)
+	defer response.Close()
+
+	response.Conn.Write([]byte(cmd))
+	response.Conn.Write([]byte("\n"))
 	return
 }
 
 func (d *docker) Kill() (err error) {
-	if !d.IsRunning() {
+	running, err := d.IsRunning()
+	if err != nil {
+		return err
+	}
+
+	if !running {
 		return
 	}
+
+	client, err := d.getClient()
+	ctx := context.Background()
+	client.ContainerKill(ctx, d.ContainerId, "SIGKILL")
 
 	return
 }
 
-func (d *docker) IsRunning() (bool) {
+func (d *docker) IsRunning() (bool, error) {
 	client, err := d.getClient()
 	if err != nil {
 		logging.Error("Error checking run status", err)
-		return false
+		return false, err
 	}
 	ctx := context.Background()
 	stats, err := client.ContainerInspect(ctx, d.ContainerId)
 	if err != nil {
 		logging.Error("Error checking run status", err)
-		return false
+		return false, err
 	}
-	return stats.State.Running
+	return stats.State.Running, nil
 }
 
 func (d *docker) WaitForMainProcess() error {
@@ -79,7 +116,12 @@ func (d *docker) WaitForMainProcess() error {
 }
 
 func (d *docker) WaitForMainProcessFor(timeout int) (err error) {
-	if d.IsRunning() {
+	running, err := d.IsRunning()
+	if err != nil {
+		return err
+	}
+
+	if running {
 		if timeout > 0 {
 			var timer = time.AfterFunc(time.Duration(timeout)*time.Millisecond, func() {
 				err = d.Kill()
@@ -94,7 +136,12 @@ func (d *docker) WaitForMainProcessFor(timeout int) (err error) {
 }
 
 func (d *docker) GetStats() (map[string]interface{}, error) {
-	if !d.IsRunning() {
+	running, err := d.IsRunning()
+	if err != nil {
+		return nil, err
+	}
+
+	if !running {
 		return nil, ppError.NewServerOffline()
 	}
 	//process, err := process.NewProcess(int32(d.mainProcess.Process.Pid))

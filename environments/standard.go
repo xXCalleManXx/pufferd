@@ -39,8 +39,12 @@ type standard struct {
 }
 
 func (s *standard) ExecuteAsync(cmd string, args []string, callback func(graceful bool)) (err error) {
-	if s.IsRunning() {
-		err = errors.New("A process is already running (" + strconv.Itoa(s.mainProcess.Process.Pid) + ")")
+	running, err := s.IsRunning()
+	if err != nil {
+		return
+	}
+	if running {
+		err = errors.New("process is already running (" + strconv.Itoa(s.mainProcess.Process.Pid) + ")")
 		return
 	}
 	s.mainProcess = exec.Command(cmd, args...)
@@ -73,7 +77,11 @@ func (s *standard) ExecuteAsync(cmd string, args []string, callback func(gracefu
 }
 
 func (s *standard) ExecuteInMainProcess(cmd string) (err error) {
-	if !s.IsRunning() {
+	running, err := s.IsRunning()
+	if err != nil {
+		return err
+	}
+	if !running {
 		err = errors.New("main process has not been started")
 		return
 	}
@@ -83,7 +91,11 @@ func (s *standard) ExecuteInMainProcess(cmd string) (err error) {
 }
 
 func (s *standard) Kill() (err error) {
-	if !s.IsRunning() {
+	running, err := s.IsRunning()
+	if err != nil {
+		return err
+	}
+	if running {
 		return
 	}
 	err = s.mainProcess.Process.Kill()
@@ -92,7 +104,7 @@ func (s *standard) Kill() (err error) {
 	return
 }
 
-func (s *standard) IsRunning() (isRunning bool) {
+func (s *standard) IsRunning() (isRunning bool, err error) {
 	isRunning = s.mainProcess != nil && s.mainProcess.Process != nil
 	if isRunning {
 		process, pErr := os.FindProcess(s.mainProcess.Process.Pid)
@@ -106,7 +118,11 @@ func (s *standard) IsRunning() (isRunning bool) {
 }
 
 func (s *standard) GetStats() (map[string]interface{}, error) {
-	if !s.IsRunning() {
+	running, err := s.IsRunning()
+	if err != nil {
+		return nil, err
+	}
+	if !running {
 		return nil, ppError.NewServerOffline()
 	}
 	process, err := process.NewProcess(int32(s.mainProcess.Process.Pid))

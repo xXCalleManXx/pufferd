@@ -52,7 +52,7 @@ type Program interface {
 	Install() (err error)
 
 	//Determines if the server is running.
-	IsRunning() (isRunning bool)
+	IsRunning() (isRunning bool, err error)
 
 	//Sends a command to the process
 	//If the program supports input, this will send the arguments to that.
@@ -160,7 +160,14 @@ func (p *ProgramData) Install() (err error) {
 	}
 
 	logging.Debugf("Installing server %s", p.Id())
-	if p.IsRunning() {
+	running, err := p.IsRunning()
+	if err != nil {
+		logging.Error("Error stopping server to install: ", err)
+		p.Environment.DisplayToConsole("Error stopping server\n")
+		return
+	}
+
+	if running {
 		err = p.Stop()
 	}
 
@@ -185,8 +192,8 @@ func (p *ProgramData) Install() (err error) {
 }
 
 //Determines if the server is running.
-func (p *ProgramData) IsRunning() (isRunning bool) {
-	isRunning = p.Environment.IsRunning()
+func (p *ProgramData) IsRunning() (isRunning bool, err error) {
+	isRunning, err = p.Environment.IsRunning()
 	return
 }
 

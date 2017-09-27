@@ -49,7 +49,7 @@ type Environment interface {
 
 	Update() (err error)
 
-	IsRunning() (isRunning bool)
+	IsRunning() (isRunning bool, err error)
 
 	WaitForMainProcess() (err error)
 
@@ -91,7 +91,11 @@ func (e *BaseEnvironment) WaitForMainProcess() error {
 }
 
 func (e *BaseEnvironment) WaitForMainProcessFor(timeout int) (err error) {
-	if e.IsRunning() {
+	running, err := e.IsRunning()
+	if err != nil {
+		return
+	}
+	if running {
 		if timeout > 0 {
 			var timer = time.AfterFunc(time.Duration(timeout)*time.Millisecond, func() {
 				err = e.Kill()

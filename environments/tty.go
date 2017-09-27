@@ -37,8 +37,12 @@ type tty struct {
 }
 
 func (s *tty) ExecuteAsync(cmd string, args []string, callback func(graceful bool)) (err error) {
-	if s.IsRunning() {
-		err = errors.New("A process is already running (" + strconv.Itoa(s.mainProcess.Process.Pid) + ")")
+	running, err := s.IsRunning()
+	if err != nil {
+		return
+	}
+	if running {
+		err = errors.New("process is already running (" + strconv.Itoa(s.mainProcess.Process.Pid) + ")")
 		return
 	}
 	process := exec.Command(cmd, args...)

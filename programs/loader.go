@@ -191,17 +191,22 @@ func Delete(id string) (err error) {
 	if program == nil {
 		return
 	}
+	running, err := program.IsRunning()
 
-	if program.IsRunning() {
+	if err != nil {
+		return
+	}
+
+	if running {
 		err = program.Stop()
 		if err != nil {
-			return err
+			return
 		}
 	}
 
 	err = program.Destroy()
 	if err != nil {
-		return err
+		return
 	}
 	os.Remove(common.JoinPath(ServerFolder, program.Id()+".json"))
 	allPrograms = append(allPrograms[:index], allPrograms[index+1:]...)
