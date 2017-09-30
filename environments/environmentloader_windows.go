@@ -13,6 +13,13 @@ func LoadEnvironment(environmentType, folder, id string, environmentSection map[
 	cache := cache.CreateCache()
 	wsManager := utils.CreateWSManager()
 	switch environmentType {
+	case "docker":
+		logging.Debugf("Loading server as docker")
+		d := &docker{ContainerId: id, ImageName: common.GetStringOrDefault(environmentSection, "image", "pufferpanel/generic")}
+		d.RootDirectory = rootDirectory
+		d.ConsoleBuffer = cache
+		d.WSManager = wsManager
+		return d
 	default:
 		logging.Debugf("Loading server as standard")
 		s := &standard{BaseEnvironment: &BaseEnvironment{}}
