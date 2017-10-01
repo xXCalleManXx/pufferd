@@ -29,6 +29,7 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/strslice"
 	"github.com/docker/docker/api/types/network"
+	"io"
 )
 
 type docker struct {
@@ -49,15 +50,14 @@ func (d *docker) ExecuteAsync(cmd string, args []string, callback func(graceful 
 	client, err := d.getClient()
 	ctx := context.Background()
 
-	opts := types.ContainerListOptions{
-		Filters: filters.NewArgs(),
-	}
-	opts.Filters.ExactMatch("container.name", d.ContainerId)
+	exists, err := d.doesContainerExist()
 
-	existingContainers, err := client.ContainerList(ctx, opts)
+	if err != nil {
+		return err
+	}
 
 	//container does not exist
-	if len(existingContainers) == 0 {
+	if !exists {
 		cmdSlice := strslice.StrSlice{}
 
 		cmdSlice = append(cmdSlice, cmd)
@@ -78,10 +78,9 @@ func (d *docker) ExecuteAsync(cmd string, args []string, callback func(graceful 
 		}
 
 		hostConfig := &container.HostConfig{
-			//AutoRemove: true,
+			AutoRemove: true,
 			NetworkMode: "host",
 			Resources: container.Resources{
-				//Memory: int64(mem),
 			},
 		}
 
@@ -93,6 +92,24 @@ func (d *docker) ExecuteAsync(cmd string, args []string, callback func(graceful 
 		}
 	}
 
+	config := types.ContainerAttachOptions{
+		Stdout: true,
+		Stderr: true,
+		Stream: true,
+	}
+
+	response, err := client.ContainerAttach(ctx, d.ContainerId, config)
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		defer response.Close()
+
+		wrapper := d.createWrapper()
+		io.Copy(wrapper, response.Reader)
+	}()
+
 	startOpts := types.ContainerStartOptions{
 	}
 
@@ -100,20 +117,6 @@ func (d *docker) ExecuteAsync(cmd string, args []string, callback func(graceful 
 	if err != nil {
 		return err
 	}
-
-	config := types.ContainerAttachOptions{
-		Stdin: true,
-	}
-
-	response, err := client.ContainerAttach(ctx, d.ContainerId, config)
-	defer response.Close()
-
-	if err != nil {
-		return err
-	}
-
-	response.Conn.Write([]byte(cmd))
-	response.Conn.Write([]byte("\n"))
 
 	return err
 }
@@ -153,7 +156,6 @@ func (d *docker) Kill() (err error) {
 	client, err := d.getClient()
 	ctx := context.Background()
 	err = client.ContainerKill(ctx, d.ContainerId, "SIGKILL")
-
 	return
 }
 
@@ -163,16 +165,13 @@ func (d *docker) IsRunning() (bool, error) {
 		logging.Error("Error checking run status", err)
 		return false, err
 	}
-	ctx := context.Background()
 
-	opts := types.ContainerListOptions{
-		Filters: filters.NewArgs(),
+	exists, err := d.doesContainerExist()
+	if !exists {
+		return false, err
 	}
-	opts.Filters.ExactMatch("container.name", d.ContainerId)
-	existingContainers, err := client.ContainerList(ctx, opts)
-	if len(existingContainers) == 0 {
-		return false, nil
-	}
+
+	ctx := context.Background()
 
 	stats, err := client.ContainerInspect(ctx, d.ContainerId)
 	if err != nil {
@@ -215,18 +214,35 @@ func (d *docker) GetStats() (map[string]interface{}, error) {
 	if !running {
 		return nil, ppError.NewServerOffline()
 	}
-	//process, err := process.NewProcess(int32(d.mainProcess.Process.Pid))
-	//if err != nil {
-	//	return nil, err
-	//}
+
 	resultMap := make(map[string]interface{})
-	//memMap, _ := process.MemoryInfo()
 	resultMap["memory"] = 0
-	//cpu, _ := process.Percent(time.Millisecond * 50)
 	resultMap["cpu"] = 0
 	return resultMap, nil
 }
 
 func (d *docker) getClient() (*client.Client, error) {
 	return client.NewEnvClient()
+}
+
+func (d *docker) doesContainerExist() (bool, error) {
+	client, err := d.getClient()
+	if err != nil {
+		return false, err
+	}
+
+	ctx := context.Background()
+
+	opts := types.ContainerListOptions{
+		Filters: filters.NewArgs(),
+	}
+
+	opts.All = true
+	opts.Filters.Add("name", d.ContainerId)
+	existingContainers, err := client.ContainerList(ctx, opts)
+	if len(existingContainers) == 0 {
+		return false, err
+	} else {
+		return true, err
+	}
 }
