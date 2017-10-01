@@ -30,6 +30,7 @@ import (
 	"github.com/docker/docker/api/types/strslice"
 	"github.com/docker/docker/api/types/network"
 	"io"
+	"io/ioutil"
 )
 
 type docker struct {
@@ -58,6 +59,12 @@ func (d *docker) ExecuteAsync(cmd string, args []string, callback func(graceful 
 
 	//container does not exist
 	if !exists {
+		err = d.pullImage(false)
+
+		if err != nil {
+			return err
+		}
+
 		cmdSlice := strslice.StrSlice{}
 
 		cmdSlice = append(cmdSlice, cmd)
@@ -245,4 +252,50 @@ func (d *docker) doesContainerExist() (bool, error) {
 	} else {
 		return true, err
 	}
+}
+
+func (d *docker) pullImage(force bool) error {
+	exists := false
+
+	client, err := d.getClient()
+	ctx := context.Background()
+
+	if err != nil {
+		return err
+	}
+
+	opts := types.ImageListOptions{
+		All: true,
+		Filters: filters.NewArgs(),
+	}
+	opts.Filters.Add("reference", d.ImageName)
+	images, err := client.ImageList(ctx, opts)
+
+	if err != nil {
+		return err
+	}
+
+	if len(images) == 1 {
+		exists = true
+	}
+
+	logging.Debugf("Does image %v exist? %v", d.ImageName, exists)
+
+	if exists && !force {
+		return nil
+	}
+
+	op := types.ImagePullOptions{
+	}
+
+	logging.Debugf("Downloading image %v", d.ImageName)
+
+	r, err := client.ImagePull(ctx, d.ImageName, op)
+	defer r.Close()
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(ioutil.Discard, r)
+	logging.Debugf("Download image %v", d.ImageName)
+	return err
 }
