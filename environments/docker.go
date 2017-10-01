@@ -51,7 +51,7 @@ func (d *docker) ExecuteAsync(cmd string, args []string, callback func(graceful 
 	client, err := d.getClient()
 	ctx := context.Background()
 
-	exists, err := d.doesContainerExist()
+	exists, err := d.doesContainerExist(client, ctx)
 
 	if err != nil {
 		return err
@@ -59,41 +59,7 @@ func (d *docker) ExecuteAsync(cmd string, args []string, callback func(graceful 
 
 	//container does not exist
 	if !exists {
-		err = d.pullImage(false)
-
-		if err != nil {
-			return err
-		}
-
-		cmdSlice := strslice.StrSlice{}
-
-		cmdSlice = append(cmdSlice, cmd)
-
-		for _, v := range args {
-			cmdSlice = append(cmdSlice, v)
-		}
-
-		config := &container.Config{
-			AttachStderr: true,
-			AttachStdin: true,
-			AttachStdout: true,
-			Tty: true,
-			StdinOnce: false,
-			NetworkDisabled: false,
-			Cmd: cmdSlice,
-			Image: d.ImageName,
-		}
-
-		hostConfig := &container.HostConfig{
-			AutoRemove: true,
-			NetworkMode: "host",
-			Resources: container.Resources{
-			},
-		}
-
-		networkConfig := &network.NetworkingConfig{
-		}
-		_, err = client.ContainerCreate(ctx, config, hostConfig, networkConfig, d.ContainerId)
+		err = d.createContainer(client, ctx, cmd, args, d.RootDirectory)
 		if err != nil {
 			return err
 		}
@@ -173,12 +139,12 @@ func (d *docker) IsRunning() (bool, error) {
 		return false, err
 	}
 
-	exists, err := d.doesContainerExist()
+	ctx := context.Background()
+
+	exists, err := d.doesContainerExist(client, ctx)
 	if !exists {
 		return false, err
 	}
-
-	ctx := context.Background()
 
 	stats, err := client.ContainerInspect(ctx, d.ContainerId)
 	if err != nil {
@@ -232,14 +198,7 @@ func (d *docker) getClient() (*client.Client, error) {
 	return client.NewEnvClient()
 }
 
-func (d *docker) doesContainerExist() (bool, error) {
-	client, err := d.getClient()
-	if err != nil {
-		return false, err
-	}
-
-	ctx := context.Background()
-
+func (d *docker) doesContainerExist(client *client.Client, ctx context.Context) (bool, error) {
 	opts := types.ContainerListOptions{
 		Filters: filters.NewArgs(),
 	}
@@ -254,15 +213,8 @@ func (d *docker) doesContainerExist() (bool, error) {
 	}
 }
 
-func (d *docker) pullImage(force bool) error {
+func (d *docker) pullImage(client *client.Client, ctx context.Context, force bool) error {
 	exists := false
-
-	client, err := d.getClient()
-	ctx := context.Background()
-
-	if err != nil {
-		return err
-	}
 
 	opts := types.ImageListOptions{
 		All: true,
@@ -297,5 +249,47 @@ func (d *docker) pullImage(force bool) error {
 	}
 	_, err = io.Copy(ioutil.Discard, r)
 	logging.Debugf("Download image %v", d.ImageName)
+	return err
+}
+
+func (d *docker) createContainer(client *client.Client, ctx context.Context, cmd string, args []string, root string) error {
+	err := d.pullImage(client, ctx, false)
+
+	if err != nil {
+		return err
+	}
+
+	cmdSlice := strslice.StrSlice{}
+
+	cmdSlice = append(cmdSlice, cmd)
+
+	for _, v := range args {
+		cmdSlice = append(cmdSlice, v)
+	}
+
+	config := &container.Config{
+		AttachStderr: true,
+		AttachStdin: true,
+		AttachStdout: true,
+		Tty: true,
+		StdinOnce: false,
+		NetworkDisabled: false,
+		Cmd: cmdSlice,
+		Image: d.ImageName,
+	}
+
+	hostConfig := &container.HostConfig{
+		AutoRemove: true,
+		NetworkMode: "host",
+		Resources: container.Resources{
+		},
+		Binds: make([]string, 0),
+	}
+	hostConfig.Binds = append(hostConfig.Binds, root + ":" + root)
+
+	networkConfig := &network.NetworkingConfig{
+	}
+
+	_, err = client.ContainerCreate(ctx, config, hostConfig, networkConfig, d.ContainerId)
 	return err
 }
