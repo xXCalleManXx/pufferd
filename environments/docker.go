@@ -276,6 +276,7 @@ func (d *docker) createContainer(client *client.Client, ctx context.Context, cmd
 		NetworkDisabled: false,
 		Cmd: cmdSlice,
 		Image: d.ImageName,
+		WorkingDir: "/server/",
 	}
 
 	hostConfig := &container.HostConfig{
@@ -285,7 +286,7 @@ func (d *docker) createContainer(client *client.Client, ctx context.Context, cmd
 		},
 		Binds: make([]string, 0),
 	}
-	hostConfig.Binds = append(hostConfig.Binds, root + ":" + root)
+	hostConfig.Binds = append(hostConfig.Binds, root + ":" + "/server/")
 
 	networkConfig := &network.NetworkingConfig{
 	}
