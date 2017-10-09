@@ -20,7 +20,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/pufferpanel/apufferi/cache"
 	"github.com/pufferpanel/pufferd/utils"
-	"time"
 	"fmt"
 	"io"
 	"os"
@@ -83,29 +82,6 @@ func (e *BaseEnvironment) Execute(cmd string, args []string, callback func(grace
 		return
 	}
 	err = e.WaitForMainProcess()
-	return
-}
-
-func (e *BaseEnvironment) WaitForMainProcess() error {
-	return e.WaitForMainProcessFor(0)
-}
-
-func (e *BaseEnvironment) WaitForMainProcessFor(timeout int) (err error) {
-	running, err := e.IsRunning()
-	if err != nil {
-		return
-	}
-	if running {
-		if timeout > 0 {
-			var timer = time.AfterFunc(time.Duration(timeout)*time.Millisecond, func() {
-				err = e.Kill()
-			})
-			e.wait.Wait()
-			timer.Stop()
-		} else {
-			e.wait.Wait()
-		}
-	}
 	return
 }
 

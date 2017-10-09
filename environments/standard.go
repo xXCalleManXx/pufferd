@@ -136,3 +136,26 @@ func (s *standard) GetStats() (map[string]interface{}, error) {
 	resultMap["cpu"] = cpu
 	return resultMap, nil
 }
+
+func (e *standard) WaitForMainProcess() error {
+	return e.WaitForMainProcessFor(0)
+}
+
+func (e *standard) WaitForMainProcessFor(timeout int) (err error) {
+	running, err := e.IsRunning()
+	if err != nil {
+		return
+	}
+	if running {
+		if timeout > 0 {
+			var timer = time.AfterFunc(time.Duration(timeout)*time.Millisecond, func() {
+				err = e.Kill()
+			})
+			e.wait.Wait()
+			timer.Stop()
+		} else {
+			e.wait.Wait()
+		}
+	}
+	return
+}

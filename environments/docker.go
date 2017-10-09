@@ -18,7 +18,6 @@ package environments
 
 import (
 	"errors"
-	"time"
 
 	ppError "github.com/pufferpanel/pufferd/errors"
 	"github.com/docker/docker/client"
@@ -31,18 +30,21 @@ import (
 	"github.com/docker/docker/api/types/network"
 	"io"
 	"io/ioutil"
+	"time"
 )
 
 type docker struct {
+	*BaseEnvironment
 	ContainerId   string
 	ImageName     string
-	BaseEnvironment
+	connection types.HijackedResponse
 }
 
 func (d *docker) ExecuteAsync(cmd string, args []string, callback func(graceful bool)) (error) {
 	running, err := d.IsRunning()
 	if err != nil {
 		return err
+
 	}
 	if running {
 		return errors.New("container is already running")
@@ -66,21 +68,24 @@ func (d *docker) ExecuteAsync(cmd string, args []string, callback func(graceful 
 	}
 
 	config := types.ContainerAttachOptions{
+		Stdin: true,
 		Stdout: true,
 		Stderr: true,
 		Stream: true,
 	}
 
-	response, err := client.ContainerAttach(ctx, d.ContainerId, config)
+	d.connection, err = client.ContainerAttach(ctx, d.ContainerId, config)
 	if err != nil {
 		return err
 	}
 
-	go func() {
-		defer response.Close()
+	d.wait.Add(1)
 
+	go func() {
+		defer d.connection.Close()
 		wrapper := d.createWrapper()
-		io.Copy(wrapper, response.Reader)
+		io.Copy(wrapper, d.connection.Reader)
+		d.wait.Done()
 	}()
 
 	startOpts := types.ContainerStartOptions{
@@ -90,7 +95,6 @@ func (d *docker) ExecuteAsync(cmd string, args []string, callback func(graceful 
 	if err != nil {
 		return err
 	}
-
 	return err
 }
 
@@ -103,16 +107,8 @@ func (d *docker) ExecuteInMainProcess(cmd string) (err error) {
 		err = errors.New("main process has not been started")
 		return
 	}
-	client, err := d.getClient()
-	config := types.ContainerAttachOptions{
-		Stdin: true,
-	}
-	ctx := context.Background()
-	response, err := client.ContainerAttach(ctx, d.ContainerId, config)
-	defer response.Close()
 
-	response.Conn.Write([]byte(cmd))
-	response.Conn.Write([]byte("\n"))
+	d.connection.Conn.Write([]byte(cmd + "\n"))
 	return
 }
 
@@ -154,30 +150,6 @@ func (d *docker) IsRunning() (bool, error) {
 	return stats.State.Running, nil
 }
 
-func (d *docker) WaitForMainProcess() error {
-	return d.WaitForMainProcessFor(0)
-}
-
-func (d *docker) WaitForMainProcessFor(timeout int) (err error) {
-	running, err := d.IsRunning()
-	if err != nil {
-		return err
-	}
-
-	if running {
-		if timeout > 0 {
-			var timer = time.AfterFunc(time.Duration(timeout)*time.Millisecond, func() {
-				err = d.Kill()
-			})
-			d.wait.Wait()
-			timer.Stop()
-		} else {
-			d.wait.Wait()
-		}
-	}
-	return
-}
-
 func (d *docker) GetStats() (map[string]interface{}, error) {
 	running, err := d.IsRunning()
 	if err != nil {
@@ -192,6 +164,29 @@ func (d *docker) GetStats() (map[string]interface{}, error) {
 	resultMap["memory"] = 0
 	resultMap["cpu"] = 0
 	return resultMap, nil
+}
+
+func (e *docker) WaitForMainProcess() error {
+	return e.WaitForMainProcessFor(0)
+}
+
+func (e *docker) WaitForMainProcessFor(timeout int) (err error) {
+	running, err := e.IsRunning()
+	if err != nil {
+		return
+	}
+	if running {
+		if timeout > 0 {
+			var timer = time.AfterFunc(time.Duration(timeout)*time.Millisecond, func() {
+				err = e.Kill()
+			})
+			e.wait.Wait()
+			timer.Stop()
+		} else {
+			e.wait.Wait()
+		}
+	}
+	return
 }
 
 func (d *docker) getClient() (*client.Client, error) {
@@ -272,7 +267,7 @@ func (d *docker) createContainer(client *client.Client, ctx context.Context, cmd
 		AttachStdin: true,
 		AttachStdout: true,
 		Tty: true,
-		StdinOnce: false,
+		OpenStdin: true,
 		NetworkDisabled: false,
 		Cmd: cmdSlice,
 		Image: d.ImageName,
