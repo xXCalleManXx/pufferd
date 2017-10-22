@@ -128,6 +128,9 @@ func Create(id string, serverType string, data map[string]interface{}) bool {
 
 	if data != nil {
 		mapper := templateJson.programData.Data
+		if mapper == nil {
+			mapper = make(map[string]DataObject, 0)
+		}
 		for k, v := range data {
 			if d, ok := mapper[k]; ok {
 				d.Value = v
