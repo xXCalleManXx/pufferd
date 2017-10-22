@@ -117,8 +117,9 @@ func Create(id string, serverType string, data map[string]interface{}) bool {
 	}
 
 	var templateJson struct {
-		programData ProgramData `json:"pufferd"`
+		ProgramData ProgramData `json:"pufferd"`
 	}
+	templateJson.ProgramData = CreateProgram()
 	err = json.Unmarshal(templateData, &templateJson)
 
 	if err != nil {
@@ -127,13 +128,13 @@ func Create(id string, serverType string, data map[string]interface{}) bool {
 	}
 
 	if data != nil {
-		mapper := templateJson.programData.Data
+		mapper := templateJson.ProgramData.Data
 		if mapper == nil {
 			mapper = make(map[string]DataObject, 0)
 		}
 		for k, v := range data {
 			if d, ok := mapper[k]; ok {
-				d.Value = v
+				d.Value= v
 				mapper[k] = d
 			} else {
 				newMap := DataObject{
@@ -146,7 +147,7 @@ func Create(id string, serverType string, data map[string]interface{}) bool {
 				mapper[k] = newMap
 			}
 		}
-		templateJson.programData.Data = mapper
+		templateJson.ProgramData.Data = mapper
 	}
 
 	f, err := os.Create(common.JoinPath(ServerFolder, id+".json"))
