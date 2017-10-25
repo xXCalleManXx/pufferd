@@ -33,9 +33,12 @@ import (
 
 type standard struct {
 	*BaseEnvironment
-	mainProcess   *exec.Cmd
-	stdInWriter   io.Writer
+	mainProcess *exec.Cmd
+	stdInWriter io.Writer
+}
 
+func createStandard() *standard {
+	return &standard{BaseEnvironment: &BaseEnvironment{Type: "standard"}}
 }
 
 func (s *standard) ExecuteAsync(cmd string, args []string, callback func(graceful bool)) (err error) {

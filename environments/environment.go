@@ -68,11 +68,12 @@ type Environment interface {
 }
 
 type BaseEnvironment struct {
-	Environment
-	RootDirectory string
-	ConsoleBuffer cache.Cache
-	WSManager utils.WebSocketManager
+	Environment                          `json:"-"`
+	RootDirectory string                 `json:"-"`
+	ConsoleBuffer cache.Cache            `json:"-"`
+	WSManager     utils.WebSocketManager `json:"-"`
 	wait          sync.WaitGroup
+	Type          string                 `json:"type"`
 }
 
 func (e *BaseEnvironment) Execute(cmd string, args []string, callback func(graceful bool)) (stdOut []byte, err error) {

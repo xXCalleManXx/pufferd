@@ -32,8 +32,12 @@ import (
 
 type tty struct {
 	standard
-	mainProcess   *exec.Cmd
-	stdInWriter   io.Writer
+	mainProcess *exec.Cmd
+	stdInWriter io.Writer
+}
+
+func createTty() *tty {
+	return &tty{standard: standard{BaseEnvironment: &BaseEnvironment{Type: "tty"}}}
 }
 
 func (s *tty) ExecuteAsync(cmd string, args []string, callback func(graceful bool)) (err error) {

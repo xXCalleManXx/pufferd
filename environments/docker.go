@@ -35,9 +35,16 @@ import (
 
 type docker struct {
 	*BaseEnvironment
-	ContainerId   string
-	ImageName     string
-	connection types.HijackedResponse
+	ContainerId string `json:"-"`
+	ImageName   string `json:"image"`
+	connection  types.HijackedResponse
+}
+
+func createDocker(containerId, imageName string) *docker {
+	if imageName == "" {
+		imageName = "pufferpanel/generic"
+	}
+	return &docker{BaseEnvironment: &BaseEnvironment{Type: "docker"}, ContainerId: containerId, ImageName: imageName}
 }
 
 func (d *docker) ExecuteAsync(cmd string, args []string, callback func(graceful bool)) (error) {
@@ -68,7 +75,7 @@ func (d *docker) ExecuteAsync(cmd string, args []string, callback func(graceful 
 	}
 
 	config := types.ContainerAttachOptions{
-		Stdin: true,
+		Stdin:  true,
 		Stdout: true,
 		Stderr: true,
 		Stream: true,
@@ -212,7 +219,7 @@ func (d *docker) pullImage(client *client.Client, ctx context.Context, force boo
 	exists := false
 
 	opts := types.ImageListOptions{
-		All: true,
+		All:     true,
 		Filters: filters.NewArgs(),
 	}
 	opts.Filters.Add("reference", d.ImageName)
@@ -263,25 +270,25 @@ func (d *docker) createContainer(client *client.Client, ctx context.Context, cmd
 	}
 
 	config := &container.Config{
-		AttachStderr: true,
-		AttachStdin: true,
-		AttachStdout: true,
-		Tty: true,
-		OpenStdin: true,
+		AttachStderr:    true,
+		AttachStdin:     true,
+		AttachStdout:    true,
+		Tty:             true,
+		OpenStdin:       true,
 		NetworkDisabled: false,
-		Cmd: cmdSlice,
-		Image: d.ImageName,
-		WorkingDir: "/server/",
+		Cmd:             cmdSlice,
+		Image:           d.ImageName,
+		WorkingDir:      "/server/",
 	}
 
 	hostConfig := &container.HostConfig{
-		AutoRemove: true,
+		AutoRemove:  true,
 		NetworkMode: "host",
 		Resources: container.Resources{
 		},
 		Binds: make([]string, 0),
 	}
-	hostConfig.Binds = append(hostConfig.Binds, root + ":" + "/server/")
+	hostConfig.Binds = append(hostConfig.Binds, root+":"+"/server/")
 
 	networkConfig := &network.NetworkingConfig{
 	}
