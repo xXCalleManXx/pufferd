@@ -31,6 +31,9 @@ import (
 	"io"
 	"io/ioutil"
 	"time"
+	"runtime"
+	"os"
+	"fmt"
 )
 
 type docker struct {
@@ -279,6 +282,10 @@ func (d *docker) createContainer(client *client.Client, ctx context.Context, cmd
 		Cmd:             cmdSlice,
 		Image:           d.ImageName,
 		WorkingDir:      "/server/",
+	}
+
+	if runtime.GOOS == "linux" {
+		config.User = fmt.Sprintf("%d:%d", os.Getuid(), os.Getgid())
 	}
 
 	hostConfig := &container.HostConfig{
