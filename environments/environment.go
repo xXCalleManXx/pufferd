@@ -68,7 +68,7 @@ type Environment interface {
 }
 
 type BaseEnvironment struct {
-	Environment                          `json:"-"`
+	Environment
 	RootDirectory string                 `json:"-"`
 	ConsoleBuffer cache.Cache            `json:"-"`
 	WSManager     utils.WebSocketManager `json:"-"`
@@ -112,10 +112,6 @@ func (e *BaseEnvironment) DisplayToConsole(msg string, data ...interface{}) {
 		fmt.Fprintf(e.ConsoleBuffer, msg, data...)
 		fmt.Fprintf(e.WSManager, msg, data...)
 	}
-}
-
-func (e *BaseEnvironment) Create() error {
-	return os.Mkdir(e.RootDirectory, 0755)
 }
 
 func (e *BaseEnvironment) Update() error {

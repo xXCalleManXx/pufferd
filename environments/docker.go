@@ -41,6 +41,8 @@ type docker struct {
 	ContainerId string `json:"-"`
 	ImageName   string `json:"image"`
 	connection  types.HijackedResponse
+	cli			*client.Client
+	downloadingImage bool
 }
 
 func createDocker(containerId, imageName string) *docker {
@@ -58,6 +60,10 @@ func (d *docker) ExecuteAsync(cmd string, args []string, callback func(graceful 
 	}
 	if running {
 		return errors.New("container is already running")
+	}
+
+	if d.downloadingImage {
+		return errors.New("container image is downloading, cannot execute")
 	}
 
 	client, err := d.getClient()
@@ -138,6 +144,23 @@ func (d *docker) Kill() (err error) {
 	return
 }
 
+func (d *docker) Create() error {
+	err := os.Mkdir(d.RootDirectory, 0755)
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		cli, err := d.getClient()
+		if err != nil {
+			return
+		}
+		err = d.pullImage(cli, context.Background(), false)
+	}()
+
+	return err
+}
+
 func (d *docker) IsRunning() (bool, error) {
 	client, err := d.getClient()
 	if err != nil {
@@ -200,7 +223,12 @@ func (e *docker) WaitForMainProcessFor(timeout int) (err error) {
 }
 
 func (d *docker) getClient() (*client.Client, error) {
-	return client.NewEnvClient()
+	var cli *client.Client
+	var err error = nil
+	if client == nil {
+		cli, err = client.NewEnvClient()
+	}
+	return cli, err
 }
 
 func (d *docker) doesContainerExist(client *client.Client, ctx context.Context) (bool, error) {
@@ -247,12 +275,16 @@ func (d *docker) pullImage(client *client.Client, ctx context.Context, force boo
 
 	logging.Debugf("Downloading image %v", d.ImageName)
 
+	d.downloadingImage = true
+
 	r, err := client.ImagePull(ctx, d.ImageName, op)
 	defer r.Close()
 	if err != nil {
 		return err
 	}
 	_, err = io.Copy(ioutil.Discard, r)
+
+	d.downloadingImage = false
 	logging.Debugf("Download image %v", d.ImageName)
 	return err
 }

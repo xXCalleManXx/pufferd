@@ -148,9 +148,9 @@ func CreateServer(c *gin.Context) {
 		return
 	}
 
-	serverType := data["type"].(string)
+	typeServer := data["type"].(string)
 
-	if !programs.Create(serverId, serverType, data) {
+	if !programs.Create(serverId, typeServer, data) {
 		errorConnection(c, nil)
 	} else {
 		http.Respond(c).Send()
@@ -382,9 +382,9 @@ func GetConsole(c *gin.Context) {
 
 func GetStats(c *gin.Context) {
 	item, _ := c.Get("server")
-	server := item.(programs.Program)
+	svr := item.(programs.Program)
 
-	results, err := server.GetEnvironment().GetStats()
+	results, err := svr.GetEnvironment().GetStats()
 	if err != nil {
 		result := make(map[string]interface{})
 		result["error"] = err.Error()
@@ -400,14 +400,14 @@ func GetStats(c *gin.Context) {
 }
 
 func NetworkServer(c *gin.Context) {
-	servers := c.DefaultQuery("ids", "")
-	if servers == "" {
+	s := c.DefaultQuery("ids", "")
+	if s == "" {
 		http.Respond(c).Status(400).Code(http.NOSERVERID).Message("no server ids provided").Send()
 		return
 	}
-	serverIds := strings.Split(servers, ",")
+	ids := strings.Split(s, ",")
 	result := make(map[string]string)
-	for _, v := range serverIds {
+	for _, v := range ids {
 		program, _ := programs.Get(v)
 		if program == nil {
 			continue

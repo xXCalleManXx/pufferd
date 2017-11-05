@@ -96,9 +96,6 @@ func (p *ProgramData) Start() (err error) {
 	}
 
 	err = p.Environment.ExecuteAsync(p.RunData.Program, common.ReplaceTokensInArr(p.RunData.Arguments, data), func(graceful bool) {
-		if (graceful && p.RunData.AutoRestartFromGraceful) || (!graceful && p.RunData.AutoRestartFromCrash) {
-			p.Start()
-		}
 	})
 	if err != nil {
 		logging.Error("Error starting server", err)

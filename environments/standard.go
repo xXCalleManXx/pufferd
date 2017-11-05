@@ -140,6 +140,10 @@ func (s *standard) GetStats() (map[string]interface{}, error) {
 	return resultMap, nil
 }
 
+func (e *standard) Create() error {
+	return os.Mkdir(e.RootDirectory, 0755)
+}
+
 func (e *standard) WaitForMainProcess() error {
 	return e.WaitForMainProcessFor(0)
 }
