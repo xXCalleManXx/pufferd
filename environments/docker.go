@@ -223,12 +223,11 @@ func (e *docker) WaitForMainProcessFor(timeout int) (err error) {
 }
 
 func (d *docker) getClient() (*client.Client, error) {
-	var cli *client.Client
 	var err error = nil
-	if client == nil {
-		cli, err = client.NewEnvClient()
+	if d.cli == nil {
+		d.cli, err = client.NewEnvClient()
 	}
-	return cli, err
+	return d.cli, err
 }
 
 func (d *docker) doesContainerExist(client *client.Client, ctx context.Context) (bool, error) {
