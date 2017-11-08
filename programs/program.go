@@ -95,6 +95,13 @@ func (p *ProgramData) Start() (err error) {
 		data[k] = v.Value
 	}
 
+	process := operations.GenerateProcess(p.RunData.Pre, p.Environment, p.DataToMap())
+	err = process.Run()
+	if err != nil {
+		p.Environment.DisplayToConsole("Error running pre execute, check daemon logs")
+		return
+	}
+	
 	err = p.Environment.ExecuteAsync(p.RunData.Program, common.ReplaceTokensInArr(p.RunData.Arguments, data), func(graceful bool) {
 	})
 	if err != nil {

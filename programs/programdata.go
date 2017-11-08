@@ -25,13 +25,14 @@ type DataObject struct {
 }
 
 type RunObject struct {
-	Arguments               []string `json:"arguments"`
-	Program                 string   `json:"program"`
-	Stop                    string   `json:"stop"`
-	Enabled                 bool     `json:"enabled"`
-	AutoStart               bool     `json:"autostart"`
-	AutoRestartFromCrash    bool     `json:"autorecover"`
-	AutoRestartFromGraceful bool     `json:"autorestart"`
+	Arguments               []string                 `json:"arguments"`
+	Program                 string                   `json:"program"`
+	Stop                    string                   `json:"stop"`
+	Enabled                 bool                     `json:"enabled"`
+	AutoStart               bool                     `json:"autostart"`
+	AutoRestartFromCrash    bool                     `json:"autorecover"`
+	AutoRestartFromGraceful bool                     `json:"autorestart"`
+	Pre                     []map[string]interface{} `json:"pre"`
 }
 
 type InstallSection struct {
@@ -53,6 +54,7 @@ func CreateProgram() ProgramData{
 		RunData: RunObject{
 			Enabled: true,
 			AutoStart: true,
+			Pre: make([]map[string]interface{}, 0),
 		},
 		Type: "standard",
 		Data: make(map[string]DataObject, 0),
