@@ -46,6 +46,12 @@ var cache = make([]*oauthCache, 20)
 
 func OAuth2Handler(scope string, requireServer bool) gin.HandlerFunc {
 	return func(gin *gin.Context) {
+		failure := true
+		defer func() {
+			if failure && !gin.IsAborted() {
+				pufferdHttp.Respond(gin).Code(pufferdHttp.UNKNOWN).Fail().Status(500).Message("unknown error")
+			}
+		}()
 		authHeader := gin.Request.Header.Get("Authorization")
 		var authToken string
 		if authHeader == "" {
@@ -115,6 +121,7 @@ func OAuth2Handler(scope string, requireServer bool) gin.HandlerFunc {
 
 			gin.Set("server", program)
 		}
+		failure = false
 	}
 }
 
