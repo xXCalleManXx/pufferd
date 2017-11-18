@@ -273,7 +273,7 @@ func (d *docker) pullImage(client *client.Client, ctx context.Context, force boo
 	}
 
 	logging.Debugf("Downloading image %v", d.ImageName)
-	d.DisplayToConsole("Downloading image for container, please wait")
+	d.DisplayToConsole("Downloading image for container, please wait\n")
 
 	d.downloadingImage = true
 
@@ -286,7 +286,7 @@ func (d *docker) pullImage(client *client.Client, ctx context.Context, force boo
 
 	d.downloadingImage = false
 	logging.Debugf("Downloaded image %v", d.ImageName)
-	d.DisplayToConsole("Downloaded image for container")
+	d.DisplayToConsole("Downloaded image for container\n")
 	return err
 }
 
