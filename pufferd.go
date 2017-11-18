@@ -40,6 +40,7 @@ import (
 	"github.com/pufferpanel/pufferd/sftp"
 	"github.com/pufferpanel/pufferd/shutdown"
 	"github.com/pufferpanel/pufferd/uninstaller"
+	"runtime"
 )
 
 var (
@@ -153,7 +154,11 @@ func main() {
 	config.Load(configPath)
 
 	logging.SetLevelByString(loggingLevel)
-	var logPath = config.GetOrDefault("logPath", "logs")
+	var defaultLogFolder = "logs"
+	if runtime.GOOS == "linux" {
+		defaultLogFolder = "/var/log/pufferd"
+	}
+	var logPath = config.GetOrDefault("logPath", defaultLogFolder)
 	logging.SetLogFolder(logPath)
 	logging.Init()
 	gin.SetMode(gin.ReleaseMode)
