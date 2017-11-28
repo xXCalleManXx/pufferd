@@ -320,7 +320,7 @@ const Vanilla = `{
     },
     "data": {
       "version": {
-      	"value": "1.12.1",
+      	"value": "1.12.2",
       	"required": true,
       	"desc": "Version of Minecraft to install",
       	"display": "Version",
@@ -898,7 +898,7 @@ const VanillaDocker = `{
     },
     "data": {
       "version": {
-      	"value": "1.12.1",
+      	"value": "1.12.2",
       	"required": true,
       	"desc": "Version of Minecraft to install",
       	"display": "Version",
