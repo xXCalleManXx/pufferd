@@ -37,10 +37,12 @@ type tty struct {
 }
 
 func createTty() *tty {
-	return &tty{standard: standard{BaseEnvironment: &BaseEnvironment{Type: "tty"}}}
+	t := &tty{standard: standard{BaseEnvironment: &BaseEnvironment{Type: "tty"}}}
+	t.executeAsync = t.ttyExecuteAsync
+	return t
 }
 
-func (s *tty) ExecuteAsync(cmd string, args []string, callback func(graceful bool)) (err error) {
+func (s *tty) ttyExecuteAsync(cmd string, args []string, callback func(graceful bool)) (err error) {
 	running, err := s.IsRunning()
 	if err != nil {
 		return

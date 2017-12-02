@@ -35,13 +35,20 @@ type standard struct {
 	*BaseEnvironment
 	mainProcess *exec.Cmd
 	stdInWriter io.Writer
+	executeAsync  func(cmd string, args []string, callback func(graceful bool)) (err error)
 }
 
 func createStandard() *standard {
-	return &standard{BaseEnvironment: &BaseEnvironment{Type: "standard"}}
+	s := &standard{BaseEnvironment: &BaseEnvironment{Type: "standard"}}
+	s.executeAsync = s.standardExecuteAsync
+	return s
 }
 
 func (s *standard) ExecuteAsync(cmd string, args []string, callback func(graceful bool)) (err error) {
+	return s.executeAsync(cmd, args, callback)
+}
+
+func (s *standard) standardExecuteAsync(cmd string, args []string, callback func(graceful bool)) (err error) {
 	running, err := s.IsRunning()
 	if err != nil {
 		return
