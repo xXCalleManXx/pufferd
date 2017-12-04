@@ -38,7 +38,7 @@ const Arma3 = `{
       ]
     },
     "run": {
-      "stop": "",
+      "stop": "#shutdown",
       "pre": [],
       "post": [],
       "arguments": [
@@ -54,13 +54,13 @@ const Arma3 = `{
       "steam_user": {
         "value": "anonymous",
         "required": true,
-        "desc": "Username for steam login",
+        "desc": "Username for Steam login",
         "display": "Steam User",
         "internal": false
       },
       "steam_password": {
         "value": "",
-        "desc": "Password for steam login",
+        "desc": "Password for Steam login",
         "display": "Steam Password",
         "internal": false
       },
