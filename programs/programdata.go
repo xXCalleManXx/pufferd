@@ -13,7 +13,7 @@ type ProgramData struct {
 	Identifier      string                 `json:"id"`
 	RunData         RunObject              `json:"run"`
 
-	Environment environments.Environment `json:"-"`
+	Environment     environments.Environment `json:"-"`
 }
 
 type DataObject struct {

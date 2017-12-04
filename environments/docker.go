@@ -49,10 +49,13 @@ func createDocker(containerId, imageName string) *docker {
 	if imageName == "" {
 		imageName = "pufferpanel/generic"
 	}
-	return &docker{BaseEnvironment: &BaseEnvironment{Type: "docker"}, ContainerId: containerId, ImageName: imageName}
+	d := &docker{BaseEnvironment: &BaseEnvironment{Type: "docker"}, ContainerId: containerId, ImageName: imageName}
+	d.BaseEnvironment.executeAsync = d.dockerExecuteAsync
+	d.BaseEnvironment.waitForMainProcess = d.WaitForMainProcess
+	return d
 }
 
-func (d *docker) ExecuteAsync(cmd string, args []string, callback func(graceful bool)) (error) {
+func (d *docker) dockerExecuteAsync(cmd string, args []string, callback func(graceful bool)) (error) {
 	running, err := d.IsRunning()
 	if err != nil {
 		return err

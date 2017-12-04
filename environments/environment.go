@@ -74,6 +74,8 @@ type BaseEnvironment struct {
 	WSManager     utils.WebSocketManager `json:"-"`
 	wait          sync.WaitGroup
 	Type          string                 `json:"type"`
+	executeAsync func(cmd string, args []string, callback func(graceful bool)) (err error)
+	waitForMainProcess func() (err error)
 }
 
 func (e *BaseEnvironment) Execute(cmd string, args []string, callback func(graceful bool)) (stdOut []byte, err error) {
@@ -84,6 +86,15 @@ func (e *BaseEnvironment) Execute(cmd string, args []string, callback func(grace
 	}
 	err = e.WaitForMainProcess()
 	return
+}
+
+func (e *BaseEnvironment) WaitForMainProcess() (err error) {
+	return e.waitForMainProcess()
+}
+
+
+func (e *BaseEnvironment) ExecuteAsync(cmd string, args []string, callback func(graceful bool)) (err error) {
+	return e.executeAsync(cmd, args, callback)
 }
 
 func (e *BaseEnvironment) GetRootDirectory() string {

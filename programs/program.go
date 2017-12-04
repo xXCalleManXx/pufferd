@@ -185,7 +185,7 @@ func (p *ProgramData) Install() (err error) {
 
 	os.MkdirAll(p.Environment.GetRootDirectory(), 0755)
 
-	process := operations.GenerateProcess(p.InstallData.Operations, p.Environment, p.DataToMap())
+	process := operations.GenerateProcess(p.InstallData.Operations, p.GetEnvironment(), p.DataToMap())
 	err = process.Run()
 	if err != nil {
 		p.Environment.DisplayToConsole("Error running installer, check daemon logs")
