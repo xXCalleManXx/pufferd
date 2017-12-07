@@ -116,6 +116,7 @@ func runServer() error {
 
 func HandleConn(conn net.Conn, config *ssh.ServerConfig) {
 	defer conn.Close()
+	logging.Debugf("SFTP connection from %s", conn.RemoteAddr().String())
 	e := handleConn(conn, config)
 	if e != nil {
 		if e.Error() != "EOF" {
