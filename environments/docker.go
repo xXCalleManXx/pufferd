@@ -104,6 +104,8 @@ func (d *docker) dockerExecuteAsync(cmd string, args []string, callback func(gra
 		defer d.connection.Close()
 		wrapper := d.createWrapper()
 		io.Copy(wrapper, d.connection.Reader)
+		c, _ := d.getClient()
+		c.ContainerStop(context.Background(), d.ContainerId, nil)
 		d.wait.Done()
 	}()
 
