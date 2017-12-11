@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/pkg/sftp"
+	"github.com/pufferpanel/sftp"
 	utils "github.com/pufferpanel/apufferi/common"
 )
 
