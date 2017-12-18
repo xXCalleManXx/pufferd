@@ -269,7 +269,7 @@ func (d *docker) pullImage(client *client.Client, ctx context.Context, force boo
 		return err
 	}
 
-	if len(images) == 1 {
+	if len(images) >= 1 {
 		exists = true
 	}
 
