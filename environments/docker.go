@@ -324,7 +324,6 @@ func (d *docker) createContainer(client *client.Client, ctx context.Context, cmd
 		NetworkDisabled: false,
 		Cmd:             cmdSlice,
 		Image:           d.ImageName,
-		WorkingDir:      "/server/",
 	}
 
 	if runtime.GOOS == "linux" {
