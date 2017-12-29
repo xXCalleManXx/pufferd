@@ -122,6 +122,7 @@ const Spigot = `{
       "post": [],
       "arguments": [
       	"-Xmx${memory}M",
+        "-Djline.terminal=jline.UnsupportedTerminal",
       	"-jar",
       	"server.jar"
       ],
@@ -697,6 +698,7 @@ const SpigotDocker = `{
       "post": [],
       "arguments": [
       	"-Xmx${memory}M",
+        "-Djline.terminal=jline.UnsupportedTerminal",
       	"-jar",
       	"server.jar"
       ],
