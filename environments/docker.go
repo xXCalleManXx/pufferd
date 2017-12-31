@@ -34,7 +34,6 @@ import (
 	"runtime"
 	"os"
 	"fmt"
-	"github.com/pufferpanel/apufferi/common"
 )
 
 type docker struct {
