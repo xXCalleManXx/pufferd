@@ -228,11 +228,16 @@ func (e *docker) WaitForMainProcessFor(timeout int) (err error) {
 	return
 }
 
+const (
+	dockerAPIversionDefault = "1.25"
+)
+
 func (d *docker) getClient() (*client.Client, error) {
 	var err error = nil
 	if d.cli == nil {
 		d.cli, err = client.NewEnvClient()
 	}
+	d.cli.UpdateClientVersion(dockerAPIversionDefault)
 	return d.cli, err
 }
 
