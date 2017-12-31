@@ -53,7 +53,7 @@ func CreateProgram() ProgramData{
 	return ProgramData{
 		RunData: RunObject{
 			Enabled: true,
-			AutoStart: true,
+			AutoStart: false,
 			Pre: make([]map[string]interface{}, 0),
 		},
 		Type: "standard",
