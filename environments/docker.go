@@ -34,6 +34,7 @@ import (
 	"runtime"
 	"os"
 	"fmt"
+	"github.com/pufferpanel/apufferi/common"
 )
 
 type docker struct {
@@ -315,6 +316,10 @@ func (d *docker) createContainer(client *client.Client, ctx context.Context, cmd
 		cmdSlice = append(cmdSlice, v)
 	}
 
+	newEnv := os.Environ()
+	//newEnv["home"] = root
+	newEnv = append(newEnv, "HOME=" + root)
+
 	config := &container.Config{
 		AttachStderr:    true,
 		AttachStdin:     true,
@@ -324,6 +329,8 @@ func (d *docker) createContainer(client *client.Client, ctx context.Context, cmd
 		NetworkDisabled: false,
 		Cmd:             cmdSlice,
 		Image:           d.ImageName,
+		WorkingDir:		 root,
+		Env:			 newEnv,
 	}
 
 	if runtime.GOOS == "linux" {
