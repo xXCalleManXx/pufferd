@@ -237,7 +237,7 @@ func (d *docker) getClient() (*client.Client, error) {
 	if d.cli == nil {
 		d.cli, err = client.NewEnvClient()
 	}
-	d.cli.UpdateClientVersion(dockerAPIversionDefault)
+	d.cli.NegotiateAPIVersion(ctx)
 	return d.cli, err
 }
 
