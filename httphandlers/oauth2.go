@@ -50,6 +50,7 @@ func OAuth2Handler(scope string, requireServer bool) gin.HandlerFunc {
 		defer func() {
 			if failure && !gin.IsAborted() {
 				pufferdHttp.Respond(gin).Code(pufferdHttp.UNKNOWN).Fail().Status(500).Message("unknown error")
+				gin.Abort()
 			}
 		}()
 		authHeader := gin.Request.Header.Get("Authorization")
