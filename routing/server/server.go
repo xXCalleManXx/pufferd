@@ -387,11 +387,14 @@ func GetStats(c *gin.Context) {
 	results, err := svr.GetEnvironment().GetStats()
 	if err != nil {
 		result := make(map[string]interface{})
-		result["error"] = err.Error()
+
 		_, isOffline := err.(ppErrors.ServerOffline)
 		if isOffline {
+			result["memory"] = 0
+			result["cpu"] = 0
 			http.Respond(c).Data(result).Status(200).Send()
 		} else {
+			result["error"] = err.Error()
 			http.Respond(c).Data(result).Status(500).Send()
 		}
 	} else {
