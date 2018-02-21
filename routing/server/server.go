@@ -83,6 +83,7 @@ func RegisterRoutes(e *gin.Engine) {
 		l.GET("/:id/logs", httphandlers.OAuth2Handler("server.console", true), GetLogs)
 
 		l.GET("/:id/stats", httphandlers.OAuth2Handler("server.stats", true), GetStats)
+		l.GET("/:id/status", httphandlers.OAuth2Handler("server.stats", true), GetStatus)
 	}
 	e.GET("/network", httphandlers.OAuth2Handler("server.network", false), NetworkServer)
 }
@@ -442,6 +443,22 @@ func GetLogs(c *gin.Context) {
 	result["epoch"] = epoch
 	result["logs"] = msg
 	http.Respond(c).Data(result).Send()
+}
+
+func GetStatus(c *gin.Context) {
+	item, _ := c.Get("server")
+	program := item.(programs.Program)
+
+	running, err := program.IsRunning()
+	result := make(map[string]interface{})
+
+	if err != nil {
+		result["error"] = err.Error()
+		http.Respond(c).Data(result).Status(500).Send()
+	} else {
+		result["running"] = running
+		http.Respond(c).Data(result).Send()
+	}
 }
 
 func errorConnection(c *gin.Context, err error) {
