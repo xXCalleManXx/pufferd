@@ -29,6 +29,7 @@ func Shutdown() *sync.WaitGroup {
 		}
 	}()
 	wg := sync.WaitGroup{}
+	programs.ShutdownService()
 	manners.Close()
 	prgs := programs.GetAll()
 	wg.Add(len(prgs))

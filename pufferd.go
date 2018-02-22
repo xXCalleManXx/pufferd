@@ -190,10 +190,12 @@ func main() {
 
 	programs.LoadFromFolder()
 
+	programs.InitService()
+
 	for _, element := range programs.GetAll() {
 		if element.IsEnabled() && element.IsAutoStart() {
 			logging.Info("Starting server " + element.Id())
-			element.Start()
+			programs.StartViaService(element)
 		}
 	}
 
@@ -251,5 +253,6 @@ func main() {
 	if err != nil {
 		logging.Error("Error starting web service", err)
 	}
+
 	shutdown.Shutdown()
 }

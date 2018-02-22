@@ -26,6 +26,9 @@ import (
 	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/pufferd/programs/operations"
 	"errors"
+	"container/list"
+	"sync"
+	"time"
 )
 
 type Program interface {
@@ -103,6 +106,11 @@ func (p *ProgramData) Start() (err error) {
 	}
 	
 	err = p.Environment.ExecuteAsync(p.RunData.Program, common.ReplaceTokensInArr(p.RunData.Arguments, data), func(graceful bool) {
+		if graceful && p.RunData.AutoRestartFromGraceful {
+			StartViaService(p)
+		} else if !graceful && p.RunData.AutoRestartFromCrash {
+			StartViaService(p)
+		}
 	})
 	if err != nil {
 		logging.Error("Error starting server", err)
@@ -295,4 +303,49 @@ func (p *ProgramData) GetNetwork() string {
 	}
 
 	return ip + ":" + port
+}
+
+
+var queue *list.List
+var lock = sync.Mutex{}
+var ticker *time.Ticker
+var running = false
+
+func InitService() {
+	queue = list.New()
+	ticker = time.NewTicker(10 * time.Second)
+	running = true
+	go func() {
+		for range ticker.C {
+			lock.Lock()
+			next := queue.Front()
+			lock.Unlock()
+			if next == nil {
+				continue
+			}
+			program := next.Value.(Program)
+			program.Start()
+		}
+	}()
+}
+
+func StartViaService (p Program) {
+	lock.Lock()
+	defer func() {
+		lock.Unlock()
+	}()
+
+	if running {
+		queue.PushBack(p)
+	}
+}
+
+func ShutdownService() {
+	lock.Lock()
+	defer func() {
+		lock.Unlock()
+	}()
+
+	running = false
+	ticker.Stop()
 }
