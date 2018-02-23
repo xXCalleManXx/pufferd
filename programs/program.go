@@ -29,6 +29,7 @@ import (
 	"container/list"
 	"sync"
 	"time"
+	"github.com/pufferpanel/apufferi/config"
 )
 
 type Program interface {
@@ -106,9 +107,14 @@ func (p *ProgramData) Start() (err error) {
 	}
 	
 	err = p.Environment.ExecuteAsync(p.RunData.Program, common.ReplaceTokensInArr(p.RunData.Arguments, data), func(graceful bool) {
+		if graceful {
+			p.CrashCounter = 0
+		}
+
 		if graceful && p.RunData.AutoRestartFromGraceful {
 			StartViaService(p)
-		} else if !graceful && p.RunData.AutoRestartFromCrash {
+		} else if !graceful && p.RunData.AutoRestartFromCrash && p.CrashCounter < config.GetIntOrDefault("crashlimit", 3) {
+			p.CrashCounter++
 			StartViaService(p)
 		}
 	})
@@ -324,7 +330,9 @@ func InitService() {
 				continue
 			}
 			program := next.Value.(Program)
-			program.Start()
+			if run, _ := program.IsRunning(); !run {
+				program.Start()
+			}
 		}
 	}()
 }
