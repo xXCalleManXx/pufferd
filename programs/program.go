@@ -311,6 +311,14 @@ func (p *ProgramData) GetNetwork() string {
 	return ip + ":" + port
 }
 
+func (p *ProgramData) CopyFrom(s *ProgramData) {
+	p.RunData = s.RunData
+	p.Display = s.Display
+	p.EnvironmentData = s.EnvironmentData
+	p.InstallData = s.InstallData
+	p.Type = s.Type
+}
+
 
 var queue *list.List
 var lock = sync.Mutex{}

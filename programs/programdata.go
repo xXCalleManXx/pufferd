@@ -14,6 +14,7 @@ type ProgramData struct {
 	RunData         RunObject              `json:"run"`
 
 	Environment     environments.Environment `json:"-"`
+	CrashCounter    int 				   `json:"-"`
 }
 
 type DataObject struct {

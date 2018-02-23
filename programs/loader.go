@@ -236,6 +236,26 @@ func Save(id string) (err error) {
 	return
 }
 
+func Reload(id string) (err error) {
+	temp := GetFromCache(id)
+	if temp == nil {
+		err = errors.New("server does not exist")
+		return
+	}
+	//have to cast it for this to work
+	program, _ := temp.(*ProgramData)
+
+	newVersion, err := Load(id)
+	if err != nil {
+		return
+	}
+
+	newV2 := newVersion.(*ProgramData)
+
+	program.CopyFrom(newV2)
+	return
+}
+
 func GetPlugins() map[string]interface{} {
 
 	temps, _ := ioutil.ReadDir(TemplateFolder)

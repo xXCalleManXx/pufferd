@@ -192,11 +192,15 @@ func EditServer(c *gin.Context) {
 }
 
 func ReloadServer(c *gin.Context) {
-	//item, _ := c.Get("server")
-	//prg := item.(programs.Program)
+	item, _ := c.Get("server")
+	prg := item.(programs.Program)
 
-	//prg.Reload()
-	http.Respond(c).Send()
+	err := programs.Reload(prg.Id())
+	if err != nil {
+		http.Respond(c).Status(500).Data(err).Message("error reloading server").Send()
+	} else {
+		http.Respond(c).Send()
+	}
 }
 
 func GetServer(c *gin.Context) {
