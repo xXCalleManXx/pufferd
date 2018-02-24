@@ -143,6 +143,7 @@ func validateToken(accessToken string, gin *gin.Context) bool {
 		errMsg := make(map[string]string)
 		errMsg["error"] = err.Error()
 		gin.JSON(500, errMsg)
+		gin.Abort()
 		return false
 	}
 	if response.StatusCode != 200 {
@@ -150,6 +151,7 @@ func validateToken(accessToken string, gin *gin.Context) bool {
 		errMsg := make(map[string]string)
 		errMsg["error"] = fmt.Sprintf("Received response %i", response.StatusCode)
 		gin.JSON(500, errMsg)
+		gin.Abort()
 		return false
 	}
 	var respArr map[string]interface{}
@@ -160,6 +162,7 @@ func validateToken(accessToken string, gin *gin.Context) bool {
 		errMsg := make(map[string]string)
 		errMsg["error"] = "Failed to parse auth server response"
 		gin.JSON(500, errMsg)
+		gin.Abort()
 		return false
 	}
 	if respArr["active"].(bool) == false {

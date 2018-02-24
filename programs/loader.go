@@ -242,11 +242,13 @@ func Reload(id string) (err error) {
 		err = errors.New("server does not exist")
 		return
 	}
+	logging.Infof("Reloading server %s", temp.Id())
 	//have to cast it for this to work
 	program, _ := temp.(*ProgramData)
 
 	newVersion, err := Load(id)
 	if err != nil {
+		logging.Error("error reloading server", err)
 		return
 	}
 
