@@ -301,6 +301,7 @@ func (p *ProgramData) GetNetwork() string {
 }
 
 func (p *ProgramData) CopyFrom(s *ProgramData) {
+	p.Data = s.Data
 	p.RunData = s.RunData
 	p.Display = s.Display
 	p.EnvironmentData = s.EnvironmentData
