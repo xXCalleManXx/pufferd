@@ -38,6 +38,8 @@ import (
 	ppErrors "github.com/pufferpanel/pufferd/errors"
 	"github.com/pufferpanel/pufferd/httphandlers"
 	"github.com/pufferpanel/pufferd/programs"
+
+	"github.com/satori/go.uuid"
 )
 
 var wsupgrader = websocket.Upgrader{
@@ -86,6 +88,7 @@ func RegisterRoutes(e *gin.Engine) {
 		l.GET("/:id/stats", httphandlers.OAuth2Handler("server.stats", true), GetStats)
 		l.GET("/:id/status", httphandlers.OAuth2Handler("server.stats", true), GetStatus)
 	}
+	l.POST("/server", httphandlers.OAuth2Handler("server.create", false), CreateServer)
 	e.GET("/network", httphandlers.OAuth2Handler("server.network", false), NetworkServer)
 }
 
@@ -134,6 +137,14 @@ func KillServer(c *gin.Context) {
 
 func CreateServer(c *gin.Context) {
 	serverId := c.Param("id")
+	if serverId == "" {
+		uuid, err := uuid.NewV4()
+		if err != nil {
+			http.Respond(c).Status(500).Message("error generating uuid").Data(err).Code(http.UNKNOWN).Send()
+			return
+		}
+		serverId = uuid.String()
+	}
 	prg, _ := programs.Get(serverId)
 
 	if prg != nil {
@@ -155,6 +166,8 @@ func CreateServer(c *gin.Context) {
 	if !programs.Create(serverId, typeServer, data) {
 		errorConnection(c, nil)
 	} else {
+		data := make(map[string]interface{})
+		data["id"] = serverId
 		http.Respond(c).Send()
 	}
 }
