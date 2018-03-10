@@ -88,7 +88,7 @@ func RegisterRoutes(e *gin.Engine) {
 		l.GET("/:id/stats", httphandlers.OAuth2Handler("server.stats", true), GetStats)
 		l.GET("/:id/status", httphandlers.OAuth2Handler("server.stats", true), GetStatus)
 	}
-	l.POST("/server", httphandlers.OAuth2Handler("server.create", false), CreateServer)
+	l.POST("", httphandlers.OAuth2Handler("server.create", false), CreateServer)
 	e.GET("/network", httphandlers.OAuth2Handler("server.network", false), NetworkServer)
 }
 
