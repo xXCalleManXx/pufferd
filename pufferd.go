@@ -194,7 +194,7 @@ func main() {
 
 	for _, element := range programs.GetAll() {
 		if element.IsEnabled() && element.IsAutoStart() {
-			logging.Info("Starting server " + element.Id())
+			logging.Info("Queued server " + element.Id())
 			programs.StartViaService(element)
 		}
 	}
