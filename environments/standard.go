@@ -29,6 +29,7 @@ import (
 	"github.com/pufferpanel/apufferi/logging"
 	ppError "github.com/pufferpanel/pufferd/errors"
 	"github.com/shirou/gopsutil/process"
+	"strings"
 )
 
 type standard struct {
@@ -61,11 +62,12 @@ func (s *standard) standardExecuteAsync(cmd string, args []string, callback func
 	s.mainProcess.Stderr = wrapper
 	pipe, err := s.mainProcess.StdinPipe()
 	if err != nil {
-		logging.Error("Error starting process", err)
+		logging.Error("Error creating process", err)
 	}
 	s.stdInWriter = pipe
 	s.wait = sync.WaitGroup{}
 	s.wait.Add(1)
+	logging.Debugf("Starting process: %s %s", s.mainProcess.Path, strings.Join(s.mainProcess.Args, " "))
 	err = s.mainProcess.Start()
 	go func() {
 		s.mainProcess.Wait()
