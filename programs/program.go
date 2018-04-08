@@ -83,7 +83,7 @@ var running = false
 
 func InitService() {
 	queue = list.New()
-	ticker = time.NewTicker(10 * time.Second)
+	ticker = time.NewTicker(1 * time.Second)
 	running = true
 	go func() {
 		for range ticker.C {
