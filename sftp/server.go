@@ -203,10 +203,11 @@ func validateSSH(username string, password string) (*ssh.Permissions, error) {
 	}
 
 	//we should only get a 200 or 400 back, if we get any others, we have a problem
-	if response.StatusCode != 200 && response.StatusCode != 400 {
+	if response.StatusCode != 200 {
 		logging.Error("Error talking to auth server", response.StatusCode)
 		return nil, errors.New("Invalid response from authorization server")
 	}
+
 	var respArr map[string]interface{}
 	json.NewDecoder(response.Body).Decode(&respArr)
 	if respArr["error"] != nil {
