@@ -31,6 +31,7 @@ import (
 	"sync"
 	"syscall"
 	"time"
+	"strings"
 )
 
 type tty struct {
