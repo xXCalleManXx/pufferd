@@ -179,3 +179,13 @@ func (e *tty) WaitForMainProcessFor(timeout int) (err error) {
 	}
 	return
 }
+
+func (e *tty) SendCode(code int) error {
+	running, err := e.IsRunning()
+
+	if err != nil || !running {
+		return err
+	}
+
+	return e.mainProcess.Process.Signal(syscall.Signal(code))
+}

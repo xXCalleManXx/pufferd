@@ -1,15 +1,15 @@
 package programs
 
 import (
-	"github.com/pufferpanel/pufferd/environments"
-	"github.com/pufferpanel/apufferi/logging"
-	"github.com/pufferpanel/pufferd/programs/operations"
-	"github.com/pufferpanel/apufferi/common"
-	"os"
-	"io/ioutil"
-	"errors"
-	"github.com/pufferpanel/apufferi/config"
 	"encoding/json"
+	"errors"
+	"github.com/pufferpanel/apufferi/common"
+	"github.com/pufferpanel/apufferi/config"
+	"github.com/pufferpanel/apufferi/logging"
+	"github.com/pufferpanel/pufferd/environments"
+	"github.com/pufferpanel/pufferd/programs/operations"
+	"io/ioutil"
+	"os"
 )
 
 type ProgramData struct {
@@ -21,8 +21,8 @@ type ProgramData struct {
 	Identifier      string                 `json:"id"`
 	RunData         RunObject              `json:"run"`
 
-	Environment     environments.Environment `json:"-"`
-	CrashCounter    int 				   `json:"-"`
+	Environment  environments.Environment `json:"-"`
+	CrashCounter int                      `json:"-"`
 }
 
 type DataObject struct {
@@ -42,6 +42,7 @@ type RunObject struct {
 	AutoRestartFromCrash    bool                     `json:"autorecover"`
 	AutoRestartFromGraceful bool                     `json:"autorestart"`
 	Pre                     []map[string]interface{} `json:"pre"`
+	StopCode                int                      `json:"stopcode"`
 }
 
 type InstallSection struct {
@@ -58,15 +59,15 @@ func (p ProgramData) DataToMap() map[string]interface{} {
 	return result
 }
 
-func CreateProgram() ProgramData{
+func CreateProgram() ProgramData {
 	return ProgramData{
 		RunData: RunObject{
-			Enabled: true,
+			Enabled:   true,
 			AutoStart: false,
-			Pre: make([]map[string]interface{}, 0),
+			Pre:       make([]map[string]interface{}, 0),
 		},
-		Type: "standard",
-		Data: make(map[string]DataObject, 0),
+		Type:    "standard",
+		Data:    make(map[string]DataObject, 0),
 		Display: "Unknown server",
 		InstallData: InstallSection{
 			Operations: make([]map[string]interface{}, 0),
@@ -119,7 +120,11 @@ func (p *ProgramData) Start() (err error) {
 //This will also stop the environment it is ran in.
 func (p *ProgramData) Stop() (err error) {
 	logging.Debugf("Stopping server %s", p.Id())
-	err = p.Environment.ExecuteInMainProcess(p.RunData.Stop)
+	if p.RunData.StopCode != 0 {
+		err = p.Environment.SendCode(p.RunData.StopCode)
+	} else {
+		err = p.Environment.ExecuteInMainProcess(p.RunData.Stop)
+	}
 	if err != nil {
 		p.Environment.DisplayToConsole("Failed to stop server\n")
 	} else {

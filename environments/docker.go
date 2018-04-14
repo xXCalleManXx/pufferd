@@ -34,6 +34,7 @@ import (
 	"runtime"
 	"os"
 	"fmt"
+	"syscall"
 )
 
 type docker struct {
@@ -352,4 +353,21 @@ func (d *docker) createContainer(client *client.Client, ctx context.Context, cmd
 
 	_, err = client.ContainerCreate(ctx, config, hostConfig, networkConfig, d.ContainerId)
 	return err
+}
+
+func (e *docker) SendCode(code int) error {
+	running, err := e.IsRunning()
+
+	if err != nil || !running {
+		return err
+	}
+
+	client, err := e.getClient()
+
+	if err != nil {
+		return err
+	}
+
+	ctx := context.Background()
+	return client.ContainerKill(ctx, e.ContainerId, syscall.Signal(code).String())
 }

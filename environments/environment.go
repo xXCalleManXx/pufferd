@@ -65,6 +65,8 @@ type Environment interface {
 	GetStats() (map[string]interface{}, error)
 
 	DisplayToConsole(msg string, data ...interface{})
+
+	SendCode(code int) error 
 }
 
 type BaseEnvironment struct {
