@@ -141,7 +141,6 @@
   version = "v0.8.0"
 
 [[projects]]
-  branch = "master"
   name = "github.com/pufferpanel/apufferi"
   packages = [
     "cache",
@@ -151,7 +150,8 @@
     "http/handler",
     "logging"
   ]
-  revision = "045c935b44b3286f2ca55c93f343914ed495f2ca"
+  revision = "d6754998e5668c3a3c677b319c2fef667444f85e"
+  version = "v1.2.3"
 
 [[projects]]
   name = "github.com/pufferpanel/sftp"
