@@ -33,7 +33,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/pufferpanel/sftp"
+	"github.com/pkg/sftp"
 	configuration "github.com/pufferpanel/apufferi/config"
 	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/pufferd/programs"
