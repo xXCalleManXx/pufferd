@@ -32,6 +32,7 @@ import (
 	"syscall"
 	"time"
 	"strings"
+	"fmt"
 )
 
 type tty struct {
@@ -47,7 +48,7 @@ func createTty() *tty {
 	return t
 }
 
-func (s *tty) ttyExecuteAsync(cmd string, args []string, callback func(graceful bool)) (err error) {
+func (s *tty) ttyExecuteAsync(cmd string, args []string, env map[string]string, callback func(graceful bool)) (err error) {
 	running, err := s.IsRunning()
 	if err != nil {
 		return
@@ -59,14 +60,11 @@ func (s *tty) ttyExecuteAsync(cmd string, args []string, callback func(graceful 
 	process := exec.Command(cmd, args...)
 	process.Dir = s.RootDirectory
 	process.Env = append(os.Environ(), "HOME="+s.RootDirectory)
-	if err != nil {
-		logging.Error("Error starting process", err)
+	for k, v := range env {
+		s.mainProcess.Env = append(s.mainProcess.Env, fmt.Sprintf("%s=%s", k, v))
 	}
-	wrapper := s.createWrapper()
 
-	if err != nil {
-		logging.Error("Error starting process", err)
-	}
+	wrapper := s.createWrapper()
 	s.wait = sync.WaitGroup{}
 	s.wait.Add(1)
 	process.SysProcAttr = &syscall.SysProcAttr{Setctty: true, Setsid: true}

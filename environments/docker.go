@@ -56,7 +56,7 @@ func createDocker(containerId, imageName string) *docker {
 	return d
 }
 
-func (d *docker) dockerExecuteAsync(cmd string, args []string, callback func(graceful bool)) (error) {
+func (d *docker) dockerExecuteAsync(cmd string, args []string, env map[string]string, callback func(graceful bool)) (error) {
 	running, err := d.IsRunning()
 	if err != nil {
 		return err

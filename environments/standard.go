@@ -30,6 +30,7 @@ import (
 	ppError "github.com/pufferpanel/pufferd/errors"
 	"github.com/shirou/gopsutil/process"
 	"strings"
+	"fmt"
 )
 
 type standard struct {
@@ -45,7 +46,7 @@ func createStandard() *standard {
 	return s
 }
 
-func (s *standard) standardExecuteAsync(cmd string, args []string, callback func(graceful bool)) (err error) {
+func (s *standard) standardExecuteAsync(cmd string, args []string, env map[string]string, callback func(graceful bool)) (err error) {
 	running, err := s.IsRunning()
 	if err != nil {
 		return
@@ -57,6 +58,9 @@ func (s *standard) standardExecuteAsync(cmd string, args []string, callback func
 	s.mainProcess = exec.Command(cmd, args...)
 	s.mainProcess.Dir = s.RootDirectory
 	s.mainProcess.Env = append(os.Environ(), "HOME="+s.RootDirectory)
+	for k, v := range env {
+		s.mainProcess.Env = append(s.mainProcess.Env, fmt.Sprintf("%s=%s", k, v))
+	}
 	wrapper := s.createWrapper()
 	s.mainProcess.Stdout = wrapper
 	s.mainProcess.Stderr = wrapper

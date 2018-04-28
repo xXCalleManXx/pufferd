@@ -29,10 +29,10 @@ import (
 
 type Environment interface {
 	//Executes a command within the environment.
-	Execute(cmd string, args []string, callback func(graceful bool)) (stdOut []byte, err error)
+	Execute(cmd string, args []string, env map[string]string, callback func(graceful bool)) (stdOut []byte, err error)
 
 	//Executes a command within the environment and immediately return
-	ExecuteAsync(cmd string, args []string, callback func(graceful bool)) (err error)
+	ExecuteAsync(cmd string, args []string, env map[string]string, callback func(graceful bool)) (err error)
 
 	//Sends a string to the StdIn of the main program process
 	ExecuteInMainProcess(cmd string) (err error)
@@ -76,13 +76,13 @@ type BaseEnvironment struct {
 	WSManager     utils.WebSocketManager `json:"-"`
 	wait          sync.WaitGroup
 	Type          string                 `json:"type"`
-	executeAsync func(cmd string, args []string, callback func(graceful bool)) (err error)
+	executeAsync func(cmd string, args []string, env map[string]string, callback func(graceful bool)) (err error)
 	waitForMainProcess func() (err error)
 }
 
-func (e *BaseEnvironment) Execute(cmd string, args []string, callback func(graceful bool)) (stdOut []byte, err error) {
+func (e *BaseEnvironment) Execute(cmd string, args []string, env map[string]string, callback func(graceful bool)) (stdOut []byte, err error) {
 	stdOut = make([]byte, 0)
-	err = e.ExecuteAsync(cmd, args, callback)
+	err = e.ExecuteAsync(cmd, args, env, callback)
 	if err != nil {
 		return
 	}
@@ -95,7 +95,7 @@ func (e *BaseEnvironment) WaitForMainProcess() (err error) {
 }
 
 
-func (e *BaseEnvironment) ExecuteAsync(cmd string, args []string, callback func(graceful bool)) (err error) {
+func (e *BaseEnvironment) ExecuteAsync(cmd string, args []string, env map[string]string, callback func(graceful bool)) (err error) {
 	return e.executeAsync(cmd, args, callback)
 }
 

@@ -43,6 +43,7 @@ type RunObject struct {
 	AutoRestartFromGraceful bool                     `json:"autorestart"`
 	Pre                     []map[string]interface{} `json:"pre"`
 	StopCode                int                      `json:"stopcode"`
+	EnvironmentVariables    map[string]string        `json:"environmentVars"`
 }
 
 type InstallSection struct {
@@ -96,18 +97,7 @@ func (p *ProgramData) Start() (err error) {
 		return
 	}
 
-	err = p.Environment.ExecuteAsync(p.RunData.Program, common.ReplaceTokensInArr(p.RunData.Arguments, data), func(graceful bool) {
-		if graceful {
-			p.CrashCounter = 0
-		}
-
-		if graceful && p.RunData.AutoRestartFromGraceful {
-			StartViaService(p)
-		} else if !graceful && p.RunData.AutoRestartFromCrash && p.CrashCounter < config.GetIntOrDefault("crashlimit", 3) {
-			p.CrashCounter++
-			StartViaService(p)
-		}
-	})
+	err = p.Environment.ExecuteAsync(p.RunData.Program, common.ReplaceTokensInArr(p.RunData.Arguments, data), common.ReplaceTokensInMap(p.RunData.EnvironmentVariables, data), p.afterExit)
 	if err != nil {
 		logging.Error("Error starting server", err)
 		p.Environment.DisplayToConsole("Failed to start server\n")
@@ -312,4 +302,17 @@ func (p *ProgramData) CopyFrom(s *ProgramData) {
 	p.EnvironmentData = s.EnvironmentData
 	p.InstallData = s.InstallData
 	p.Type = s.Type
+}
+
+func(p *ProgramData) afterExit(graceful bool) {
+	if graceful {
+		p.CrashCounter = 0
+	}
+
+	if graceful && p.RunData.AutoRestartFromGraceful {
+		StartViaService(p)
+	} else if !graceful && p.RunData.AutoRestartFromCrash && p.CrashCounter < config.GetIntOrDefault("crashlimit", 3) {
+		p.CrashCounter++
+		StartViaService(p)
+	}
 }
