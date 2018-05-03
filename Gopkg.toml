@@ -59,11 +59,7 @@
 
 [[constraint]]
   name = "github.com/pufferpanel/apufferi"
-  version = "1.2.3"
-
-[[constraint]]
-  name = "github.com/pufferpanel/sftp"
-  version = "1.0.0"
+  version = "1.2.4"
 
 [[constraint]]
   name = "github.com/satori/go.uuid"
