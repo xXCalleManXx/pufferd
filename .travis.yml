@@ -3,4 +3,4 @@ language: go
 go_import_path: github.com/pufferpanel/pufferd
 
 go:
-  - 1.10
+  - "1.10"
