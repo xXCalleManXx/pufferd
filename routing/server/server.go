@@ -138,11 +138,7 @@ func KillServer(c *gin.Context) {
 func CreateServer(c *gin.Context) {
 	serverId := c.Param("id")
 	if serverId == "" {
-		uuid, err := uuid.NewV4()
-		if err != nil {
-			http.Respond(c).Status(500).Message("error generating uuid").Data(err).Code(http.UNKNOWN).Send()
-			return
-		}
+		uuid := uuid.NewV4()
 		serverId = uuid.String()
 	}
 	prg, _ := programs.Get(serverId)
