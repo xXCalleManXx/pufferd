@@ -35,7 +35,11 @@
 
 [[constraint]]
   name = "github.com/docker/docker"
-  version = "1.13.1"
+  branch = "master"
+
+[[override]]
+  name = "github.com/docker/distribution"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/gin-gonic/gin"
