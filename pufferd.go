@@ -83,7 +83,7 @@ func main() {
 		shutdown.Command(pid)
 	}
 
-	if _, err := os.Stat(configPath); os.IsNotExist(err) && !runInstaller {
+	if _, err := os.Stat(configPath); os.IsNotExist(err) && !runInstaller && !version {
 		if _, err := os.Stat("/etc/pufferd/config.json"); err == nil {
 			logging.Info("No config passed, defaulting to /etc/pufferd/config.json")
 			configPath = "/etc/pufferd/config.json"
