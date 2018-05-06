@@ -44,13 +44,14 @@ type docker struct {
 	connection  types.HijackedResponse
 	cli			*client.Client
 	downloadingImage bool
+	enforceNetwork bool
 }
 
-func createDocker(containerId, imageName string) *docker {
+func createDocker(containerId, imageName string, enforceNetwork bool) *docker {
 	if imageName == "" {
 		imageName = "pufferpanel/generic"
 	}
-	d := &docker{BaseEnvironment: &BaseEnvironment{Type: "docker"}, ContainerId: containerId, ImageName: imageName}
+	d := &docker{BaseEnvironment: &BaseEnvironment{Type: "docker"}, ContainerId: containerId, ImageName: imageName, enforceNetwork: enforceNetwork}
 	d.BaseEnvironment.executeAsync = d.dockerExecuteAsync
 	d.BaseEnvironment.waitForMainProcess = d.WaitForMainProcess
 	return d
@@ -232,7 +233,7 @@ func (e *docker) WaitForMainProcessFor(timeout int) (err error) {
 func (d *docker) getClient() (*client.Client, error) {
 	var err error = nil
 	if d.cli == nil {
-		d.cli, err = client.NewEnvClient()
+		d.cli, err = client.NewClientWithOpts(client.FromEnv)
 		ctx := context.Background()
 		d.cli.NegotiateAPIVersion(ctx)
 	}
