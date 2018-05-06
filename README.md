@@ -1,7 +1,11 @@
 # pufferd
 The PufferPanel daemon
 
-[![Build Status](https://travis-ci.org/PufferPanel/pufferd.svg?branch=master)](https://travis-ci.org/PufferPanel/pufferd)
+Travis Status - [![Travis Build Status](https://travis-ci.org/PufferPanel/pufferd.svg?branch=master)](https://travis-ci.org/PufferPanel/pufferd)
+
+Linux Build Status - ![Linux Build Status](https://ci.pufferpanel.com/app/rest/builds/buildType:core/statusIcon.svg)
+
+Windows Build Status - ![Windows Build Status](https://ci.pufferpanel.com/app/rest/builds/buildType:core-windows/statusIcon.svg)
 
 [Documentation](https://pufferd.pufferpanel.com)
 
