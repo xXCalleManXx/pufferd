@@ -20,6 +20,7 @@ type ProgramData struct {
 	Type            string                 `json:"type"`
 	Identifier      string                 `json:"id"`
 	RunData         RunObject              `json:"run"`
+	Template        string                 `json:"template"`
 
 	Environment  environments.Environment `json:"-"`
 	CrashCounter int                      `json:"-"`
@@ -183,7 +184,29 @@ func (p *ProgramData) Install() (err error) {
 
 	os.MkdirAll(p.Environment.GetRootDirectory(), 0755)
 
-	process := operations.GenerateProcess(p.InstallData.Operations, p.GetEnvironment(), p.DataToMap())
+	var process operations.OperationProcess
+
+	if len(p.InstallData.Operations) == 0 && p.Template != "" {
+		templateData, err := ioutil.ReadFile(common.JoinPath(TemplateFolder, p.Template+".json"))
+		if err != nil {
+			p.Environment.DisplayToConsole("Error running installer, check daemon logs")
+			return err
+		}
+
+		var templateJson ProgramData
+		err = json.Unmarshal(templateData, &templateJson)
+		if err != nil {
+			logging.Error("Malformed json for program "+p.Template, err)
+			p.Environment.DisplayToConsole("Error running installer, check daemon logs")
+			return err
+		}
+
+		process = operations.GenerateProcess(templateJson.InstallData.Operations, p.GetEnvironment(), p.DataToMap())
+
+	} else {
+		process = operations.GenerateProcess(p.InstallData.Operations, p.GetEnvironment(), p.DataToMap())
+	}
+
 	err = process.Run()
 	if err != nil {
 		p.Environment.DisplayToConsole("Error running installer, check daemon logs")
@@ -304,7 +327,7 @@ func (p *ProgramData) CopyFrom(s *ProgramData) {
 	p.Type = s.Type
 }
 
-func(p *ProgramData) afterExit(graceful bool) {
+func (p *ProgramData) afterExit(graceful bool) {
 	if graceful {
 		p.CrashCounter = 0
 	}

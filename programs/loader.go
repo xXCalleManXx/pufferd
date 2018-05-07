@@ -119,8 +119,12 @@ func Create(id string, serverType string, data map[string]interface{}) bool {
 	var templateJson struct {
 		ProgramData ProgramData `json:"pufferd"`
 	}
+
+	templateJson.ProgramData.Template = serverType
+
 	templateJson.ProgramData = CreateProgram()
 	err = json.Unmarshal(templateData, &templateJson)
+	template
 
 	if err != nil {
 		logging.Error("Error reading template file for type "+serverType, err)
