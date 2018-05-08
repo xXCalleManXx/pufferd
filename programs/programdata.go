@@ -12,6 +12,10 @@ import (
 	"os"
 )
 
+type ServerJson struct {
+	ProgramData ProgramData `json:"pufferd"`
+}
+
 type ProgramData struct {
 	Data            map[string]DataObject  `json:"data"`
 	Display         string                 `json:"display"`
@@ -189,6 +193,7 @@ func (p *ProgramData) Install() (err error) {
 	if len(p.InstallData.Operations) == 0 && p.Template != "" {
 		templateData, err := ioutil.ReadFile(common.JoinPath(TemplateFolder, p.Template+".json"))
 		if err != nil {
+			logging.Error("Error reading template for "+p.Template, err)
 			p.Environment.DisplayToConsole("Error running installer, check daemon logs")
 			return err
 		}
@@ -265,8 +270,8 @@ func (p *ProgramData) IsAutoStart() (isAutoStart bool) {
 func (p *ProgramData) Save(file string) (err error) {
 	logging.Debugf("Saving server %s", p.Id())
 
-	endResult := make(map[string]interface{})
-	endResult["pufferd"] = p
+	endResult := ServerJson{}
+	endResult.ProgramData = *p
 
 	data, err := json.MarshalIndent(endResult, "", "  ")
 	if err != nil {

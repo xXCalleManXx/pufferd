@@ -32,7 +32,7 @@ import (
 )
 
 var (
-	allPrograms    []Program = make([]Program, 0)
+	allPrograms    = make([]Program, 0)
 	ServerFolder   string
 	TemplateFolder string
 )
@@ -87,9 +87,7 @@ func Load(id string) (program Program, err error) {
 }
 
 func LoadFromData(id string, source []byte) (program Program, err error) {
-	var data struct {
-		ProgramData ProgramData `json:"pufferd"`
-	}
+	data := ServerJson{}
 	data.ProgramData = CreateProgram()
 	err = json.Unmarshal(source, &data)
 	if err != nil {
@@ -116,15 +114,11 @@ func Create(id string, serverType string, data map[string]interface{}) bool {
 		return false
 	}
 
-	var templateJson struct {
-		ProgramData ProgramData `json:"pufferd"`
-	}
-
-	templateJson.ProgramData.Template = serverType
+	templateJson := ServerJson{}
 
 	templateJson.ProgramData = CreateProgram()
+	templateJson.ProgramData.Template = serverType
 	err = json.Unmarshal(templateData, &templateJson)
-	template
 
 	if err != nil {
 		logging.Error("Error reading template file for type "+serverType, err)
@@ -233,7 +227,7 @@ func GetFromCache(id string) Program {
 func Save(id string) (err error) {
 	program := GetFromCache(id)
 	if program == nil {
-		err = errors.New("No server with given id")
+		err = errors.New("no server with given id")
 		return
 	}
 	err = program.Save(common.JoinPath(ServerFolder, id+".json"))
