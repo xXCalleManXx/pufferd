@@ -62,8 +62,9 @@ func main() {
 	var migrate bool
 	var uninstall bool
 	var configPath string
-	var pid int
+	var shutdownPid int
 	var runDaemon bool
+	var reloadPid int
 	flag.StringVar(&loggingLevel, "logging", "INFO", "Lowest logging level to display")
 	flag.StringVar(&authRoot, "auth", "", "Base URL to the authorization server")
 	flag.StringVar(&authToken, "token", "", "Authorization token")
@@ -74,15 +75,21 @@ func main() {
 	flag.BoolVar(&migrate, "migrate", false, "Migrate Scales data to pufferd")
 	flag.BoolVar(&uninstall, "uninstall", false, "Uninstall pufferd")
 	flag.StringVar(&configPath, "config", "config.json", "Path to pufferd config.json")
-	flag.IntVar(&pid, "shutdown", 0, "PID to shut down")
+	flag.IntVar(&shutdownPid, "shutdown", 0, "PID to shut down")
+	flag.IntVar(&reloadPid, "shutdown", 0, "PID to shut down")
 	flag.BoolVar(&runDaemon, "run", false, "Runs the daemon")
 	flag.Parse()
 
 	versionString := fmt.Sprintf("pufferd %s (%s)", VERSION, GITHASH)
 
-	if pid != 0 {
+	if shutdownPid != 0 {
 		logging.Info("Shutting down")
-		commands.Shutdown(pid)
+		commands.Shutdown(shutdownPid)
+	}
+
+	if reloadPid != 0 {
+		logging.Info("Reloading")
+		commands.Reload(reloadPid)
 	}
 
 	if _, err := os.Stat(configPath); os.IsNotExist(err) && !runInstaller && !version {
@@ -116,7 +123,7 @@ func main() {
 		migration.MigrateFromScales()
 	}
 
-	if license || version || regenerate || migrate || pid != 0 {
+	if license || version || regenerate || migrate || shutdownPid != 0 || reloadPid != 0{
 		return
 	}
 
