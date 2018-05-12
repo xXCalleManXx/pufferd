@@ -76,7 +76,7 @@ func main() {
 	flag.BoolVar(&uninstall, "uninstall", false, "Uninstall pufferd")
 	flag.StringVar(&configPath, "config", "config.json", "Path to pufferd config.json")
 	flag.IntVar(&shutdownPid, "shutdown", 0, "PID to shut down")
-	flag.IntVar(&reloadPid, "shutdown", 0, "PID to shut down")
+	flag.IntVar(&reloadPid, "reload", 0, "PID to shut down")
 	flag.BoolVar(&runDaemon, "run", false, "Runs the daemon")
 	flag.Parse()
 
