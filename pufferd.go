@@ -20,14 +20,8 @@ import (
 	"flag"
 	"io/ioutil"
 	"os"
-	"path/filepath"
-
 	"fmt"
 
-	"net/http"
-	"strings"
-
-	"github.com/braintree/manners"
 	"github.com/gin-gonic/gin"
 	"github.com/pufferpanel/apufferi/config"
 	"github.com/pufferpanel/apufferi/logging"
@@ -36,11 +30,17 @@ import (
 	"github.com/pufferpanel/pufferd/install"
 	"github.com/pufferpanel/pufferd/migration"
 	"github.com/pufferpanel/pufferd/programs"
-	"github.com/pufferpanel/pufferd/routing"
-	"github.com/pufferpanel/pufferd/sftp"
 	"github.com/pufferpanel/pufferd/shutdown"
-	"github.com/pufferpanel/pufferd/uninstaller"
 	"runtime"
+	"net/http"
+	"github.com/pufferpanel/pufferd/routing"
+	"path/filepath"
+	"github.com/pufferpanel/pufferd/sftp"
+	"github.com/braintree/manners"
+	"os/signal"
+	"runtime/debug"
+	"github.com/pufferpanel/pufferd/commands"
+	"syscall"
 )
 
 var (
@@ -48,6 +48,8 @@ var (
 	MAJORVERSION = "nightly"
 	GITHASH      = "unknown"
 )
+
+var runService = true
 
 func main() {
 	var loggingLevel string
@@ -80,7 +82,7 @@ func main() {
 
 	if pid != 0 {
 		logging.Info("Shutting down")
-		shutdown.Command(pid)
+		commands.Shutdown(pid)
 	}
 
 	if _, err := os.Stat(configPath); os.IsNotExist(err) && !runInstaller && !version {
@@ -94,22 +96,7 @@ func main() {
 	}
 
 	if uninstall {
-		fmt.Println("This option will UNINSTALL pufferd, are you sure? Please enter \"yes\" to proceed [no]")
-		var response string
-		fmt.Scanln(&response)
-		if strings.ToLower(response) == "yes" || strings.ToLower(response) == "y" {
-			if os.Geteuid() != 0 {
-				logging.Error("To uninstall pufferd you need to have sudo or root privileges")
-			} else {
-				config.Load(configPath)
-				uninstaller.StartProcess()
-				logging.Info("pufferd is now uninstalled.")
-			}
-		} else {
-			logging.Info("Uninstall process aborted")
-			logging.Info("Exiting")
-		}
-		return
+		commands.Uninstall(configPath)
 	}
 
 	if version || !runDaemon {
@@ -121,19 +108,7 @@ func main() {
 	}
 
 	if regenerate {
-		config.Load(configPath)
-		programs.Initialize()
-
-		if _, err := os.Stat(programs.TemplateFolder); os.IsNotExist(err) {
-			logging.Info("No template directory found, creating")
-			err = os.MkdirAll(programs.TemplateFolder, 0755)
-			if err != nil {
-				logging.Error("Error creating template folder", err)
-			}
-		}
-		// Overwrite existing templates
-		templates.CopyTemplates()
-		logging.Info("Templates regenerated")
+		commands.Regenerate(configPath)
 	}
 
 	if migrate {
@@ -188,35 +163,6 @@ func main() {
 		os.MkdirAll(programs.ServerFolder, 0755)
 	}
 
-	programs.LoadFromFolder()
-
-	programs.InitService()
-
-	for _, element := range programs.GetAll() {
-		if element.IsEnabled() && element.IsAutoStart() {
-			logging.Info("Queued server " + element.Id())
-			programs.StartViaService(element)
-		}
-	}
-
-	r := routing.ConfigureWeb()
-
-	useHttps := false
-
-	dataFolder := config.GetOrDefault("datafolder", "data")
-	httpsPem := filepath.Join(dataFolder, "https.pem")
-	httpsKey := filepath.Join(dataFolder, "https.key")
-
-	if _, err := os.Stat(httpsPem); os.IsNotExist(err) {
-		logging.Warn("No HTTPS.PEM found in data folder, will use http instead")
-	} else if _, err := os.Stat(httpsKey); os.IsNotExist(err) {
-		logging.Warn("No HTTPS.KEY found in data folder, will use http instead")
-	} else {
-		useHttps = true
-	}
-
-	sftp.Run()
-
 	//check if there's an update
 	if config.GetOrDefault("update-check", "true") == "true" {
 		go func() {
@@ -239,9 +185,46 @@ func main() {
 		}()
 	}
 
-	web := config.GetOrDefault("web", config.GetOrDefault("webhost", "0.0.0.0")+":"+config.GetOrDefault("webport", "5656"))
+	programs.LoadFromFolder()
 
-	shutdown.CreateHook()
+	programs.InitService()
+
+	for _, element := range programs.GetAll() {
+		if element.IsEnabled() && element.IsAutoStart() {
+			logging.Info("Queued server " + element.Id())
+			programs.StartViaService(element)
+		}
+	}
+
+	CreateHook()
+
+	for runService {
+		runServices()
+	}
+
+	shutdown.Shutdown()
+}
+
+func runServices() {
+	r := routing.ConfigureWeb()
+
+	useHttps := false
+
+	dataFolder := config.GetOrDefault("datafolder", "data")
+	httpsPem := filepath.Join(dataFolder, "https.pem")
+	httpsKey := filepath.Join(dataFolder, "https.key")
+
+	if _, err := os.Stat(httpsPem); os.IsNotExist(err) {
+		logging.Warn("No HTTPS.PEM found in data folder, will use http instead")
+	} else if _, err := os.Stat(httpsKey); os.IsNotExist(err) {
+		logging.Warn("No HTTPS.KEY found in data folder, will use http instead")
+	} else {
+		useHttps = true
+	}
+
+	sftp.Run()
+
+	web := config.GetOrDefault("web", config.GetOrDefault("webhost", "0.0.0.0")+":"+config.GetOrDefault("webport", "5656"))
 
 	logging.Infof("Starting web access on %s", web)
 	var err error
@@ -253,6 +236,28 @@ func main() {
 	if err != nil {
 		logging.Error("Error starting web service", err)
 	}
+}
 
-	shutdown.Shutdown()
+func CreateHook() {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.Signal(15), syscall.Signal(1))
+	go func() {
+		defer func() {
+			if err := recover(); err != nil {
+				logging.Errorf("Error: %+v\n%s", err, debug.Stack())
+			}
+		}()
+
+		var sig os.Signal
+
+		for sig != syscall.Signal(15) {
+			sig = <- c
+			switch sig {
+			case syscall.Signal(1):
+			}
+		}
+
+		runService = false
+		shutdown.CompleteShutdown()
+	}()
 }
