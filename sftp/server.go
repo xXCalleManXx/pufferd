@@ -38,6 +38,7 @@ import (
 	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/pufferd/programs"
 	"golang.org/x/crypto/ssh"
+	"path/filepath"
 )
 
 func Run() {
@@ -164,7 +165,7 @@ func handleConn(conn net.Conn, config *ssh.ServerConfig) error {
 			}
 		}(requests)
 
-		fs := CreateRequestPrefix(path.Join(programs.ServerFolder, sc.Permissions.Extensions["server_id"]))
+		fs := CreateRequestPrefix(filepath.Join(programs.ServerFolder, sc.Permissions.Extensions["server_id"]))
 
 		server := sftp.NewRequestServer(channel, fs)
 
