@@ -10,6 +10,7 @@ import (
 
 	"github.com/pkg/sftp"
 	utils "github.com/pufferpanel/apufferi/common"
+	"github.com/pufferpanel/apufferi/logging"
 )
 
 type requestPrefix struct {
@@ -23,11 +24,13 @@ func CreateRequestPrefix(prefix string) sftp.Handlers {
 }
 
 func (rp requestPrefix) Fileread(request *sftp.Request) (io.ReaderAt, error) {
+	logging.Debug("read request: " + request.Filepath)
 	file, err := rp.getFile(request.Filepath, os.O_RDONLY, 0644)
 	return file, err
 }
 
 func (rp requestPrefix) Filewrite(request *sftp.Request) (io.WriterAt, error) {
+	logging.Debug("write request: " + request.Filepath)
 	file, err := rp.getFile(request.Filepath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	return file, err
 }
@@ -44,6 +47,7 @@ func (rp requestPrefix) Filecmd(request *sftp.Request) error {
 			return rp.maskError(err)
 		}
 	}
+	logging.Debugf("cmd request [%s]: %s", request.Method, request.Filepath)
 	switch request.Method {
 	case "SetStat", "Setstat":
 		{
@@ -79,6 +83,7 @@ func (rp requestPrefix) Filelist(request *sftp.Request) (sftp.ListerAt, error) {
 	if err != nil {
 		return nil, rp.maskError(err)
 	}
+	logging.Debugf("list request [%s]: %s", request.Method, request.Filepath)
 	switch request.Method {
 	case "List":
 		{
@@ -89,9 +94,12 @@ func (rp requestPrefix) Filelist(request *sftp.Request) (sftp.ListerAt, error) {
 			files, err := file.Readdir(0)
 			if err != nil {
 				return nil, err
-			} else {
-				return listerat(files), nil
 			}
+			err = file.Close()
+			if err != nil {
+				return nil, rp.maskError(err)
+			}
+			return listerat(files), nil
 		}
 	case "Stat":
 		{
@@ -100,6 +108,10 @@ func (rp requestPrefix) Filelist(request *sftp.Request) (sftp.ListerAt, error) {
 				return nil, rp.maskError(err)
 			}
 			fi, err := file.Stat()
+			if err != nil {
+				return nil, rp.maskError(err)
+			}
+			err = file.Close()
 			if err != nil {
 				return nil, rp.maskError(err)
 			}
@@ -119,6 +131,10 @@ func (rp requestPrefix) Filelist(request *sftp.Request) (sftp.ListerAt, error) {
 			if err != nil {
 				return nil, rp.maskError(err)
 			}
+			err = file.Close()
+			if err != nil {
+				return nil, rp.maskError(err)
+			}
 			return listerat([]os.FileInfo{fi}), nil
 		}
 	default:
@@ -127,13 +143,14 @@ func (rp requestPrefix) Filelist(request *sftp.Request) (sftp.ListerAt, error) {
 }
 
 func (rp requestPrefix) getFile(path string, flags int, mode os.FileMode) (*os.File, error) {
+	logging.Debugf("Requesting path: %s", path)
 	filePath, err := rp.validate(path)
 	folderPath := filepath.Dir(filePath)
 	if err != nil {
 		return nil, rp.maskError(err)
 	}
 
-	if flags&os.O_CREATE == 1  {
+	if flags&os.O_CREATE != 0  {
 		if _, err := os.Stat(folderPath); os.IsNotExist(err) {
 			os.MkdirAll(folderPath, 0755)
 		}
