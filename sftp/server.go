@@ -41,11 +41,17 @@ import (
 	"path/filepath"
 )
 
+var sftpServer net.Listener
+
 func Run() {
 	e := runServer()
 	if e != nil {
 		logging.Error("Error starting SFTP", e)
 	}
+}
+
+func Stop() {
+	sftpServer.Close()
 }
 
 func runServer() error {
@@ -99,7 +105,7 @@ func runServer() error {
 
 	bind := configuration.GetOrDefault("sftp", "0.0.0.0:5657")
 
-	listener, e := net.Listen("tcp", bind)
+	sftpServer, e = net.Listen("tcp", bind)
 	if e != nil {
 		return e
 	}
@@ -107,8 +113,10 @@ func runServer() error {
 
 	go func() {
 		for {
-			conn, _ := listener.Accept()
-			go HandleConn(conn, config)
+			conn, _ := sftpServer.Accept()
+			if conn != nil {
+				go HandleConn(conn, config)
+			}
 		}
 	}()
 

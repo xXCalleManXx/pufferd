@@ -50,6 +50,7 @@ var (
 )
 
 var runService = true
+var configPath string
 
 func main() {
 	var loggingLevel string
@@ -61,7 +62,6 @@ func main() {
 	var regenerate bool
 	var migrate bool
 	var uninstall bool
-	var configPath string
 	var shutdownPid int
 	var runDaemon bool
 	var reloadPid int
@@ -92,7 +92,7 @@ func main() {
 		commands.Reload(reloadPid)
 	}
 
-	if _, err := os.Stat(configPath); os.IsNotExist(err) && !runInstaller && !version {
+	if _, err := os.Stat(configPath); os.IsNotExist(err) && !runInstaller && !version && reloadPid == 0 && shutdownPid == 0 {
 		if _, err := os.Stat("/etc/pufferd/config.json"); err == nil {
 			logging.Info("No config passed, defaulting to /etc/pufferd/config.json")
 			configPath = "/etc/pufferd/config.json"
@@ -106,7 +106,7 @@ func main() {
 		commands.Uninstall(configPath)
 	}
 
-	if version || !runDaemon {
+	if version {
 		os.Stdout.WriteString(versionString + "\r\n")
 	}
 
@@ -261,6 +261,9 @@ func CreateHook() {
 			sig = <- c
 			switch sig {
 			case syscall.Signal(1):
+				manners.Close()
+				sftp.Stop()
+				config.Load(configPath)
 			}
 		}
 
