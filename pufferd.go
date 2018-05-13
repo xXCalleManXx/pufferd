@@ -18,29 +18,30 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
-	"fmt"
 
+	"github.com/braintree/manners"
 	"github.com/gin-gonic/gin"
 	"github.com/pufferpanel/apufferi/config"
 	"github.com/pufferpanel/apufferi/logging"
+	"github.com/pufferpanel/pufferd/commands"
 	"github.com/pufferpanel/pufferd/data"
 	"github.com/pufferpanel/pufferd/data/templates"
 	"github.com/pufferpanel/pufferd/install"
 	"github.com/pufferpanel/pufferd/migration"
 	"github.com/pufferpanel/pufferd/programs"
-	"github.com/pufferpanel/pufferd/shutdown"
-	"runtime"
-	"net/http"
 	"github.com/pufferpanel/pufferd/routing"
-	"path/filepath"
 	"github.com/pufferpanel/pufferd/sftp"
-	"github.com/braintree/manners"
+	"github.com/pufferpanel/pufferd/shutdown"
+	"net/http"
 	"os/signal"
+	"path/filepath"
+	"runtime"
 	"runtime/debug"
-	"github.com/pufferpanel/pufferd/commands"
 	"syscall"
+	"strings"
 )
 
 var (
@@ -123,7 +124,7 @@ func main() {
 		migration.MigrateFromScales()
 	}
 
-	if license || version || regenerate || migrate || shutdownPid != 0 || reloadPid != 0{
+	if license || version || regenerate || migrate || shutdownPid != 0 || reloadPid != 0 {
 		return
 	}
 
@@ -171,26 +172,7 @@ func main() {
 	}
 
 	//check if there's an update
-	if config.GetOrDefault("update-check", "true") == "true" {
-		go func() {
-			url := "https://dl.pufferpanel.com/pufferd/" + MAJORVERSION + "/version.txt"
-			logging.Debug("Checking for updates using " + url)
-			resp, err := http.Get(url)
-			if err != nil {
-				return
-			}
-			defer resp.Body.Close()
-			onlineVersion, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				return
-			}
-			if string(onlineVersion) != GITHASH {
-				logging.Infof("DL server reports a different hash than this version, an update may be available")
-				logging.Infof("Installed: %s", GITHASH)
-				logging.Infof("Online: %s", onlineVersion)
-			}
-		}()
-	}
+	go CheckForUpdate()
 
 	programs.LoadFromFolder()
 
@@ -258,7 +240,7 @@ func CreateHook() {
 		var sig os.Signal
 
 		for sig != syscall.Signal(15) {
-			sig = <- c
+			sig = <-c
 			switch sig {
 			case syscall.Signal(1):
 				manners.Close()
@@ -270,4 +252,26 @@ func CreateHook() {
 		runService = false
 		shutdown.CompleteShutdown()
 	}()
+}
+
+func CheckForUpdate() {
+	if config.GetOrDefault("update-check", "true") == "true" {
+		url := "https://dl.pufferpanel.com/pufferd/" + MAJORVERSION + "/version.txt"
+		logging.Debug("Checking for updates using " + url)
+		resp, err := http.Get(url)
+		if err != nil {
+			return
+		}
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return
+		}
+		onlineVersion := strings.TrimSpace(string(body))
+		if string(onlineVersion) != GITHASH {
+			logging.Infof("DL server reports a different hash than this version, an update may be available")
+			logging.Infof("Installed: %s", GITHASH)
+			logging.Infof("Online: %s", onlineVersion)
+		}
+	}
 }
