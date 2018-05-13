@@ -2,10 +2,10 @@ package commands
 
 import (
 	"github.com/pufferpanel/apufferi/config"
-	"github.com/pufferpanel/pufferd/programs"
-	"os"
 	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/pufferd/data/templates"
+	"github.com/pufferpanel/pufferd/programs"
+	"os"
 )
 
 func Regenerate(configPath string) {

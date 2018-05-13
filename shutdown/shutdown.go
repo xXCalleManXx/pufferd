@@ -1,12 +1,12 @@
 package shutdown
 
 import (
-	"os"
-	"runtime/debug"
-	"sync"
 	"github.com/braintree/manners"
 	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/pufferd/programs"
+	"os"
+	"runtime/debug"
+	"sync"
 )
 
 func CompleteShutdown() {

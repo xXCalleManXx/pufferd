@@ -40,8 +40,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"runtime/debug"
-	"syscall"
 	"strings"
+	"syscall"
 )
 
 var (

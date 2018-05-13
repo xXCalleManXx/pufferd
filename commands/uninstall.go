@@ -2,11 +2,11 @@ package commands
 
 import (
 	"fmt"
-	"strings"
-	"os"
-	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/apufferi/config"
+	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/pufferd/uninstaller"
+	"os"
+	"strings"
 )
 
 func Uninstall(configPath string) {

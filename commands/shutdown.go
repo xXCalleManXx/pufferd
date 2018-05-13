@@ -1,11 +1,11 @@
 package commands
 
 import (
-	"os"
-	"github.com/pufferpanel/apufferi/logging"
-	"time"
-	"syscall"
 	"errors"
+	"github.com/pufferpanel/apufferi/logging"
+	"os"
+	"syscall"
+	"time"
 )
 
 func Shutdown(pid int) {

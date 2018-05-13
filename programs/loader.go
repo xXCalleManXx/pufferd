@@ -132,15 +132,15 @@ func Create(id string, serverType string, data map[string]interface{}) bool {
 		}
 		for k, v := range data {
 			if d, ok := mapper[k]; ok {
-				d.Value= v
+				d.Value = v
 				mapper[k] = d
 			} else {
 				newMap := DataObject{
-					Value: v,
+					Value:       v,
 					Description: "No Description",
-					Display: k,
-					Required: false,
-					Internal: true,
+					Display:     k,
+					Required:    false,
+					Internal:    true,
 				}
 				mapper[k] = newMap
 			}

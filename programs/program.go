@@ -18,9 +18,9 @@ package programs
 
 import (
 	"container/list"
+	"github.com/pufferpanel/pufferd/environments"
 	"sync"
 	"time"
-	"github.com/pufferpanel/pufferd/environments"
 )
 
 type Program interface {
@@ -101,7 +101,7 @@ func InitService() {
 	}()
 }
 
-func StartViaService (p Program) {
+func StartViaService(p Program) {
 	lock.Lock()
 	defer func() {
 		lock.Unlock()

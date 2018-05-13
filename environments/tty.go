@@ -20,6 +20,7 @@ package environments
 
 import (
 	"errors"
+	"fmt"
 	"github.com/kr/pty"
 	"github.com/pufferpanel/apufferi/logging"
 	ppError "github.com/pufferpanel/pufferd/errors"
@@ -28,11 +29,10 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
-	"strings"
-	"fmt"
 )
 
 type tty struct {

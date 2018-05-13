@@ -150,7 +150,7 @@ func (rp requestPrefix) getFile(path string, flags int, mode os.FileMode) (*os.F
 		return nil, rp.maskError(err)
 	}
 
-	if flags&os.O_CREATE != 0  {
+	if flags&os.O_CREATE != 0 {
 		if _, err := os.Stat(folderPath); os.IsNotExist(err) {
 			os.MkdirAll(folderPath, 0755)
 		}

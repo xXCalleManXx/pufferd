@@ -1,9 +1,9 @@
 package commands
 
 import (
-	"os"
-	"github.com/pufferpanel/apufferi/logging"
 	"errors"
+	"github.com/pufferpanel/apufferi/logging"
+	"os"
 	"syscall"
 )
 

@@ -26,11 +26,11 @@ import (
 	"syscall"
 	"time"
 
+	"fmt"
 	"github.com/pufferpanel/apufferi/logging"
 	ppError "github.com/pufferpanel/pufferd/errors"
 	"github.com/shirou/gopsutil/process"
 	"strings"
-	"fmt"
 )
 
 type standard struct {
