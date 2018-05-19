@@ -135,7 +135,7 @@ func main() {
 	if runtime.GOOS == "linux" {
 		defaultLogFolder = "/var/log/pufferd"
 	}
-	var logPath = config.GetOrDefault("logPath", defaultLogFolder)
+	var logPath = config.GetStringOrDefault("logPath", defaultLogFolder)
 	logging.SetLogFolder(logPath)
 	logging.Init()
 	gin.SetMode(gin.ReleaseMode)
@@ -199,7 +199,7 @@ func runServices() {
 
 	useHttps := false
 
-	dataFolder := config.GetOrDefault("datafolder", "data")
+	dataFolder := config.GetStringOrDefault("datafolder", "data")
 	httpsPem := filepath.Join(dataFolder, "https.pem")
 	httpsKey := filepath.Join(dataFolder, "https.key")
 
@@ -213,7 +213,7 @@ func runServices() {
 
 	sftp.Run()
 
-	web := config.GetOrDefault("web", config.GetOrDefault("webhost", "0.0.0.0")+":"+config.GetOrDefault("webport", "5656"))
+	web := config.GetStringOrDefault("web", config.GetStringOrDefault("webhost", "0.0.0.0")+":"+config.GetStringOrDefault("webport", "5656"))
 
 	logging.Infof("Starting web access on %s", web)
 	var err error
@@ -255,7 +255,7 @@ func CreateHook() {
 }
 
 func CheckForUpdate() {
-	if config.GetOrDefault("update-check", "true") == "true" {
+	if config.GetBoolOrDefault("update-check", true) {
 		url := "https://dl.pufferpanel.com/pufferd/" + MAJORVERSION + "/version.txt"
 		logging.Debug("Checking for updates using " + url)
 		resp, err := http.Get(url)

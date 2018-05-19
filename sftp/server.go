@@ -61,7 +61,7 @@ func runServer() error {
 		},
 	}
 
-	serverKeyFile := path.Join(configuration.GetOrDefault("datafolder", "data"), "server.key")
+	serverKeyFile := path.Join(configuration.GetStringOrDefault("datafolder", "data"), "server.key")
 
 	_, e := os.Stat(serverKeyFile)
 
@@ -103,7 +103,7 @@ func runServer() error {
 
 	config.AddHostKey(hkey)
 
-	bind := configuration.GetOrDefault("sftp", "0.0.0.0:5657")
+	bind := configuration.GetStringOrDefault("sftp", "0.0.0.0:5657")
 
 	sftpServer, e = net.Listen("tcp", bind)
 	if e != nil {
@@ -193,14 +193,14 @@ func PrintDiscardRequests(in <-chan *ssh.Request) {
 }
 
 func validateSSH(username string, password string) (*ssh.Permissions, error) {
-	authUrl := configuration.Get("authserver")
+	authUrl := configuration.GetString("authserver")
 	client := &http.Client{}
 	data := url.Values{}
 	data.Set("grant_type", "password")
 	data.Set("username", username)
 	data.Set("password", password)
 	data.Set("scope", "sftp")
-	token := configuration.Get("authtoken")
+	token := configuration.GetString("authtoken")
 	request, _ := http.NewRequest("POST", authUrl, bytes.NewBufferString(data.Encode()))
 	request.Header.Add("Authorization", "Bearer "+token)
 	request.Header.Add("Content-Type", "application/x-www-form-urlencoded")

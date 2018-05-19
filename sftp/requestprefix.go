@@ -24,18 +24,19 @@ func CreateRequestPrefix(prefix string) sftp.Handlers {
 }
 
 func (rp requestPrefix) Fileread(request *sftp.Request) (io.ReaderAt, error) {
-	logging.Debug("read request: " + request.Filepath)
+	logging.Devel("read request: " + request.Filepath)
 	file, err := rp.getFile(request.Filepath, os.O_RDONLY, 0644)
 	return file, err
 }
 
 func (rp requestPrefix) Filewrite(request *sftp.Request) (io.WriterAt, error) {
-	logging.Debug("write request: " + request.Filepath)
+	logging.Devel("write request: " + request.Filepath)
 	file, err := rp.getFile(request.Filepath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	return file, err
 }
 
 func (rp requestPrefix) Filecmd(request *sftp.Request) error {
+	logging.Develf("cmd request [%s]: %s", request.Method, request.Filepath)
 	sourceName, err := rp.validate(request.Filepath)
 	if err != nil {
 		return rp.maskError(err)
@@ -47,7 +48,6 @@ func (rp requestPrefix) Filecmd(request *sftp.Request) error {
 			return rp.maskError(err)
 		}
 	}
-	logging.Debugf("cmd request [%s]: %s", request.Method, request.Filepath)
 	switch request.Method {
 	case "SetStat", "Setstat":
 		{
@@ -79,11 +79,11 @@ func (rp requestPrefix) Filecmd(request *sftp.Request) error {
 }
 
 func (rp requestPrefix) Filelist(request *sftp.Request) (sftp.ListerAt, error) {
+	logging.Develf("list request [%s]: %s", request.Method, request.Filepath)
 	sourceName, err := rp.validate(request.Filepath)
 	if err != nil {
 		return nil, rp.maskError(err)
 	}
-	logging.Debugf("list request [%s]: %s", request.Method, request.Filepath)
 	switch request.Method {
 	case "List":
 		{
@@ -143,7 +143,7 @@ func (rp requestPrefix) Filelist(request *sftp.Request) (sftp.ListerAt, error) {
 }
 
 func (rp requestPrefix) getFile(path string, flags int, mode os.FileMode) (*os.File, error) {
-	logging.Debugf("Requesting path: %s", path)
+	logging.Develf("Requesting path: %s", path)
 	filePath, err := rp.validate(path)
 	folderPath := filepath.Dir(filePath)
 	if err != nil {
@@ -180,7 +180,7 @@ func (rp requestPrefix) tryPrefix(path string) (bool, string) {
 }
 
 func (rp requestPrefix) stripPrefix(path string) string {
-	newStr := strings.Replace(path, rp.prefix, "", -1)
+	newStr := strings.TrimPrefix(path, rp.prefix)
 	if len(newStr) == 0 {
 		newStr = "/"
 	}
