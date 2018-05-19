@@ -178,8 +178,8 @@
     "http/handler",
     "logging"
   ]
-  revision = "9a83b799497d8343d1e50c096436f59907d1b0d2"
-  version = "v1.2.5"
+  revision = "75dee3da02db1876c26304c8b11687d4b28e3a63"
+  version = "v1.2.6"
 
 [[projects]]
   name = "github.com/satori/go.uuid"
@@ -260,6 +260,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a8ac8acbc180229abd957cf8555316c122a0e6f449272a077aef49e8eb2bee86"
+  inputs-digest = "aac5e3560b1f78c2de4e1ad42f7cb680c4944aee0e3cc334fae9345e157d5a92"
   solver-name = "gps-cdcl"
   solver-version = 1
