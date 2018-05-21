@@ -117,6 +117,7 @@ func Create(id string, serverType string, data map[string]interface{}) bool {
 	templateJson := ServerJson{}
 
 	templateJson.ProgramData = CreateProgram()
+	templateJson.ProgramData.Identifier = id
 	templateJson.ProgramData.Template = serverType
 	err = json.Unmarshal(templateData, &templateJson)
 

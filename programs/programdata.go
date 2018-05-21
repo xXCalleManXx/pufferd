@@ -31,11 +31,12 @@ type ProgramData struct {
 }
 
 type DataObject struct {
-	Description string      `json:"desc"`
-	Display     string      `json:"display"`
-	Internal    bool        `json:"internal"`
-	Required    bool        `json:"required"`
-	Value       interface{} `json:"value"`
+	Description  string      `json:"desc"`
+	Display      string      `json:"display"`
+	Internal     bool        `json:"internal"`
+	Required     bool        `json:"required"`
+	Value        interface{} `json:"value"`
+	UserEditable bool        `json:"userEdit"`
 }
 
 type RunObject struct {
@@ -47,7 +48,7 @@ type RunObject struct {
 	AutoRestartFromCrash    bool                     `json:"autorecover"`
 	AutoRestartFromGraceful bool                     `json:"autorestart"`
 	Pre                     []map[string]interface{} `json:"pre"`
-	StopCode                int                      `json:"stopcode"`
+	StopCode                int                      `json:"stopCode,omitempty"`
 	EnvironmentVariables    map[string]string        `json:"environmentVars"`
 }
 
@@ -191,6 +192,7 @@ func (p *ProgramData) Install() (err error) {
 	var process operations.OperationProcess
 
 	if len(p.InstallData.Operations) == 0 && p.Template != "" {
+		logging.Debugf("Server %s has no defined install data, using template", p.Id())
 		templateData, err := ioutil.ReadFile(common.JoinPath(TemplateFolder, p.Template+".json"))
 		if err != nil {
 			logging.Error("Error reading template for "+p.Template, err)
@@ -198,7 +200,7 @@ func (p *ProgramData) Install() (err error) {
 			return err
 		}
 
-		var templateJson ProgramData
+		templateJson := ServerJson{}
 		err = json.Unmarshal(templateData, &templateJson)
 		if err != nil {
 			logging.Error("Malformed json for program "+p.Template, err)
@@ -206,9 +208,10 @@ func (p *ProgramData) Install() (err error) {
 			return err
 		}
 
-		process = operations.GenerateProcess(templateJson.InstallData.Operations, p.GetEnvironment(), p.DataToMap())
+		process = operations.GenerateProcess(templateJson.ProgramData.InstallData.Operations, p.GetEnvironment(), p.DataToMap())
 
 	} else {
+		logging.Debugf("Server %s has a defined install data", p.Id())
 		process = operations.GenerateProcess(p.InstallData.Operations, p.GetEnvironment(), p.DataToMap())
 	}
 
