@@ -213,7 +213,9 @@ func validateSSH(username string, password string) (*ssh.Permissions, error) {
 
 	//we should only get a 200 or 400 back, if we get any others, we have a problem
 	if response.StatusCode != 200 {
-		logging.Error("Error talking to auth server", response.StatusCode)
+		msg, _ := ioutil.ReadAll(response.Body)
+
+		logging.Errorf("Error talking to auth server: [%d] [%s]", response.StatusCode, msg)
 		return nil, errors.New("Invalid response from authorization server")
 	}
 
