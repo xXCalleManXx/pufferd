@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/pkg/sftp"
+	"github.com/pufferpanel/sftp"
 	utils "github.com/pufferpanel/apufferi/common"
 	"github.com/pufferpanel/apufferi/logging"
 )
@@ -20,7 +20,7 @@ type requestPrefix struct {
 func CreateRequestPrefix(prefix string) sftp.Handlers {
 	h := requestPrefix{prefix: prefix}
 
-	return sftp.Handlers{h, h, h, h}
+	return sftp.Handlers{h, h, h, h, h}
 }
 
 func (rp requestPrefix) Fileread(request *sftp.Request) (io.ReaderAt, error) {
@@ -168,6 +168,23 @@ func (rp requestPrefix) Filelist(request *sftp.Request) (sftp.ListerAt, error) {
 	}
 }
 
+func (rp requestPrefix) Folderopen(request *sftp.Request) error {
+	logging.Devel("-----------------")
+	logging.Develf("opendir request [%s]: %s", request.Method, request.Filepath)
+	logging.Develf("Flags: %v", request.Flags)
+	logging.Develf("Attributes: %v", request.Attrs)
+	logging.Develf("Target: %v", request.Target)
+	logging.Devel("-----------------")
+	sourceName, err := rp.validate(request.Filepath)
+	if err != nil {
+		logging.Devel("pp-sftp internal error: ", err)
+		return rp.maskError(err)
+	}
+
+	_, err = os.Stat(sourceName)
+	return err
+}
+
 func (rp requestPrefix) getFile(path string, flags int, mode os.FileMode) (*os.File, error) {
 	logging.Develf("Requesting path: %s", path)
 	filePath, err := rp.validate(path)
@@ -181,10 +198,13 @@ func (rp requestPrefix) getFile(path string, flags int, mode os.FileMode) (*os.F
 	var file *os.File
 
 	if flags&os.O_CREATE != 0 {
-		if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		_, err := os.Stat(filePath)
+		if os.IsNotExist(err) {
 			err = nil
 			os.MkdirAll(folderPath, 0755)
 			file, err = os.Create(filePath)
+		} else if err == nil {
+			file, err = os.OpenFile(filePath, flags, mode)
 		}
 	} else {
 		file, err = os.OpenFile(filePath, flags, mode)
@@ -219,7 +239,11 @@ func (rp requestPrefix) tryPrefix(path string) (bool, string) {
 }
 
 func (rp requestPrefix) stripPrefix(path string) string {
-	newStr := strings.TrimPrefix(path, rp.prefix)
+	prefix, err := filepath.Abs(rp.prefix)
+	if err != nil {
+		prefix = rp.prefix
+	}
+	newStr := strings.TrimPrefix(path, prefix)
 	if len(newStr) == 0 {
 		newStr = "/"
 	}

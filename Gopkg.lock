@@ -163,12 +163,6 @@
   version = "v0.8.0"
 
 [[projects]]
-  name = "github.com/pkg/sftp"
-  packages = ["."]
-  revision = "5bf2a174b604c6b5549dd9740d924ff2f02e3ad7"
-  version = "1.6.0"
-
-[[projects]]
   name = "github.com/pufferpanel/apufferi"
   packages = [
     "cache",
@@ -180,6 +174,12 @@
   ]
   revision = "75dee3da02db1876c26304c8b11687d4b28e3a63"
   version = "v1.2.6"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/pufferpanel/sftp"
+  packages = ["."]
+  revision = "7874470a0c49b0b998e100886b51a80ef4d119f8"
 
 [[projects]]
   name = "github.com/satori/go.uuid"
@@ -260,6 +260,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "aac5e3560b1f78c2de4e1ad42f7cb680c4944aee0e3cc334fae9345e157d5a92"
+  inputs-digest = "a0bcdc9845d94fb1cb96188cfac44cc8d05d682c9076f227198e295d3677bafa"
   solver-name = "gps-cdcl"
   solver-version = 1
