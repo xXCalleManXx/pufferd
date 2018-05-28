@@ -181,8 +181,15 @@ func (rp requestPrefix) Folderopen(request *sftp.Request) error {
 		return rp.maskError(err)
 	}
 
-	_, err = os.Stat(sourceName)
-	return err
+	fi, err := os.Stat(sourceName)
+	if err != nil {
+		return err
+	}
+	if fi.IsDir() {
+		return nil
+	} else {
+		return errors.New("not a directory")
+	}
 }
 
 func (rp requestPrefix) getFile(path string, flags int, mode os.FileMode) (*os.File, error) {
