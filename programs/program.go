@@ -85,20 +85,7 @@ func InitService() {
 	queue = list.New()
 	ticker = time.NewTicker(1 * time.Second)
 	running = true
-	go func() {
-		for range ticker.C {
-			lock.Lock()
-			next := queue.Front()
-			lock.Unlock()
-			if next == nil {
-				continue
-			}
-			program := next.Value.(Program)
-			if run, _ := program.IsRunning(); !run {
-				program.Start()
-			}
-		}
-	}()
+	go processQueue()
 }
 
 func StartViaService(p Program) {
@@ -120,4 +107,22 @@ func ShutdownService() {
 
 	running = false
 	ticker.Stop()
+}
+
+func processQueue() {
+	for range ticker.C {
+		lock.Lock()
+		next := queue.Front()
+		if next != nil {
+			queue.Remove(next)
+		}
+		lock.Unlock()
+		if next == nil {
+			continue
+		}
+		program := next.Value.(Program)
+		if run, _ := program.IsRunning(); !run {
+			program.Start()
+		}
+	}
 }

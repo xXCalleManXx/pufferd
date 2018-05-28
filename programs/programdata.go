@@ -69,9 +69,12 @@ func (p ProgramData) DataToMap() map[string]interface{} {
 func CreateProgram() ProgramData {
 	return ProgramData{
 		RunData: RunObject{
-			Enabled:   true,
-			AutoStart: false,
-			Pre:       make([]map[string]interface{}, 0),
+			Enabled:                 true,
+			AutoStart:               false,
+			AutoRestartFromCrash:    false,
+			AutoRestartFromGraceful: false,
+			Pre:                  make([]map[string]interface{}, 0),
+			EnvironmentVariables: make(map[string]string, 0),
 		},
 		Type:    "standard",
 		Data:    make(map[string]DataObject, 0),
@@ -96,7 +99,7 @@ func (p *ProgramData) Start() (err error) {
 		data[k] = v.Value
 	}
 
-	process := operations.GenerateProcess(p.RunData.Pre, p.Environment, p.DataToMap())
+	process := operations.GenerateProcess(p.RunData.Pre, p.Environment, p.DataToMap(), p.RunData.EnvironmentVariables)
 	err = process.Run()
 	if err != nil {
 		p.Environment.DisplayToConsole("Error running pre execute, check daemon logs")
@@ -208,11 +211,11 @@ func (p *ProgramData) Install() (err error) {
 			return err
 		}
 
-		process = operations.GenerateProcess(templateJson.ProgramData.InstallData.Operations, p.GetEnvironment(), p.DataToMap())
+		process = operations.GenerateProcess(templateJson.ProgramData.InstallData.Operations, p.GetEnvironment(), p.DataToMap(), p.RunData.EnvironmentVariables)
 
 	} else {
 		logging.Debugf("Server %s has a defined install data", p.Id())
-		process = operations.GenerateProcess(p.InstallData.Operations, p.GetEnvironment(), p.DataToMap())
+		process = operations.GenerateProcess(p.InstallData.Operations, p.GetEnvironment(), p.DataToMap(), p.RunData.EnvironmentVariables)
 	}
 
 	err = process.Run()
@@ -338,6 +341,10 @@ func (p *ProgramData) CopyFrom(s *ProgramData) {
 func (p *ProgramData) afterExit(graceful bool) {
 	if graceful {
 		p.CrashCounter = 0
+	}
+
+	if !p.RunData.AutoRestartFromCrash && !p.RunData.AutoRestartFromGraceful {
+		return
 	}
 
 	if graceful && p.RunData.AutoRestartFromGraceful {
