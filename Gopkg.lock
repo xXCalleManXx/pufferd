@@ -169,11 +169,10 @@
     "common",
     "config",
     "http",
-    "http/handler",
     "logging"
   ]
-  revision = "75dee3da02db1876c26304c8b11687d4b28e3a63"
-  version = "v1.2.6"
+  revision = "bc4fdb9b960675a3cb7c0f77fbb224d94a88a7f4"
+  version = "v2.0.0"
 
 [[projects]]
   branch = "master"
@@ -260,6 +259,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a0bcdc9845d94fb1cb96188cfac44cc8d05d682c9076f227198e295d3677bafa"
+  inputs-digest = "684580a2d1b3b7e890584df03aac43b11304f9033eebb8a4961619a09e14cd49"
   solver-name = "gps-cdcl"
   solver-version = 1
