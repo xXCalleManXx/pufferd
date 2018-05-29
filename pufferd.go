@@ -62,7 +62,6 @@ func main() {
 	var license bool
 	var regenerate bool
 	var migrate bool
-	var uninstall bool
 	var shutdownPid int
 	var runDaemon bool
 	var reloadPid int
@@ -74,7 +73,6 @@ func main() {
 	flag.BoolVar(&license, "license", false, "View license")
 	flag.BoolVar(&regenerate, "regenerate", false, "Regenerate pufferd templates")
 	flag.BoolVar(&migrate, "migrate", false, "Migrate Scales data to pufferd")
-	flag.BoolVar(&uninstall, "uninstall", false, "Uninstall pufferd")
 	flag.StringVar(&configPath, "config", "config.json", "Path to pufferd config.json")
 	flag.IntVar(&shutdownPid, "shutdown", 0, "PID to shut down")
 	flag.IntVar(&reloadPid, "reload", 0, "PID to shut down")
@@ -101,10 +99,6 @@ func main() {
 			logging.Error("Cannot find a config file!")
 			return
 		}
-	}
-
-	if uninstall {
-		commands.Uninstall(configPath)
 	}
 
 	if version {
