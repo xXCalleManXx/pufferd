@@ -48,6 +48,7 @@ type RunObject struct {
 	AutoRestartFromCrash    bool                     `json:"autorecover"`
 	AutoRestartFromGraceful bool                     `json:"autorestart"`
 	Pre                     []map[string]interface{} `json:"pre"`
+	Post                    []map[string]interface{} `json:"post"`
 	StopCode                int                      `json:"stopCode,omitempty"`
 	EnvironmentVariables    map[string]string        `json:"environmentVars"`
 }
@@ -341,6 +342,17 @@ func (p *ProgramData) CopyFrom(s *ProgramData) {
 func (p *ProgramData) afterExit(graceful bool) {
 	if graceful {
 		p.CrashCounter = 0
+	}
+
+	mapping := p.DataToMap()
+	mapping["success"] = graceful
+
+	processes := operations.GenerateProcess(p.RunData.Post, p.Environment, mapping, p.RunData.EnvironmentVariables)
+
+	err := processes.Run()
+	if err != nil {
+		logging.Error("Error running post processing")
+		return
 	}
 
 	if !p.RunData.AutoRestartFromCrash && !p.RunData.AutoRestartFromGraceful {

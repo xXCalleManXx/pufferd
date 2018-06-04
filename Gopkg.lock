@@ -169,6 +169,7 @@
     "common",
     "config",
     "http",
+    "http/handler",
     "logging"
   ]
   revision = "bc4fdb9b960675a3cb7c0f77fbb224d94a88a7f4"
@@ -259,6 +260,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "684580a2d1b3b7e890584df03aac43b11304f9033eebb8a4961619a09e14cd49"
+  inputs-digest = "df84fef3e9c2d157a31020ee7078ad182613f1373db9c913f1e9968d075d8c9d"
   solver-name = "gps-cdcl"
   solver-version = 1
