@@ -107,7 +107,7 @@ func (s *standard) Kill() (err error) {
 	if err != nil {
 		return err
 	}
-	if running {
+	if !running {
 		return
 	}
 	err = s.mainProcess.Process.Kill()
