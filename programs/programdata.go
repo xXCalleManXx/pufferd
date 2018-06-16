@@ -75,6 +75,7 @@ func CreateProgram() ProgramData {
 			AutoRestartFromCrash:    false,
 			AutoRestartFromGraceful: false,
 			Pre:                  make([]map[string]interface{}, 0),
+			Post:                 make([]map[string]interface{}, 0),
 			EnvironmentVariables: make(map[string]string, 0),
 		},
 		Type:    "standard",
@@ -103,7 +104,7 @@ func (p *ProgramData) Start() (err error) {
 	process := operations.GenerateProcess(p.RunData.Pre, p.Environment, p.DataToMap(), p.RunData.EnvironmentVariables)
 	err = process.Run()
 	if err != nil {
-		p.Environment.DisplayToConsole("Error running pre execute, check daemon logs")
+		p.Environment.DisplayToConsole("Error running pre execute, check daemon logs\n")
 		return
 	}
 
@@ -200,7 +201,7 @@ func (p *ProgramData) Install() (err error) {
 		templateData, err := ioutil.ReadFile(common.JoinPath(TemplateFolder, p.Template+".json"))
 		if err != nil {
 			logging.Error("Error reading template for "+p.Template, err)
-			p.Environment.DisplayToConsole("Error running installer, check daemon logs")
+			p.Environment.DisplayToConsole("Error running installer, check daemon logs\n")
 			return err
 		}
 
@@ -208,20 +209,20 @@ func (p *ProgramData) Install() (err error) {
 		err = json.Unmarshal(templateData, &templateJson)
 		if err != nil {
 			logging.Error("Malformed json for program "+p.Template, err)
-			p.Environment.DisplayToConsole("Error running installer, check daemon logs")
+			p.Environment.DisplayToConsole("Error running installer, check daemon logs\n")
 			return err
 		}
 
 		process = operations.GenerateProcess(templateJson.ProgramData.InstallData.Operations, p.GetEnvironment(), p.DataToMap(), p.RunData.EnvironmentVariables)
 
 	} else {
-		logging.Debugf("Server %s has a defined install data", p.Id())
+		logging.Debugf("Server %s has defined install data", p.Id())
 		process = operations.GenerateProcess(p.InstallData.Operations, p.GetEnvironment(), p.DataToMap(), p.RunData.EnvironmentVariables)
 	}
 
 	err = process.Run()
 	if err != nil {
-		p.Environment.DisplayToConsole("Error running installer, check daemon logs")
+		p.Environment.DisplayToConsole("Error running installer, check daemon logs\n")
 	} else {
 		p.Environment.DisplayToConsole("Server installed\n")
 	}
@@ -337,6 +338,7 @@ func (p *ProgramData) CopyFrom(s *ProgramData) {
 	p.EnvironmentData = s.EnvironmentData
 	p.InstallData = s.InstallData
 	p.Type = s.Type
+	p.Template = s.Template
 }
 
 func (p *ProgramData) afterExit(graceful bool) {
@@ -349,9 +351,13 @@ func (p *ProgramData) afterExit(graceful bool) {
 
 	processes := operations.GenerateProcess(p.RunData.Post, p.Environment, mapping, p.RunData.EnvironmentVariables)
 
+	p.Environment.DisplayToConsole("Running post-execution steps\n")
+	logging.Debugf("Running post execution steps: %s", p.Id())
+
 	err := processes.Run()
 	if err != nil {
 		logging.Error("Error running post processing")
+		p.Environment.DisplayToConsole("Error executing post steps\n")
 		return
 	}
 
