@@ -174,10 +174,10 @@ func main() {
 
 	for _, element := range programs.GetAll() {
 		if element.IsEnabled() {
-			element.GetEnvironment().DisplayToConsole("Daemon has been started")
+			element.GetEnvironment().DisplayToConsole("Daemon has been started\n")
 			if element.IsAutoStart() {
 				logging.Info("Queued server " + element.Id())
-				element.GetEnvironment().DisplayToConsole("Server has been queued to start")
+				element.GetEnvironment().DisplayToConsole("Server has been queued to start\n")
 				programs.StartViaService(element)
 			}
 		}
