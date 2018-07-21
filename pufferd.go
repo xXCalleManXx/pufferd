@@ -28,9 +28,7 @@ import (
 	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/pufferd/commands"
 	"github.com/pufferpanel/pufferd/data"
-	"github.com/pufferpanel/pufferd/data/templates"
 	"github.com/pufferpanel/pufferd/install"
-	"github.com/pufferpanel/pufferd/migration"
 	"github.com/pufferpanel/pufferd/programs"
 	"github.com/pufferpanel/pufferd/routing"
 	"github.com/pufferpanel/pufferd/sftp"
@@ -60,8 +58,6 @@ func main() {
 	var runInstaller bool
 	var version bool
 	var license bool
-	var regenerate bool
-	var migrate bool
 	var shutdownPid int
 	var runDaemon bool
 	var reloadPid int
@@ -71,8 +67,6 @@ func main() {
 	flag.BoolVar(&runInstaller, "install", false, "If installing instead of running")
 	flag.BoolVar(&version, "version", false, "Get the version")
 	flag.BoolVar(&license, "license", false, "View license")
-	flag.BoolVar(&regenerate, "regenerate", false, "Regenerate pufferd templates")
-	flag.BoolVar(&migrate, "migrate", false, "Migrate Scales data to pufferd")
 	flag.StringVar(&configPath, "config", "config.json", "Path to pufferd config.json")
 	flag.IntVar(&shutdownPid, "shutdown", 0, "PID to shut down")
 	flag.IntVar(&reloadPid, "reload", 0, "PID to shut down")
@@ -109,16 +103,7 @@ func main() {
 		os.Stdout.WriteString(data.LICENSE + "\r\n")
 	}
 
-	if regenerate {
-		commands.Regenerate(configPath)
-	}
-
-	if migrate {
-		config.Load(configPath)
-		migration.MigrateFromScales()
-	}
-
-	if license || version || regenerate || migrate || shutdownPid != 0 || reloadPid != 0 {
+	if license || version || shutdownPid != 0 || reloadPid != 0 {
 		return
 	}
 
@@ -154,10 +139,6 @@ func main() {
 			logging.Error("Error creating template folder", err)
 		}
 
-	}
-	if files, _ := ioutil.ReadDir(programs.TemplateFolder); len(files) == 0 {
-		logging.Info("Templates being copied to " + programs.TemplateFolder)
-		templates.CopyTemplates()
 	}
 
 	if _, err := os.Stat(programs.ServerFolder); os.IsNotExist(err) {
