@@ -25,15 +25,27 @@ import (
 )
 
 type WriteFile struct {
-	TargetFile  string
-	Environment environments.Environment
-	Text        string
+	TargetFile string
+	Text       string
 }
 
-func (c *WriteFile) Run() error {
+func (c WriteFile) Run(env environments.Environment) error {
 	logging.Debugf("Writing data to file: %s", c.TargetFile)
-	c.Environment.DisplayToConsole("Writing some data to file: %s\n ", c.TargetFile)
-	target := common.JoinPath(c.Environment.GetRootDirectory(), c.TargetFile)
+	env.DisplayToConsole("Writing some data to file: %s\n ", c.TargetFile)
+	target := common.JoinPath(env.GetRootDirectory(), c.TargetFile)
 	ioutil.WriteFile(target, []byte(c.Text), 0644)
 	return nil
+}
+
+type WriteFileOperationFactory struct {
+}
+
+func (of WriteFileOperationFactory) Create(op CreateOperation) Operation {
+	text := op.OperationArgs["text"].(string)
+	target := op.OperationArgs["target"].(string)
+	return WriteFile{TargetFile: target, Text: common.ReplaceTokens(text, op.DataMap)}
+}
+
+func (of WriteFileOperationFactory) Key() string {
+	return "writefile"
 }

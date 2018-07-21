@@ -28,19 +28,18 @@ import (
 type Move struct {
 	SourceFile  string
 	TargetFile  string
-	Environment environments.Environment
 }
 
-func (m *Move) Run() error {
-	source := common.JoinPath(m.Environment.GetRootDirectory(), m.SourceFile)
-	target := common.JoinPath(m.Environment.GetRootDirectory(), m.TargetFile)
+func (m Move) Run(env environments.Environment) error {
+	source := common.JoinPath(env.GetRootDirectory(), m.SourceFile)
+	target := common.JoinPath(env.GetRootDirectory(), m.TargetFile)
 	result, valid := validateMove(source, target)
 	if !valid {
 		return nil
 	}
 	for k, v := range result {
 		logging.Debugf("Moving file from %s to %s", source, target)
-		m.Environment.DisplayToConsole("Moving file from %s to %s\n", m.SourceFile, m.TargetFile)
+		env.DisplayToConsole("Moving file from %s to %s\n", m.SourceFile, m.TargetFile)
 		err := os.Rename(k, v)
 		if err != nil {
 			logging.Error("Error moving file", err)
@@ -82,4 +81,17 @@ func validateMove(source string, target string) (result map[string]string, valid
 	}
 	valid = true
 	return
+}
+
+type MoveOperationFactory struct {
+}
+
+func (of MoveOperationFactory) 	Create(op CreateOperation) Operation {
+	source := op.OperationArgs["source"].(string)
+	target := op.OperationArgs["target"].(string)
+	return Move{SourceFile: source, TargetFile: target}
+}
+
+func (of MoveOperationFactory) Key() string {
+	return "move"
 }

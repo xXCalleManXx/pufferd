@@ -17,25 +17,44 @@
 package ops
 
 import (
-	"fmt"
 	"strings"
 
+	"fmt"
+	"github.com/pufferpanel/apufferi/common"
 	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/pufferd/environments"
 )
 
 type Command struct {
-	Command     string
-	Environment environments.Environment
-	Env         map[string]string
+	Commands []string
+	Env      map[string]string
 }
 
-func (c *Command) Run() error {
-	logging.Debugf("Executing command: %s", c.Command)
-	c.Environment.DisplayToConsole(fmt.Sprintf("Executing: %s\n", c.Command))
-	parts := strings.Split(c.Command, " ")
-	cmd := parts[0]
-	args := parts[1:]
-	_, err := c.Environment.Execute(cmd, args, c.Env, nil)
-	return err
+func (c Command) Run(env environments.Environment) error {
+	for _, cmd := range c.Commands {
+		logging.Debugf("Executing command: %s", cmd)
+		env.DisplayToConsole(fmt.Sprintf("Executing: %s\n", cmd))
+		parts := strings.Split(cmd, " ")
+		cmd := parts[0]
+		args := parts[1:]
+		_, err := env.Execute(cmd, args, c.Env, nil)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+type CommandOperationFactory struct {
+}
+
+func (of CommandOperationFactory) Create(op CreateOperation) Operation {
+	commands := common.ToStringArray(op.OperationArgs["commands"])
+	env := common.ReplaceTokensInMap(op.EnvironmentVariables, op.DataMap)
+	return Command{Commands: commands, Env: env}
+}
+
+func (of CommandOperationFactory) Key() string {
+	return "command"
 }

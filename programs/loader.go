@@ -29,6 +29,7 @@ import (
 	"github.com/pufferpanel/apufferi/config"
 	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/pufferd/environments"
+	"github.com/pufferpanel/pufferd/programs/operations"
 )
 
 var (
@@ -40,6 +41,8 @@ var (
 func Initialize() {
 	ServerFolder = config.GetStringOrDefault("serverfolder", common.JoinPath("data", "servers"))
 	TemplateFolder = config.GetStringOrDefault("templatefolder", common.JoinPath("data", "templates"))
+
+	operations.LoadOperations()
 }
 
 func LoadFromFolder() {

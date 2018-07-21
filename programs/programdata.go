@@ -102,7 +102,7 @@ func (p *ProgramData) Start() (err error) {
 	}
 
 	process := operations.GenerateProcess(p.RunData.Pre, p.Environment, p.DataToMap(), p.RunData.EnvironmentVariables)
-	err = process.Run()
+	err = process.Run(p.Environment)
 	if err != nil {
 		p.Environment.DisplayToConsole("Error running pre execute, check daemon logs\n")
 		return
@@ -220,7 +220,7 @@ func (p *ProgramData) Install() (err error) {
 		process = operations.GenerateProcess(p.InstallData.Operations, p.GetEnvironment(), p.DataToMap(), p.RunData.EnvironmentVariables)
 	}
 
-	err = process.Run()
+	err = process.Run(p.Environment)
 	if err != nil {
 		p.Environment.DisplayToConsole("Error running installer, check daemon logs\n")
 	} else {
@@ -354,7 +354,7 @@ func (p *ProgramData) afterExit(graceful bool) {
 	p.Environment.DisplayToConsole("Running post-execution steps\n")
 	logging.Debugf("Running post execution steps: %s", p.Id())
 
-	err := processes.Run()
+	err := processes.Run(p.Environment)
 	if err != nil {
 		logging.Error("Error running post processing")
 		p.Environment.DisplayToConsole("Error executing post steps\n")

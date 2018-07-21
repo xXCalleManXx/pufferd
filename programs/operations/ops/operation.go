@@ -16,6 +16,20 @@
 
 package ops
 
+import "github.com/pufferpanel/pufferd/environments"
+
 type Operation interface {
-	Run() error
+	Run(env environments.Environment) error
+}
+
+type OperationFactory interface {
+	Create(CreateOperation) Operation
+
+	Key() string
+}
+
+type CreateOperation struct {
+	OperationArgs        map[string]interface{}
+	EnvironmentVariables map[string]string
+	DataMap              map[string]interface{}
 }

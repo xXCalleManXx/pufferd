@@ -26,12 +26,23 @@ import (
 
 type Mkdir struct {
 	TargetFile  string
-	Environment environments.Environment
 }
 
-func (m *Mkdir) Run() error {
+func (m *Mkdir) Run(env environments.Environment) error {
 	logging.Debugf("Making directory: %s\n", m.TargetFile)
-	m.Environment.DisplayToConsole("Creating directory: %s\n", m.TargetFile)
-	target := common.JoinPath(m.Environment.GetRootDirectory(), m.TargetFile)
+	env.DisplayToConsole("Creating directory: %s\n", m.TargetFile)
+	target := common.JoinPath(env.GetRootDirectory(), m.TargetFile)
 	return os.MkdirAll(target, 0755)
+}
+
+type MkdirOperationFactory struct {
+}
+
+func (of MkdirOperationFactory) Create(op CreateOperation) Operation {
+	target := op.OperationArgs["target"].(string)
+	return &Mkdir{TargetFile: target}
+}
+
+func (of MkdirOperationFactory) Key() string {
+	return "mkdir"
 }

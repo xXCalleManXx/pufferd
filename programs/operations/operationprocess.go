@@ -17,41 +17,56 @@
 package operations
 
 import (
-	"github.com/pufferpanel/apufferi/common"
 	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/pufferd/programs/operations/ops"
 )
 
+var commandMapping map[string]ops.OperationFactory
+
+func LoadOperations() {
+	commandMapping = make(map[string]ops.OperationFactory)
+
+	commandFactory := ops.CommandOperationFactory{}
+	commandMapping[commandFactory.Key()] = commandFactory
+
+	downloadFactory := ops.DownloadOperationFactory{}
+	commandMapping[downloadFactory.Key()] = downloadFactory
+
+	mkdirFactory := ops.MkdirOperationFactory{}
+	commandMapping[mkdirFactory.Key()] = mkdirFactory
+
+	moveFactory := ops.MoveOperationFactory{}
+	commandMapping[moveFactory.Key()] = moveFactory
+
+	writeFileFactory := ops.WriteFileOperationFactory{}
+	commandMapping[writeFileFactory.Key()] = writeFileFactory
+}
+
 func GenerateProcess(directions []map[string]interface{}, environment environments.Environment, dataMapping map[string]interface{}, env map[string]string) OperationProcess {
-	datamap := make(map[string]interface{})
+	dataMap := make(map[string]interface{})
 	for k, v := range dataMapping {
-		datamap[k] = v
+		dataMap[k] = v
 	}
-	datamap["rootdir"] = environment.GetRootDirectory()
+
+	//DEPRECATED: This will be removed in 1.4/2.0. This key should have been camelCased.
+	dataMap["rootdir"] = environment.GetRootDirectory()
+
+	dataMap["rootDir"] = environment.GetRootDirectory()
 	operationList := make([]ops.Operation, 0)
 	for _, mapping := range directions {
-		switch mapping["type"] {
-		case "command":
-			for _, element := range common.ToStringArray(mapping["commands"]) {
-				operationList = append(operationList, &ops.Command{Command: common.ReplaceTokens(element, datamap), Environment: environment, Env: env})
-			}
-		case "download":
-			for _, element := range common.ToStringArray(mapping["files"]) {
-				operationList = append(operationList, &ops.Download{File: common.ReplaceTokens(element, datamap), Environment: environment})
-			}
-		case "move":
-			source := mapping["source"].(string)
-			target := mapping["target"].(string)
-			operationList = append(operationList, &ops.Move{SourceFile: source, TargetFile: target, Environment: environment})
-		case "mkdir":
-			target := mapping["target"].(string)
-			operationList = append(operationList, &ops.Mkdir{TargetFile: target, Environment: environment})
-		case "writefile":
-			text := mapping["text"].(string)
-			target := mapping["target"].(string)
-			operationList = append(operationList, &ops.WriteFile{TargetFile: target, Environment: environment, Text: common.ReplaceTokens(text, datamap)})
+
+		factory := commandMapping[mapping["type"].(string)]
+
+		opCreate := ops.CreateOperation{
+			OperationArgs:        mapping,
+			EnvironmentVariables: env,
+			DataMap:              dataMapping,
 		}
+
+		op := factory.Create(opCreate)
+
+		operationList = append(operationList, op)
 	}
 	return OperationProcess{processInstructions: operationList}
 }
@@ -60,9 +75,9 @@ type OperationProcess struct {
 	processInstructions []ops.Operation
 }
 
-func (p *OperationProcess) Run() (err error) {
+func (p *OperationProcess) Run(env environments.Environment) (err error) {
 	for p.HasNext() {
-		err = p.RunNext()
+		err = p.RunNext(env)
 		if err != nil {
 			logging.Error("Error running process: ", err)
 			break
@@ -71,10 +86,10 @@ func (p *OperationProcess) Run() (err error) {
 	return
 }
 
-func (p *OperationProcess) RunNext() error {
+func (p *OperationProcess) RunNext(env environments.Environment) error {
 	var op ops.Operation
 	op, p.processInstructions = p.processInstructions[0], p.processInstructions[1:]
-	err := op.Run()
+	err := op.Run(env)
 	return err
 }
 
