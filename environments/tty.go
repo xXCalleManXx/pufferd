@@ -33,7 +33,7 @@ import (
 	"sync"
 	"syscall"
 	"time"
-)
+	)
 
 type tty struct {
 	*BaseEnvironment
@@ -45,6 +45,7 @@ func createTty() *tty {
 	t := &tty{BaseEnvironment: &BaseEnvironment{Type: "tty"}}
 	t.BaseEnvironment.executeAsync = t.ttyExecuteAsync
 	t.BaseEnvironment.waitForMainProcess = t.WaitForMainProcess
+	t.wait = sync.WaitGroup{}
 	return t
 }
 
@@ -57,6 +58,8 @@ func (s *tty) ttyExecuteAsync(cmd string, args []string, env map[string]string, 
 		err = errors.New("process is already running (" + strconv.Itoa(s.mainProcess.Process.Pid) + ")")
 		return
 	}
+	s.wait.Wait()
+
 	process := exec.Command(cmd, args...)
 	process.Dir = s.RootDirectory
 	process.Env = append(os.Environ(), "HOME="+s.RootDirectory)
@@ -65,7 +68,6 @@ func (s *tty) ttyExecuteAsync(cmd string, args []string, env map[string]string, 
 	}
 
 	wrapper := s.createWrapper()
-	s.wait = sync.WaitGroup{}
 	s.wait.Add(1)
 	process.SysProcAttr = &syscall.SysProcAttr{Setctty: true, Setsid: true}
 	s.mainProcess = process

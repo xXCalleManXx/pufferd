@@ -35,6 +35,7 @@ import (
 	"runtime"
 	"syscall"
 	"time"
+	"sync"
 )
 
 type docker struct {
@@ -54,6 +55,7 @@ func createDocker(containerId, imageName string, enforceNetwork bool) *docker {
 	d := &docker{BaseEnvironment: &BaseEnvironment{Type: "docker"}, ContainerId: containerId, ImageName: imageName, enforceNetwork: enforceNetwork}
 	d.BaseEnvironment.executeAsync = d.dockerExecuteAsync
 	d.BaseEnvironment.waitForMainProcess = d.WaitForMainProcess
+	d.wait = sync.WaitGroup{}
 	return d
 }
 
@@ -66,6 +68,8 @@ func (d *docker) dockerExecuteAsync(cmd string, args []string, env map[string]st
 	if running {
 		return errors.New("container is already running")
 	}
+
+	d.wait.Wait()
 
 	if d.downloadingImage {
 		return errors.New("container image is downloading, cannot execute")

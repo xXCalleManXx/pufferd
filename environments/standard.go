@@ -43,6 +43,7 @@ func createStandard() *standard {
 	s := &standard{BaseEnvironment: &BaseEnvironment{Type: "standard"}}
 	s.BaseEnvironment.executeAsync = s.standardExecuteAsync
 	s.BaseEnvironment.waitForMainProcess = s.WaitForMainProcess
+	s.wait = sync.WaitGroup{}
 	return s
 }
 
@@ -55,6 +56,7 @@ func (s *standard) standardExecuteAsync(cmd string, args []string, env map[strin
 		err = errors.New("process is already running (" + strconv.Itoa(s.mainProcess.Process.Pid) + ")")
 		return
 	}
+	s.wait.Wait()
 	s.mainProcess = exec.Command(cmd, args...)
 	s.mainProcess.Dir = s.RootDirectory
 	s.mainProcess.Env = append(os.Environ(), "HOME="+s.RootDirectory)
@@ -69,7 +71,6 @@ func (s *standard) standardExecuteAsync(cmd string, args []string, env map[strin
 		logging.Error("Error creating process", err)
 	}
 	s.stdInWriter = pipe
-	s.wait = sync.WaitGroup{}
 	s.wait.Add(1)
 	logging.Debugf("Starting process: %s %s", s.mainProcess.Path, strings.Join(s.mainProcess.Args, " "))
 	err = s.mainProcess.Start()
