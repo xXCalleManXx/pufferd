@@ -17,10 +17,10 @@
 package operations
 
 import (
-	"github.com/pufferpanel/apufferi/logging"
+		"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/pufferd/programs/operations/ops"
-)
+			)
 
 var commandMapping map[string]ops.OperationFactory
 
@@ -41,6 +41,8 @@ func LoadOperations() {
 
 	writeFileFactory := ops.WriteFileOperationFactory{}
 	commandMapping[writeFileFactory.Key()] = writeFileFactory
+
+	loadOpsFromDir()
 }
 
 func GenerateProcess(directions []map[string]interface{}, environment environments.Environment, dataMapping map[string]interface{}, env map[string]string) OperationProcess {
@@ -96,3 +98,4 @@ func (p *OperationProcess) RunNext(env environments.Environment) error {
 func (p *OperationProcess) HasNext() bool {
 	return len(p.processInstructions) != 0 && p.processInstructions[0] != nil
 }
+

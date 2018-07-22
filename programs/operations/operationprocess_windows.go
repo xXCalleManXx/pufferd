@@ -1,0 +1,4 @@
+package operations
+
+func loadOpsFromDir() {
+}
