@@ -39,8 +39,8 @@ var (
 )
 
 func Initialize() {
-	ServerFolder = config.GetStringOrDefault("serverfolder", common.JoinPath("data", "servers"))
-	TemplateFolder = config.GetStringOrDefault("templatefolder", common.JoinPath("data", "templates"))
+	ServerFolder = config.GetStringOrDefault("serverFolder", common.JoinPath("data", "servers"))
+	TemplateFolder = config.GetStringOrDefault("templateFolder", common.JoinPath("data", "templates"))
 
 	operations.LoadOperations()
 }

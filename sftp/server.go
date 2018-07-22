@@ -61,7 +61,7 @@ func runServer() error {
 		},
 	}
 
-	serverKeyFile := path.Join(configuration.GetStringOrDefault("datafolder", "data"), "server.key")
+	serverKeyFile := path.Join(configuration.GetStringOrDefault("dataFolder", "data"), "server.key")
 
 	_, e := os.Stat(serverKeyFile)
 
@@ -129,7 +129,7 @@ func HandleConn(conn net.Conn, config *ssh.ServerConfig) {
 	e := handleConn(conn, config)
 	if e != nil {
 		if e.Error() != "EOF" {
-			logging.Error("sftpd connection errored:", e)
+			logging.Error("sftpd connection error:", e)
 		}
 	}
 }
@@ -193,14 +193,14 @@ func PrintDiscardRequests(in <-chan *ssh.Request) {
 }
 
 func validateSSH(username string, password string) (*ssh.Permissions, error) {
-	authUrl := configuration.GetString("authserver")
+	authUrl := configuration.GetString("authServer")
 	client := &http.Client{}
 	data := url.Values{}
 	data.Set("grant_type", "password")
 	data.Set("username", username)
 	data.Set("password", password)
 	data.Set("scope", "sftp")
-	token := configuration.GetString("authtoken")
+	token := configuration.GetString("authToken")
 	request, _ := http.NewRequest("POST", authUrl, bytes.NewBufferString(data.Encode()))
 	request.Header.Add("Authorization", "Bearer "+token)
 	request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
@@ -211,7 +211,7 @@ func validateSSH(username string, password string) (*ssh.Permissions, error) {
 		return nil, errors.New("Invalid response from authorization server")
 	}
 
-	//we should only get a 200 or 400 back, if we get any others, we have a problem
+	//we should only get a 200, if we get any others, we have a problem
 	if response.StatusCode != 200 {
 		msg, _ := ioutil.ReadAll(response.Body)
 

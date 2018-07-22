@@ -127,8 +127,8 @@ func OAuth2Handler(scope string, requireServer bool) gin.HandlerFunc {
 }
 
 func validateToken(accessToken string, gin *gin.Context) bool {
-	authUrl := config.GetString("infoserver")
-	token := config.GetString("authtoken")
+	authUrl := config.GetString("infoServer")
+	token := config.GetString("authToken")
 	client := &http.Client{}
 	data := url.Values{}
 	data.Set("token", accessToken)

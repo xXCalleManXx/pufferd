@@ -178,7 +178,7 @@ func runServices() {
 
 	useHttps := false
 
-	dataFolder := config.GetStringOrDefault("datafolder", "data")
+	dataFolder := config.GetStringOrDefault("dataFolder", "data")
 	httpsPem := filepath.Join(dataFolder, "https.pem")
 	httpsKey := filepath.Join(dataFolder, "https.key")
 
@@ -192,7 +192,7 @@ func runServices() {
 
 	sftp.Run()
 
-	web := config.GetStringOrDefault("web", config.GetStringOrDefault("webhost", "0.0.0.0")+":"+config.GetStringOrDefault("webport", "5656"))
+	web := config.GetStringOrDefault("web", config.GetStringOrDefault("webHost", "0.0.0.0")+":"+config.GetStringOrDefault("webPort", "5656"))
 
 	logging.Infof("Starting web access on %s", web)
 	var err error

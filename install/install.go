@@ -26,8 +26,8 @@ func Install(configPath string, authRoot string, authToken string) {
 	config := data.CONFIG
 
 	replacements := make(map[string]interface{})
-	replacements["authurl"] = strings.TrimSuffix(authRoot, "/")
-	replacements["authtoken"] = authToken
+	replacements["authUrl"] = strings.TrimSuffix(authRoot, "/")
+	replacements["authToken"] = authToken
 
 	configData := []byte(common.ReplaceTokens(config, replacements))
 
