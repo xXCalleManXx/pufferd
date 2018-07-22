@@ -1,4 +1,4 @@
 package operations
 
-func loadOpsFromDir() {
+func loadOpModules() {
 }
