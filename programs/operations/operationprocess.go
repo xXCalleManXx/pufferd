@@ -18,6 +18,7 @@ package operations
 
 import (
 	"github.com/pufferpanel/apufferi/logging"
+	"github.com/pufferpanel/modules/operations"
 	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/pufferd/programs/operations/ops"
 )
@@ -27,20 +28,7 @@ var commandMapping map[string]ops.OperationFactory
 func LoadOperations() {
 	commandMapping = make(map[string]ops.OperationFactory)
 
-	commandFactory := ops.CommandOperationFactory{}
-	commandMapping[commandFactory.Key()] = commandFactory
-
-	downloadFactory := ops.DownloadOperationFactory{}
-	commandMapping[downloadFactory.Key()] = downloadFactory
-
-	mkdirFactory := ops.MkdirOperationFactory{}
-	commandMapping[mkdirFactory.Key()] = mkdirFactory
-
-	moveFactory := ops.MoveOperationFactory{}
-	commandMapping[moveFactory.Key()] = moveFactory
-
-	writeFileFactory := ops.WriteFileOperationFactory{}
-	commandMapping[writeFileFactory.Key()] = writeFileFactory
+	loadCoreModules()
 
 	loadOpModules()
 }
@@ -97,4 +85,24 @@ func (p *OperationProcess) RunNext(env environments.Environment) error {
 
 func (p *OperationProcess) HasNext() bool {
 	return len(p.processInstructions) != 0 && p.processInstructions[0] != nil
+}
+
+func loadCoreModules() {
+	commandFactory := ops.CommandOperationFactory{}
+	commandMapping[commandFactory.Key()] = commandFactory
+
+	downloadFactory := ops.DownloadOperationFactory{}
+	commandMapping[downloadFactory.Key()] = downloadFactory
+
+	mkdirFactory := ops.MkdirOperationFactory{}
+	commandMapping[mkdirFactory.Key()] = mkdirFactory
+
+	moveFactory := ops.MoveOperationFactory{}
+	commandMapping[moveFactory.Key()] = moveFactory
+
+	writeFileFactory := ops.WriteFileOperationFactory{}
+	commandMapping[writeFileFactory.Key()] = writeFileFactory
+
+	mojangFactory := operations.MojangDlOperationFactory{}
+	commandMapping[mojangFactory.Key()] = mojangFactory
 }

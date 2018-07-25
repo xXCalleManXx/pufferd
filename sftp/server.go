@@ -206,6 +206,7 @@ func validateSSH(username string, password string) (*ssh.Permissions, error) {
 	request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	request.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
 	response, err := client.Do(request)
+	defer response.Body.Close()
 	if err != nil {
 		logging.Error("Error talking to auth server", err)
 		return nil, errors.New("Invalid response from authorization server")
