@@ -21,6 +21,7 @@ type ProgramData struct {
 	Display         string                 `json:"display"`
 	EnvironmentData map[string]interface{} `json:"environment"`
 	InstallData     InstallSection         `json:"install"`
+	UninstallData   InstallSection         `json:"uninstall"`
 	Type            string                 `json:"type"`
 	Identifier      string                 `json:"id"`
 	RunData         RunObject              `json:"run"`
@@ -162,6 +163,12 @@ func (p *ProgramData) Create() (err error) {
 //This will delete the server, environment, and any files related to it.
 func (p *ProgramData) Destroy() (err error) {
 	logging.Debugf("Destroying server %s", p.Id())
+	process := operations.GenerateProcess(p.UninstallData.Operations, p.Environment, p.DataToMap(), p.RunData.EnvironmentVariables)
+	err = process.Run(p.Environment)
+	if err != nil {
+		p.Environment.DisplayToConsole("Error running uninstall, check daemon logs\n")
+		return
+	}
 	err = p.Environment.Delete()
 	return
 }
