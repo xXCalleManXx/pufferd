@@ -49,7 +49,7 @@ func OAuth2Handler(scope string, requireServer bool) gin.HandlerFunc {
 		failure := true
 		defer func() {
 			if failure && !gin.IsAborted() {
-				pufferdHttp.Respond(gin).Code(pufferdHttp.UNKNOWN).Fail().Status(500).Message("unknown error")
+				pufferdHttp.Respond(gin).Code(pufferdHttp.UNKNOWN).Fail().Status(500).Message("unknown error").Send()
 				gin.Abort()
 			}
 		}()
@@ -58,14 +58,14 @@ func OAuth2Handler(scope string, requireServer bool) gin.HandlerFunc {
 		if authHeader == "" {
 			authToken = gin.Query("accessToken")
 			if authToken == "" {
-				pufferdHttp.Respond(gin).Fail().Code(pufferdHttp.NOTAUTHORIZED).Status(400).Message("no access token provided")
+				pufferdHttp.Respond(gin).Fail().Code(pufferdHttp.NOTAUTHORIZED).Status(400).Message("no access token provided").Send()
 				gin.Abort()
 				return
 			}
 		} else {
 			authArr := strings.SplitN(authHeader, " ", 2)
 			if len(authArr) < 2 || authArr[0] != "Bearer" {
-				pufferdHttp.Respond(gin).Code(pufferdHttp.NOTAUTHORIZED).Fail().Status(400).Message("invalid access token format")
+				pufferdHttp.Respond(gin).Code(pufferdHttp.NOTAUTHORIZED).Fail().Status(400).Message("invalid access token format").Send()
 				gin.Abort()
 				return
 			}
