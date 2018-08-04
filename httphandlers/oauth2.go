@@ -137,7 +137,6 @@ func validateToken(accessToken string, gin *gin.Context) bool {
 	request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	request.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
 	response, err := client.Do(request)
-	defer response.Body.Close()
 	if err != nil {
 		logging.Error("Error talking to auth server", err)
 		errMsg := make(map[string]string)
@@ -146,6 +145,8 @@ func validateToken(accessToken string, gin *gin.Context) bool {
 		gin.Abort()
 		return false
 	}
+	defer response.Body.Close()
+
 	if response.StatusCode != 200 {
 		logging.Error("Unexpected response code from auth server", response.StatusCode)
 		errMsg := make(map[string]string)
