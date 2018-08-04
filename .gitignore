@@ -28,3 +28,6 @@ _testmain.go
 .DS_Store
 
 vendor/
+config.json
+!resources/config.json
+logs/
