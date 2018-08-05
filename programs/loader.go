@@ -298,3 +298,12 @@ func GetPlugin(name string) (interface{}, error) {
 	dataSec["display"] = segment["display"]
 	return dataSec, nil
 }
+
+func GetPluginReadme(name string) (string, error) {
+	data, err := ioutil.ReadFile(common.JoinPath(TemplateFolder, name+".md"))
+	if err != nil {
+		return "no readme", err
+	}
+
+	return string(data), nil
+}
