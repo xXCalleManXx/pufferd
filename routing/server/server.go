@@ -40,6 +40,7 @@ import (
 	"github.com/pufferpanel/pufferd/programs"
 
 	"github.com/satori/go.uuid"
+	"github.com/pufferpanel/pufferd/messages"
 )
 
 var wsupgrader = websocket.Upgrader{
@@ -397,7 +398,10 @@ func GetConsole(c *gin.Context) {
 	}
 	console, _ := program.GetEnvironment().GetConsole()
 	for _, v := range console {
-		conn.WriteMessage(websocket.TextMessage, []byte(v))
+		msg := messages.ConsoleMessage{Line: v}
+		data, _ := json.Marshal(&messages.Transmission{Message: msg, Type: msg.Key()})
+
+		conn.WriteMessage(websocket.TextMessage, data)
 	}
 	program.GetEnvironment().AddListener(conn)
 }

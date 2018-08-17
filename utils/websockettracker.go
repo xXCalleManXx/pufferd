@@ -20,6 +20,8 @@ import (
 	"sync"
 
 	"github.com/gorilla/websocket"
+	"github.com/pufferpanel/pufferd/messages"
+	"encoding/json"
 )
 
 type WebSocketManager interface {
@@ -49,7 +51,10 @@ func (ws *wsManager) Write(source []byte) (n int, e error) {
 		ws.locker.Lock()
 		for i := 0; i < len(ws.sockets); i++ {
 			socket := ws.sockets[i]
-			e = socket.WriteMessage(websocket.TextMessage, msg)
+			packet := messages.ConsoleMessage{Line: string(msg)}
+			data, _ := json.Marshal(&messages.Transmission{Message: packet, Type: packet.Key()})
+
+			socket.WriteMessage(websocket.TextMessage, data)
 			if e != nil {
 				if i+1 == len(ws.sockets) {
 					ws.sockets = ws.sockets[:i]
