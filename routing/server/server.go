@@ -39,8 +39,8 @@ import (
 	"github.com/pufferpanel/pufferd/httphandlers"
 	"github.com/pufferpanel/pufferd/programs"
 
-	"github.com/satori/go.uuid"
 	"github.com/pufferpanel/pufferd/messages"
+	"github.com/satori/go.uuid"
 )
 
 var wsupgrader = websocket.Upgrader{
@@ -396,13 +396,15 @@ func GetConsole(c *gin.Context) {
 		errorConnection(c, err)
 		return
 	}
+
 	console, _ := program.GetEnvironment().GetConsole()
 	for _, v := range console {
 		msg := messages.ConsoleMessage{Line: v}
-		data, _ := json.Marshal(&messages.Transmission{Message: msg, Type: msg.Key()})
-
-		conn.WriteMessage(websocket.TextMessage, data)
+		conn.WriteJSON(&messages.Transmission{Message: msg, Type: msg.Key()})
 	}
+
+	go listenOnSocket(conn, program)
+
 	program.GetEnvironment().AddListener(conn)
 }
 
@@ -489,4 +491,57 @@ func GetStatus(c *gin.Context) {
 func errorConnection(c *gin.Context, err error) {
 	logging.Error("error on api call", err)
 	http.Respond(c).Status(500).Code(http.UNKNOWN).Data(err).Message("error handling request").Send()
+}
+
+func listenOnSocket(conn *websocket.Conn, server programs.Program) {
+	for {
+		msgType, data, err := conn.ReadMessage()
+		if err != nil {
+			logging.Error("error on websocket", err)
+			return
+		}
+		if msgType != websocket.TextMessage {
+			continue
+		}
+		mapping := make(map[string]interface{})
+
+		err = json.Unmarshal(data, &mapping)
+		if err != nil {
+			logging.Error("error on websocket", err)
+			continue
+		}
+
+		messageType := mapping["type"]
+		if _, ok := messageType.(string); ok {
+			switch messageType.(string) {
+			case "statRequest":
+				{
+					results, err := server.GetEnvironment().GetStats()
+					if err != nil {
+						result := make(map[string]interface{})
+
+						_, isOffline := err.(ppErrors.ServerOffline)
+						if isOffline {
+							result["memory"] = 0
+							result["cpu"] = 0
+							conn.WriteJSON(result)
+						} else {
+							result["error"] = err.Error()
+							conn.WriteJSON(result)
+						}
+					} else {
+						conn.WriteJSON(results)
+					}
+				}
+			case "ping":
+				{
+					result := make(map[string]string)
+					result["ping"] = "pong"
+					conn.WriteJSON(result)
+				}
+			}
+		} else {
+			logging.Error("message type ")
+		}
+	}
 }
