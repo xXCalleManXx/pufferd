@@ -24,6 +24,7 @@ import (
 	gohttp "net/http"
 	"os"
 	"path/filepath"
+	"reflect"
 
 	"strconv"
 	"strings"
@@ -398,10 +399,8 @@ func GetConsole(c *gin.Context) {
 	}
 
 	console, _ := program.GetEnvironment().GetConsole()
-	for _, v := range console {
-		msg := messages.ConsoleMessage{Line: v}
-		conn.WriteJSON(&messages.Transmission{Message: msg, Type: msg.Key()})
-	}
+	msg := messages.ConsoleMessage{Logs: console}
+	conn.WriteJSON(&messages.Transmission{Message: msg, Type: msg.Key()})
 
 	go listenOnSocket(conn, program)
 
@@ -517,21 +516,18 @@ func listenOnSocket(conn *websocket.Conn, server programs.Program) {
 			case "statRequest":
 				{
 					results, err := server.GetEnvironment().GetStats()
+					msg := messages.StatMessage{}
 					if err != nil {
-						result := make(map[string]interface{})
-
 						_, isOffline := err.(ppErrors.ServerOffline)
 						if isOffline {
-							result["memory"] = 0
-							result["cpu"] = 0
-							conn.WriteJSON(result)
-						} else {
-							result["error"] = err.Error()
-							conn.WriteJSON(result)
+							msg.Cpu = 0
+							msg.Memory = 0
 						}
 					} else {
-						conn.WriteJSON(results)
+						msg.Cpu, _ = strconv.Atoi(results["cpu"].(string))
+						msg.Memory, _ = strconv.Atoi(results["memory"].(string))
 					}
+					conn.WriteJSON(&messages.Transmission{Message: msg, Type: msg.Key()})
 				}
 			case "ping":
 				{
@@ -541,7 +537,7 @@ func listenOnSocket(conn *websocket.Conn, server programs.Program) {
 				}
 			}
 		} else {
-			logging.Error("message type ")
+			logging.Errorf("message type is not a string, but was %s", reflect.TypeOf(messageType))
 		}
 	}
 }

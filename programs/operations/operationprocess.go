@@ -18,7 +18,6 @@ package operations
 
 import (
 	"github.com/pufferpanel/apufferi/logging"
-	"github.com/pufferpanel/modules/operations"
 	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/pufferd/programs/operations/ops"
 )
@@ -103,6 +102,9 @@ func loadCoreModules() {
 	writeFileFactory := ops.WriteFileOperationFactory{}
 	commandMapping[writeFileFactory.Key()] = writeFileFactory
 
-	mojangFactory := operations.MojangDlOperationFactory{}
+	mojangFactory := ops.MojangDlOperationFactory{}
 	commandMapping[mojangFactory.Key()] = mojangFactory
+
+	spongeforgeDlFactory := ops.SpongeForgeDlOperationFactory{}
+	commandMapping[spongeforgeDlFactory.Key()] = spongeforgeDlFactory
 }
