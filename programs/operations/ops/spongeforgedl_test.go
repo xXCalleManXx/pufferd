@@ -1,16 +1,14 @@
 package ops
 
 import (
-	"testing"
-	"github.com/pufferpanel/pufferd/programs/operations/ops"
-	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/pufferd/cache"
+	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/pufferd/utils"
+	"testing"
 )
 
-
 func TestSpongeForgeDlOperationFactory_Create(t *testing.T) {
-	var factory ops.OperationFactory
+	var factory OperationFactory
 
 	factory = SpongeForgeDlOperationFactory{}
 
@@ -21,9 +19,9 @@ func TestSpongeForgeDlOperationFactory_Create(t *testing.T) {
 
 	version := "stable"
 
-	createCmd := ops.CreateOperation{
+	createCmd := CreateOperation{
 		OperationArgs: make(map[string]interface{}),
-		DataMap: make(map[string]interface{}),
+		DataMap:       make(map[string]interface{}),
 	}
 
 	createCmd.OperationArgs["releaseType"] = version
@@ -32,7 +30,7 @@ func TestSpongeForgeDlOperationFactory_Create(t *testing.T) {
 
 	err := op.Run(&environments.BaseEnvironment{
 		ConsoleBuffer: cache.CreateCache(),
-		WSManager: utils.CreateWSManager(),
+		WSManager:     utils.CreateWSManager(),
 	})
 
 	if err != nil {

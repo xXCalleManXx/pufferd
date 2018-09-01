@@ -79,6 +79,7 @@ func OAuth2Handler(scope string, requireServer bool) gin.HandlerFunc {
 			gin.Set("scopes", cached.scopes)
 		} else {
 			if !validateToken(authToken, gin) {
+				gin.Abort()
 				return
 			}
 		}

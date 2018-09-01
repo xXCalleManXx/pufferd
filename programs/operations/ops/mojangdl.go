@@ -21,17 +21,28 @@ func (op MojangDl) Run(env environments.Environment) error {
 	client := &http.Client{}
 
 	response, err := client.Get(VERSION_JSON)
-	defer response.Body.Close()
 	if err != nil {
 		return err
 	}
 
 	var data MojangLauncherJson
-
 	json.NewDecoder(response.Body).Decode(&data)
+	response.Body.Close()
+
+	var targetVersion string
+	switch op.Version {
+		case "release":
+			targetVersion = data.Latest.Release
+		case "latest":
+			targetVersion = data.Latest.Release
+		case "snapshot":
+			targetVersion = data.Latest.Snapshot
+		default:
+			targetVersion = op.Version
+	}
 
 	for _, version := range data.Versions {
-		if version.Id == op.Version {
+		if version.Id == targetVersion {
 			logging.Debugf("Version %s json located, downloading from %s", version.Id, version.Url)
 			env.DisplayToConsole(fmt.Sprintf("Version %s json located, downloading from %s\n", version.Id, version.Url))
 			//now, get the version json for this one...
@@ -39,7 +50,7 @@ func (op MojangDl) Run(env environments.Environment) error {
 		}
 	}
 
-	env.DisplayToConsole("Could not locate version " + op.Version + "\n")
+	env.DisplayToConsole("Could not locate version " + targetVersion + "\n")
 
 	return errors.New("Version not located: " + op.Version)
 }
@@ -51,11 +62,9 @@ func downloadServerFromJson(url, target string, env environments.Environment) er
 		return err
 	}
 
-	defer response.Body.Close()
-
 	var data MojangVersionJson
-
 	json.NewDecoder(response.Body).Decode(&data)
+	response.Body.Close()
 
 	serverBlock := data.Downloads["server"]
 
@@ -84,6 +93,12 @@ func (of MojangDlOperationFactory) Key() string {
 
 type MojangLauncherJson struct {
 	Versions []MojangLauncherVersion `json:"versions"`
+	Latest MojangLatest `json:"latest"`
+}
+
+type MojangLatest struct {
+	Release string `json:"release"`
+	Snapshot string `json:"snapshot"`
 }
 
 type MojangLauncherVersion struct {

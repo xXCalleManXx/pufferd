@@ -2,11 +2,10 @@ package ops
 
 import (
 	"testing"
-	"github.com/pufferpanel/pufferd/programs/operations/ops"
 )
 
 func TestMojangDlOperationFactory_Create(t *testing.T) {
-	var factory ops.OperationFactory
+	var factory OperationFactory
 
 	factory = MojangDlOperationFactory{}
 
@@ -15,10 +14,10 @@ func TestMojangDlOperationFactory_Create(t *testing.T) {
 		return
 	}
 
-	version := "1.13"
+	version := "release"
 	filename := "server.jar"
 
-	createCmd := ops.CreateOperation{
+	createCmd := CreateOperation{
 		OperationArgs: make(map[string]interface{}),
 		DataMap: make(map[string]interface{}),
 	}
