@@ -17,15 +17,15 @@
 package data
 
 const CONFIG = `{
-	"authserver": "${authurl}/oauth2/token/request",
-	"infoserver": "${authurl}/oauth2/token/info",
-	"authtoken": "${authtoken}",
+	"authServer": "${authUrl}/oauth2/token/request",
+	"infoServer": "${authUrl}/oauth2/token/info",
+	"authToken": "${authToken}",
 	"forward": "false",
 	"console-buffer": "50",
 	"web": "0.0.0.0:5656",
 	"sftp": "0.0.0.0:5657",
 	"update-check": true,
-	"serverfolder": "data/servers",
-	"templatefolder": "data/templates",
-	"datafolder": "data"
+	"serverFolder": "data/servers",
+	"templateFolder": "data/templates",
+	"dataFolder": "data"
 }`

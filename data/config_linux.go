@@ -17,15 +17,15 @@
 package data
 
 const CONFIG = `{
-	"authserver": "${authurl}/oauth2/token/request",
-	"infoserver": "${authurl}/oauth2/token/info",
-	"authtoken": "${authtoken}",
+	"authServer": "${authUrl}/oauth2/token/request",
+	"infoServer": "${authUrl}/oauth2/token/info",
+	"authToken": "${authToken}",
 	"forward": "false",
 	"console-buffer": "50",
 	"web": "0.0.0.0:5656",
 	"sftp": "0.0.0.0:5657",
 	"update-check": true,
-	"serverfolder": "/var/lib/pufferd/servers",
-	"templatefolder": "/var/lib/pufferd/templates",
-	"datafolder": "/etc/pufferd"
+	"serverFolder": "/var/lib/pufferd/servers",
+	"templateFolder": "/var/lib/pufferd/templates",
+	"dataFolder": "/etc/pufferd"
 }`
