@@ -77,10 +77,6 @@
   branch = "master"
   name = "golang.org/x/crypto"
 
-[[constraint]]
-  branch = "master"
-  name = "github.com/pufferpanel/sftp"
-
 [prune]
   go-tests = true
   unused-packages = true

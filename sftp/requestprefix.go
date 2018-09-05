@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/pufferpanel/sftp"
+	"github.com/pkg/sftp"
 	utils "github.com/pufferpanel/apufferi/common"
 	"github.com/pufferpanel/apufferi/logging"
 )
@@ -20,7 +20,7 @@ type requestPrefix struct {
 func CreateRequestPrefix(prefix string) sftp.Handlers {
 	h := requestPrefix{prefix: prefix}
 
-	return sftp.Handlers{h, h, h, h, h}
+	return sftp.Handlers{FileCmd: h, FileGet: h, FileList: h, FilePut: h}
 }
 
 func (rp requestPrefix) Fileread(request *sftp.Request) (io.ReaderAt, error) {
@@ -165,30 +165,6 @@ func (rp requestPrefix) Filelist(request *sftp.Request) (sftp.ListerAt, error) {
 		}
 	default:
 		return nil, errors.New(fmt.Sprintf("Unknown request method: %s", request.Method))
-	}
-}
-
-func (rp requestPrefix) Folderopen(request *sftp.Request) error {
-	logging.Devel("-----------------")
-	logging.Develf("opendir request [%s]: %s", request.Method, request.Filepath)
-	logging.Develf("Flags: %v", request.Flags)
-	logging.Develf("Attributes: %v", request.Attrs)
-	logging.Develf("Target: %v", request.Target)
-	logging.Devel("-----------------")
-	sourceName, err := rp.validate(request.Filepath)
-	if err != nil {
-		logging.Devel("pp-sftp internal error: ", err)
-		return rp.maskError(err)
-	}
-
-	fi, err := os.Stat(sourceName)
-	if err != nil {
-		return err
-	}
-	if fi.IsDir() {
-		return nil
-	} else {
-		return errors.New("not a directory")
 	}
 }
 
