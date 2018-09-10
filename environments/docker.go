@@ -114,6 +114,9 @@ func (d *docker) dockerExecuteAsync(cmd string, args []string, env map[string]st
 		c.ContainerStop(context.Background(), d.ContainerId, nil)
 		time.Sleep(1 * time.Second)
 		d.wait.Done()
+		if callback != nil {
+			callback(true)
+		}
 	}()
 
 	startOpts := types.ContainerStartOptions{}
