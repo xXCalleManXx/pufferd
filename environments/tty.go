@@ -76,10 +76,10 @@ func (s *tty) ttyExecuteAsync(cmd string, args []string, env map[string]string, 
 	s.stdInWriter = tty
 	go func() {
 		io.Copy(wrapper, tty)
-		process.Wait()
+		err = process.Wait()
 		s.wait.Done()
 		if callback != nil {
-			if s.mainProcess == nil || s.mainProcess.ProcessState == nil {
+			if s.mainProcess == nil || s.mainProcess.ProcessState == nil || err != nil  {
 				callback(false)
 			} else {
 				callback(s.mainProcess.ProcessState.Success())

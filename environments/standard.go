@@ -75,10 +75,14 @@ func (s *standard) standardExecuteAsync(cmd string, args []string, env map[strin
 	logging.Debugf("Starting process: %s %s", s.mainProcess.Path, strings.Join(s.mainProcess.Args, " "))
 	err = s.mainProcess.Start()
 	go func() {
-		s.mainProcess.Wait()
+		err := s.mainProcess.Wait()
 		s.wait.Done()
 		if callback != nil {
-			callback(s.mainProcess.ProcessState.Success())
+			if s.mainProcess == nil || s.mainProcess.ProcessState == nil || err != nil  {
+				callback(false)
+			} else {
+				callback(s.mainProcess.ProcessState.Success())
+			}
 		}
 	}()
 	if err != nil && err.Error() != "exit status 1" {
