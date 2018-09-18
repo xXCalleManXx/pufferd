@@ -524,8 +524,8 @@ func listenOnSocket(conn *websocket.Conn, server programs.Program) {
 							msg.Memory = 0
 						}
 					} else {
-						msg.Cpu, _ = strconv.Atoi(results["cpu"].(string))
-						msg.Memory, _ = strconv.Atoi(results["memory"].(string))
+						msg.Cpu, _ = results["cpu"].(float64)
+						msg.Memory, _ = results["memory"].(float64)
 					}
 					conn.WriteJSON(&messages.Transmission{Message: msg, Type: msg.Key()})
 				}

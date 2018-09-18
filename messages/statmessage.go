@@ -1,8 +1,8 @@
 package messages
 
 type StatMessage struct {
-	Memory int `json:"memory"`
-	Cpu    int `json:"cpu"`
+	Memory float64 `json:"memory"`
+	Cpu    float64 `json:"cpu"`
 }
 
 func (m StatMessage) Key() string {
