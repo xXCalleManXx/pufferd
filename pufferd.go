@@ -164,6 +164,8 @@ func main() {
 		}
 	}
 
+	defer recoverPanic()
+
 	CreateHook()
 
 	for runService {
@@ -252,5 +254,12 @@ func CheckForUpdate() {
 			logging.Infof("Installed: %s", GITHASH)
 			logging.Infof("Online: %s", onlineVersion)
 		}
+	}
+}
+
+func recoverPanic() {
+	if rec := recover(); rec != nil {
+		err := rec.(error)
+		logging.Critical("Unhandled error", err)
 	}
 }
