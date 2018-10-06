@@ -17,6 +17,7 @@
 package environments
 
 import (
+	"encoding/json"
 	"errors"
 
 	"context"
@@ -205,6 +206,25 @@ func (d *docker) GetStats() (map[string]interface{}, error) {
 
 	if !running {
 		return nil, ppError.NewServerOffline()
+	}
+
+	client, err := d.getClient()
+
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := client.ContainerStats(context.Background(), d.ContainerId, false)
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+
+	data := make(map[string]interface{})
+	err = json.NewDecoder(res.Body).Decode(&data)
+	if err != nil {
+		return nil, err
 	}
 
 	resultMap := make(map[string]interface{})

@@ -79,7 +79,7 @@ func runServer() error {
 			Headers: nil,
 			Bytes:   data,
 		}
-		ioutil.WriteFile(serverKeyFile, pem.EncodeToMemory(&block), 0700)
+		e = ioutil.WriteFile(serverKeyFile, pem.EncodeToMemory(&block), 0700)
 		if e != nil {
 			return e
 		}
@@ -97,7 +97,6 @@ func runServer() error {
 	hkey, e := ssh.ParsePrivateKey(data)
 
 	if e != nil {
-		logging.Debug("trigger")
 		return e
 	}
 
@@ -149,7 +148,10 @@ func handleConn(conn net.Conn, config *ssh.ServerConfig) error {
 		// protocol intended. In the case of an SFTP session, this is "subsystem"
 		// with a payload string of "<length=4>sftp"
 		if newChannel.ChannelType() != "session" {
-			newChannel.Reject(ssh.UnknownChannelType, "unknown channel type")
+			err := newChannel.Reject(ssh.UnknownChannelType, "unknown channel type")
+			if err != nil {
+				return err
+			}
 			continue
 		}
 		channel, requests, err := newChannel.Accept()
@@ -206,11 +208,11 @@ func validateSSH(username string, password string) (*ssh.Permissions, error) {
 	request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	request.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
 	response, err := client.Do(request)
-	defer response.Body.Close()
 	if err != nil {
 		logging.Error("Error talking to auth server", err)
 		return nil, errors.New("Invalid response from authorization server")
 	}
+	defer response.Body.Close()
 
 	//we should only get a 200, if we get any others, we have a problem
 	if response.StatusCode != 200 {
@@ -221,7 +223,10 @@ func validateSSH(username string, password string) (*ssh.Permissions, error) {
 	}
 
 	var respArr map[string]interface{}
-	json.NewDecoder(response.Body).Decode(&respArr)
+	err = json.NewDecoder(response.Body).Decode(&respArr)
+	if err != nil {
+		return nil, err
+	}
 	if respArr["error"] != nil {
 		return nil, errors.New("Incorrect username or password")
 	}
