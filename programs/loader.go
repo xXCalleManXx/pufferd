@@ -46,8 +46,11 @@ func Initialize() {
 }
 
 func LoadFromFolder() {
-	os.Mkdir(ServerFolder, 0755)
-	var programFiles, err = ioutil.ReadDir(ServerFolder)
+	err := os.Mkdir(ServerFolder, 0755)
+	if err != nil && !os.IsNotExist(err) {
+		logging.Critical("Error creating server data folder", err)
+	}
+	programFiles, err := ioutil.ReadDir(ServerFolder)
 	if err != nil {
 		logging.Critical("Error reading from server data folder", err)
 	}
@@ -180,8 +183,8 @@ func Create(id string, serverType string, data map[string]interface{}) bool {
 
 	program, _ := LoadFromData(id, newData)
 	allPrograms = append(allPrograms, program)
-	program.Create()
-	return true
+	err = program.Create()
+	return err == nil
 }
 
 func Delete(id string) (err error) {
@@ -214,7 +217,10 @@ func Delete(id string) (err error) {
 	if err != nil {
 		return
 	}
-	os.Remove(common.JoinPath(ServerFolder, program.Id()+".json"))
+	err = os.Remove(common.JoinPath(ServerFolder, program.Id()+".json"))
+	if err != nil {
+		logging.Error("Error removing server json", err)
+	}
 	allPrograms = append(allPrograms[:index], allPrograms[index+1:]...)
 	return
 }
@@ -286,23 +292,22 @@ func GetPlugin(name string) (interface{}, error) {
 		return nil, err
 	}
 
-	var templateJson map[string]interface{}
-	err = json.Unmarshal(templateData, &templateJson)
+	var template ProgramTemplate
+	err = json.Unmarshal(templateData, &template)
 	if err != nil {
 		logging.Error("Malformed json for program "+name, err)
 		return nil, err
 	}
-	segment := common.GetMapOrNull(templateJson, "pufferd")
 	dataSec := make(map[string]interface{})
-	dataSec["variables"] = segment["data"].(map[string]interface{})
-	dataSec["display"] = segment["display"]
+	dataSec["variables"] = template.Data
+	dataSec["display"] = template.Display
 	return dataSec, nil
 }
 
 func GetPluginReadme(name string) (string, error) {
 	data, err := ioutil.ReadFile(common.JoinPath(TemplateFolder, name+".md"))
 	if err != nil {
-		return "no readme", err
+		return "", err
 	}
 
 	return string(data), nil

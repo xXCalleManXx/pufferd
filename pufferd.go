@@ -67,7 +67,7 @@ func main() {
 	flag.BoolVar(&runInstaller, "install", false, "If installing instead of running")
 	flag.BoolVar(&version, "version", false, "Get the version")
 	flag.BoolVar(&license, "license", false, "View license")
-	flag.StringVar(&configPath, "config", "config.json", "Path to pufferd config.json")
+	flag.StringVar(&configPath, "config", "config.json", "Path to config.json")
 	flag.IntVar(&shutdownPid, "shutdown", 0, "PID to shut down")
 	flag.IntVar(&reloadPid, "reload", 0, "PID to shut down")
 	flag.BoolVar(&runDaemon, "run", false, "Runs the daemon")
@@ -85,7 +85,19 @@ func main() {
 		commands.Reload(reloadPid)
 	}
 
-	if _, err := os.Stat(configPath); os.IsNotExist(err) && !runInstaller && !version && reloadPid == 0 && shutdownPid == 0 {
+	if version {
+		fmt.Println(versionString)
+	}
+
+	if license {
+		fmt.Println(data.LICENSE)
+	}
+
+	if license || version || shutdownPid != 0 || reloadPid != 0 {
+		return
+	}
+
+	if _, err := os.Stat(configPath); os.IsNotExist(err) && !runInstaller {
 		if _, err := os.Stat("/etc/pufferd/config.json"); err == nil {
 			logging.Info("No config passed, defaulting to /etc/pufferd/config.json")
 			configPath = "/etc/pufferd/config.json"
@@ -93,18 +105,6 @@ func main() {
 			logging.Error("Cannot find a config file!")
 			return
 		}
-	}
-
-	if version {
-		os.Stdout.WriteString(versionString + "\r\n")
-	}
-
-	if license {
-		os.Stdout.WriteString(data.LICENSE + "\r\n")
-	}
-
-	if license || version || shutdownPid != 0 || reloadPid != 0 {
-		return
 	}
 
 	config.Load(configPath)
@@ -143,7 +143,11 @@ func main() {
 
 	if _, err := os.Stat(programs.ServerFolder); os.IsNotExist(err) {
 		logging.Info("No server directory found, creating")
-		os.MkdirAll(programs.ServerFolder, 0755)
+		err = os.MkdirAll(programs.ServerFolder, 0755)
+		if err != nil {
+			logging.Error("Error creating server folder directory", err)
+			return
+		}
 	}
 
 	//check if there's an update

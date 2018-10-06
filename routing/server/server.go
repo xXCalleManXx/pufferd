@@ -25,7 +25,6 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-
 	"strconv"
 	"strings"
 
@@ -139,8 +138,8 @@ func KillServer(c *gin.Context) {
 func CreateServer(c *gin.Context) {
 	serverId := c.Param("id")
 	if serverId == "" {
-		uuid := uuid.NewV4()
-		serverId = uuid.String()
+		id := uuid.NewV4()
+		serverId = id.String()
 	}
 	prg, _ := programs.Get(serverId)
 
