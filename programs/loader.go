@@ -109,7 +109,7 @@ func LoadFromData(id string, source []byte) (program Program, err error) {
 	return
 }
 
-func Create(id string, serverType string, data map[string]interface{}) bool {
+func Create(id string, serverType string, data map[string]interface{}, env map[string]interface{}) bool {
 	if GetFromCache(id) != nil {
 		return false
 	}
@@ -120,7 +120,7 @@ func Create(id string, serverType string, data map[string]interface{}) bool {
 		return false
 	}
 
-	templateJson := ServerJson{}
+	templateJson := ProgramTemplate{}
 
 	templateJson.ProgramData = CreateProgram()
 	templateJson.ProgramData.Identifier = id
@@ -155,6 +155,8 @@ func Create(id string, serverType string, data map[string]interface{}) bool {
 		templateJson.ProgramData.Data = mapper
 	}
 
+	program := templateJson.Create(env)
+
 	f, err := os.Create(common.JoinPath(ServerFolder, id+".json"))
 
 	if err != nil {
@@ -167,21 +169,21 @@ func Create(id string, serverType string, data map[string]interface{}) bool {
 	encoder := json.NewEncoder(f)
 	encoder.SetEscapeHTML(false)
 	encoder.SetIndent("", "  ")
-	err = encoder.Encode(templateJson)
+	err = encoder.Encode(program)
 
 	if err != nil {
 		logging.Error("Error writing server file", err)
 		return false
 	}
 
-	newData, err := json.Marshal(templateJson)
+	newData, err := json.Marshal(program)
 
 	if err != nil {
 		logging.Error("Error regenerating file", err)
 		return false
 	}
 
-	program, _ := LoadFromData(id, newData)
+	program, _ = LoadFromData(id, newData)
 	allPrograms = append(allPrograms, program)
 	err = program.Create()
 	return err == nil
