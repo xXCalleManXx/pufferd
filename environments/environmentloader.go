@@ -56,6 +56,8 @@ func GetSupportedEnvironments() []string {
 	i := 0
 	for _, v := range mapping {
 		result[i] = v.Key()
-		i++;
+		i++
 	}
+
+	return result
 }
