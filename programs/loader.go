@@ -288,22 +288,19 @@ func GetPlugins() map[string]interface{} {
 	return mapping
 }
 
-func GetPlugin(name string) (interface{}, error) {
+func GetPlugin(name string) (ProgramTemplate, error) {
 	templateData, err := ioutil.ReadFile(common.JoinPath(TemplateFolder, name+".json"))
 	if err != nil {
-		return nil, err
+		return ProgramTemplate{}, err
 	}
 
 	var template ProgramTemplate
 	err = json.Unmarshal(templateData, &template)
 	if err != nil {
 		logging.Error("Malformed json for program "+name, err)
-		return nil, err
+		return ProgramTemplate{}, err
 	}
-	dataSec := make(map[string]interface{})
-	dataSec["variables"] = template.Data
-	dataSec["display"] = template.Display
-	return dataSec, nil
+	return template, nil
 }
 
 func GetPluginReadme(name string) (string, error) {

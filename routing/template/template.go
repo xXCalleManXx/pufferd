@@ -31,7 +31,7 @@ func RegisterRoutes(e *gin.Engine) {
 		l.GET("", httphandlers.OAuth2Handler("node.templates", false), GetTemplates)
 		l.GET("/:id", httphandlers.OAuth2Handler("node.templates", false), GetTemplate)
 		l.GET("/:id/readme", httphandlers.OAuth2Handler("node.templates", false), GetTemplateReadme)
-		l.POST("/:id", httphandlers.OAuth2Handler("node.templates.edit", false), EditTemplate)
+		//l.POST("/:id", httphandlers.OAuth2Handler("node.templates.edit", false), EditTemplate)
 	}
 }
 
