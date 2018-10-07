@@ -45,6 +45,42 @@ type oauthCache struct {
 var cache = make([]*oauthCache, 20)
 
 func OAuth2Handler(scope string, requireServer bool) gin.HandlerFunc {
+	return func (gin *gin.Context) {
+		gin.Set("server_id", gin.Param("id"))
+		gin.Set("scopes", scope)
+
+		if requireServer {
+			serverId := gin.Param("id")
+			canAccessId, _ := gin.Get("server_id")
+
+			accessId := canAccessId.(string)
+
+			var program programs.Program
+
+			if accessId == "*" {
+				program, _ = programs.Get(serverId)
+			} else {
+				program, _ = programs.Get(accessId)
+			}
+
+			if program == nil {
+				pufferdHttp.Respond(gin).Fail().Status(404).Code(pufferdHttp.NOSERVER).Message("no server with id " + serverId).Send()
+				gin.Abort()
+				return
+			}
+
+			if accessId != program.Id() && accessId != "*" {
+				pufferdHttp.Respond(gin).Fail().Status(403).Code(pufferdHttp.NOTAUTHORIZED).Message("invalid server access").Send()
+				gin.Abort()
+				return
+			}
+
+			gin.Set("server", program)
+		}
+
+		return
+	}
+
 	return func(gin *gin.Context) {
 		failure := true
 		defer func() {

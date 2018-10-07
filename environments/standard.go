@@ -18,6 +18,8 @@ package environments
 
 import (
 	"errors"
+	"github.com/pufferpanel/apufferi/cache"
+	"github.com/pufferpanel/pufferd/utils"
 	"io"
 	"os"
 	"os/exec"
@@ -37,14 +39,6 @@ type standard struct {
 	*BaseEnvironment
 	mainProcess *exec.Cmd
 	stdInWriter io.Writer
-}
-
-func createStandard() *standard {
-	s := &standard{BaseEnvironment: &BaseEnvironment{Type: "standard"}}
-	s.BaseEnvironment.executeAsync = s.standardExecuteAsync
-	s.BaseEnvironment.waitForMainProcess = s.WaitForMainProcess
-	s.wait = sync.WaitGroup{}
-	return s
 }
 
 func (s *standard) standardExecuteAsync(cmd string, args []string, env map[string]string, callback func(graceful bool)) (err error) {
@@ -189,4 +183,24 @@ func (e *standard) SendCode(code int) error {
 	}
 
 	return e.mainProcess.Process.Signal(syscall.Signal(code))
+}
+
+type StandardFactory struct {
+	EnvironmentFactory
+}
+
+func (sf StandardFactory) Create(folder, id string, environmentSection map[string]interface{}, rootDirectory string, cache cache.Cache, wsManager utils.WebSocketManager) Environment {
+	s := &standard{BaseEnvironment: &BaseEnvironment{Type: "standard"}}
+	s.BaseEnvironment.executeAsync = s.standardExecuteAsync
+	s.BaseEnvironment.waitForMainProcess = s.WaitForMainProcess
+	s.wait = sync.WaitGroup{}
+
+	s.RootDirectory = rootDirectory
+	s.ConsoleBuffer = cache
+	s.WSManager = wsManager
+	return s
+}
+
+func (sf StandardFactory) Key() string {
+	return "standard"
 }

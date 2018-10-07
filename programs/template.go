@@ -22,7 +22,7 @@ type ProgramTemplate struct {
 
 type ProgramTemplateData struct {
 	ProgramData
-	SupportedEnvironments []map[string]interface{}
+	SupportedEnvironments map[string]interface{} `json:"supportedEnvironments"`
 }
 
 func (pt ProgramTemplate) Create(environment map[string]interface{}) Program {

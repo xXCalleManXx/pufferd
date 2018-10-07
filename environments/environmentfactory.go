@@ -16,6 +16,13 @@
 
 package environments
 
-func loadAdditionalModules(mapping map[string]EnvironmentFactory) {
-	
+import (
+	"github.com/pufferpanel/apufferi/cache"
+	"github.com/pufferpanel/pufferd/utils"
+)
+
+type EnvironmentFactory interface {
+	Create(folder, id string, environmentSection map[string]interface{}, rootDirectory string, cache cache.Cache, wsManager utils.WebSocketManager) Environment
+
+	Key() string
 }

@@ -19,6 +19,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/pufferpanel/pufferd/environments"
 	"io/ioutil"
 	"os"
 
@@ -130,6 +131,7 @@ func main() {
 		return
 	}
 
+	environments.LoadModules()
 	programs.Initialize()
 
 	if _, err := os.Stat(programs.TemplateFolder); os.IsNotExist(err) {

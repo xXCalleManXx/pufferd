@@ -41,8 +41,6 @@ func (of SpongeForgeDlOperationFactory) Key() string {
 	return "spongeforgedl"
 }
 
-var Factory SpongeForgeDlOperationFactory
-
 type download struct {
 	Dependencies dependencies        `json:"dependencies"`
 	Artifacts    map[string]artifact `json:"artifacts"`

@@ -19,6 +19,10 @@ package environments
 import (
 	"encoding/json"
 	"errors"
+	"github.com/pufferpanel/apufferi/cache"
+	"github.com/pufferpanel/apufferi/common"
+	"github.com/pufferpanel/pufferd/utils"
+	"sync"
 
 	"context"
 	"fmt"
@@ -36,7 +40,6 @@ import (
 	"runtime"
 	"syscall"
 	"time"
-	"sync"
 )
 
 type docker struct {
@@ -47,17 +50,6 @@ type docker struct {
 	cli              *client.Client
 	downloadingImage bool
 	enforceNetwork   bool
-}
-
-func createDocker(containerId, imageName string, enforceNetwork bool) *docker {
-	if imageName == "" {
-		imageName = "pufferpanel/generic"
-	}
-	d := &docker{BaseEnvironment: &BaseEnvironment{Type: "docker"}, ContainerId: containerId, ImageName: imageName, enforceNetwork: enforceNetwork}
-	d.BaseEnvironment.executeAsync = d.dockerExecuteAsync
-	d.BaseEnvironment.waitForMainProcess = d.WaitForMainProcess
-	d.wait = sync.WaitGroup{}
-	return d
 }
 
 func (d *docker) dockerExecuteAsync(cmd string, args []string, env map[string]string, callback func(graceful bool)) error {
@@ -397,4 +389,31 @@ func (e *docker) SendCode(code int) error {
 
 	ctx := context.Background()
 	return client.ContainerKill(ctx, e.ContainerId, syscall.Signal(code).String())
+}
+
+type DockerFactory struct {
+	EnvironmentFactory
+}
+
+func (df DockerFactory) Create(folder, id string, environmentSection map[string]interface{}, rootDirectory string, cache cache.Cache, wsManager utils.WebSocketManager) Environment {
+	imageName := common.GetStringOrDefault(environmentSection, "image", "")
+	enforceNetwork := common.GetBooleanOrDefault(environmentSection, "enforceNetwork", false)
+
+	if imageName == "" {
+		imageName = "pufferpanel/generic"
+	}
+
+	d := &docker{BaseEnvironment: &BaseEnvironment{Type: "docker"}, ContainerId: id, ImageName: imageName, enforceNetwork: enforceNetwork}
+	d.BaseEnvironment.executeAsync = d.dockerExecuteAsync
+	d.BaseEnvironment.waitForMainProcess = d.WaitForMainProcess
+	d.wait = sync.WaitGroup{}
+
+	d.RootDirectory = rootDirectory
+	d.ConsoleBuffer = cache
+	d.WSManager = wsManager
+	return d
+}
+
+func (df DockerFactory) Key() string {
+	return "docker"
 }

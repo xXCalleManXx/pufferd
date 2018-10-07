@@ -104,7 +104,10 @@ func LoadFromData(id string, source []byte) (program Program, err error) {
 
 	environmentType := common.GetStringOrDefault(data.ProgramData.EnvironmentData, "type", "standard")
 
-	data.ProgramData.Environment = environments.LoadEnvironment(environmentType, ServerFolder, id, data.ProgramData.EnvironmentData)
+	data.ProgramData.Environment, err = environments.Create(environmentType, ServerFolder, id, data.ProgramData.EnvironmentData)
+	if err != nil {
+		return
+	}
 	program = &data.ProgramData
 	return
 }

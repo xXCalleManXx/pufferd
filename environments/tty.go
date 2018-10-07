@@ -22,8 +22,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/kr/pty"
+	"github.com/pufferpanel/apufferi/cache"
 	"github.com/pufferpanel/apufferi/logging"
 	ppError "github.com/pufferpanel/pufferd/errors"
+	"github.com/pufferpanel/pufferd/utils"
 	"github.com/shirou/gopsutil/process"
 	"io"
 	"os"
@@ -39,14 +41,6 @@ type tty struct {
 	*BaseEnvironment
 	mainProcess *exec.Cmd
 	stdInWriter io.Writer
-}
-
-func createTty() *tty {
-	t := &tty{BaseEnvironment: &BaseEnvironment{Type: "tty"}}
-	t.BaseEnvironment.executeAsync = t.ttyExecuteAsync
-	t.BaseEnvironment.waitForMainProcess = t.WaitForMainProcess
-	t.wait = sync.WaitGroup{}
-	return t
 }
 
 func (s *tty) ttyExecuteAsync(cmd string, args []string, env map[string]string, callback func(graceful bool)) (err error) {
@@ -188,4 +182,24 @@ func (e *tty) SendCode(code int) error {
 	}
 
 	return e.mainProcess.Process.Signal(syscall.Signal(code))
+}
+
+type TtyFactory struct {
+	EnvironmentFactory
+}
+
+func (tf TtyFactory) Create(folder, id string, environmentSection map[string]interface{}, rootDirectory string, cache cache.Cache, wsManager utils.WebSocketManager) Environment {
+	t := &tty{BaseEnvironment: &BaseEnvironment{Type: "tty"}}
+	t.BaseEnvironment.executeAsync = t.ttyExecuteAsync
+	t.BaseEnvironment.waitForMainProcess = t.WaitForMainProcess
+	t.wait = sync.WaitGroup{}
+
+	t.RootDirectory = rootDirectory
+	t.ConsoleBuffer = cache
+	t.WSManager = wsManager
+	return t
+}
+
+func (tf TtyFactory) Key() string {
+	return "tty"
 }
