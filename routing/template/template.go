@@ -26,7 +26,7 @@ import (
 )
 
 func RegisterRoutes(e *gin.Engine) {
-	l := e.Group("_templates")
+	l := e.Group("templates")
 	{
 		l.GET("", httphandlers.OAuth2Handler("node.templates", false), GetTemplates)
 		l.GET("/:id", httphandlers.OAuth2Handler("node.templates", false), GetTemplate)

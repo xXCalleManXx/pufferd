@@ -33,45 +33,45 @@ type ServerJson struct {
 }
 
 type ProgramData struct {
-	Data            map[string]DataObject  `json:"data"`
-	Display         string                 `json:"display"`
-	EnvironmentData map[string]interface{} `json:"environment"`
-	InstallData     InstallSection         `json:"install"`
-	UninstallData   InstallSection         `json:"uninstall"`
-	Type            string                 `json:"type"`
-	Identifier      string                 `json:"id"`
-	RunData         RunObject              `json:"run"`
-	Template        string                 `json:"template"`
+	Data            map[string]DataObject  `json:"data,omitempty"`
+	Display         string                 `json:"display,omitempty"`
+	EnvironmentData map[string]interface{} `json:"environment,omitempty"`
+	InstallData     InstallSection         `json:"install,omitempty"`
+	UninstallData   InstallSection         `json:"uninstall,omitempty"`
+	Type            string                 `json:"type,omitempty"`
+	Identifier      string                 `json:"id,omitempty"`
+	RunData         RunObject              `json:"run,omitempty"`
+	Template        string                 `json:"template,omitempty"`
 
 	Environment  environments.Environment `json:"-"`
 	CrashCounter int                      `json:"-"`
 }
 
 type DataObject struct {
-	Description  string      `json:"desc"`
-	Display      string      `json:"display"`
-	Internal     bool        `json:"internal"`
-	Required     bool        `json:"required"`
-	Value        interface{} `json:"value"`
-	UserEditable bool        `json:"userEdit"`
+	Description  string      `json:"desc,omitempty"`
+	Display      string      `json:"display,omitempty"`
+	Internal     bool        `json:"internal,omitempty"`
+	Required     bool        `json:"required,omitempty"`
+	Value        interface{} `json:"value,omitempty"`
+	UserEditable bool        `json:"userEdit,omitempty"`
 }
 
 type RunObject struct {
-	Arguments               []string                 `json:"arguments"`
-	Program                 string                   `json:"program"`
-	Stop                    string                   `json:"stop"`
-	Enabled                 bool                     `json:"enabled"`
-	AutoStart               bool                     `json:"autostart"`
-	AutoRestartFromCrash    bool                     `json:"autorecover"`
-	AutoRestartFromGraceful bool                     `json:"autorestart"`
-	Pre                     []map[string]interface{} `json:"pre"`
-	Post                    []map[string]interface{} `json:"post"`
+	Arguments               []string                 `json:"arguments,omitempty"`
+	Program                 string                   `json:"program,omitempty"`
+	Stop                    string                   `json:"stop,omitempty"`
+	Enabled                 bool                     `json:"enabled,omitempty"`
+	AutoStart               bool                     `json:"autostart,omitempty"`
+	AutoRestartFromCrash    bool                     `json:"autorecover,omitempty"`
+	AutoRestartFromGraceful bool                     `json:"autorestart,omitempty"`
+	Pre                     []map[string]interface{} `json:"pre,omitempty"`
+	Post                    []map[string]interface{} `json:"post,omitempty"`
 	StopCode                int                      `json:"stopCode,omitempty"`
-	EnvironmentVariables    map[string]string        `json:"environmentVars"`
+	EnvironmentVariables    map[string]string        `json:"environmentVars,omitempty"`
 }
 
 type InstallSection struct {
-	Operations []map[string]interface{} `json:"commands"`
+	Operations []map[string]interface{} `json:"commands,,omitempty"`
 }
 
 func (p ProgramData) DataToMap() map[string]interface{} {

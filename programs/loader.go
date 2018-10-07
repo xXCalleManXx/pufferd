@@ -47,7 +47,7 @@ func Initialize() {
 
 func LoadFromFolder() {
 	err := os.Mkdir(ServerFolder, 0755)
-	if err != nil && !os.IsNotExist(err) {
+	if err != nil && !os.IsExist(err) {
 		logging.Critical("Error creating server data folder", err)
 	}
 	programFiles, err := ioutil.ReadDir(ServerFolder)
@@ -120,11 +120,11 @@ func Create(id string, serverType string, data map[string]interface{}, env map[s
 		return false
 	}
 
-	templateJson := ProgramTemplate{}
+	templateJson := ProgramTemplate{Core: ProgramTemplateData{}}
 
-	templateJson.ProgramData = CreateProgram()
-	templateJson.ProgramData.Identifier = id
-	templateJson.ProgramData.Template = serverType
+	templateJson.Core.ProgramData = CreateProgram()
+	templateJson.Core.ProgramData.Identifier = id
+	templateJson.Core.ProgramData.Template = serverType
 	err = json.Unmarshal(templateData, &templateJson)
 
 	if err != nil {
@@ -133,7 +133,7 @@ func Create(id string, serverType string, data map[string]interface{}, env map[s
 	}
 
 	if data != nil {
-		mapper := templateJson.ProgramData.Data
+		mapper := templateJson.Core.ProgramData.Data
 		if mapper == nil {
 			mapper = make(map[string]DataObject, 0)
 		}
@@ -152,7 +152,7 @@ func Create(id string, serverType string, data map[string]interface{}, env map[s
 				mapper[k] = newMap
 			}
 		}
-		templateJson.ProgramData.Data = mapper
+		templateJson.Core.ProgramData.Data = mapper
 	}
 
 	program := templateJson.Create(env)
@@ -288,19 +288,19 @@ func GetPlugins() map[string]interface{} {
 	return mapping
 }
 
-func GetPlugin(name string) (ProgramTemplate, error) {
+func GetPlugin(name string) (ProgramTemplateData, error) {
 	templateData, err := ioutil.ReadFile(common.JoinPath(TemplateFolder, name+".json"))
 	if err != nil {
-		return ProgramTemplate{}, err
+		return ProgramTemplateData{}, err
 	}
 
 	var template ProgramTemplate
 	err = json.Unmarshal(templateData, &template)
 	if err != nil {
 		logging.Error("Malformed json for program "+name, err)
-		return ProgramTemplate{}, err
+		return ProgramTemplateData{}, err
 	}
-	return template, nil
+	return template.Core, nil
 }
 
 func GetPluginReadme(name string) (string, error) {

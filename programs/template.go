@@ -17,13 +17,17 @@
 package programs
 
 type ProgramTemplate struct {
+	Core ProgramTemplateData `json:"pufferd"`
+}
+
+type ProgramTemplateData struct {
 	ProgramData
 	SupportedEnvironments []map[string]interface{}
 }
 
-func (pt ProgramTemplate) Create(environment map[string]interface{}) (Program) {
+func (pt ProgramTemplate) Create(environment map[string]interface{}) Program {
 	newPrg := &ProgramData{}
-	newPrg.CopyFrom(&pt.ProgramData)
+	newPrg.CopyFrom(&pt.Core.ProgramData)
 	newPrg.EnvironmentData = environment
 
 	return newPrg

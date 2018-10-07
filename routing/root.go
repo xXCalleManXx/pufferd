@@ -50,7 +50,6 @@ func RegisterRoutes(e *gin.Engine) {
 	e.HEAD("", func(c *gin.Context) {
 		c.Status(200)
 	})
-	e.GET("/templates", template.GetTemplates)
 	e.GET("/_shutdown", httphandlers.OAuth2Handler("node.stop", false), Shutdown)
 }
 
