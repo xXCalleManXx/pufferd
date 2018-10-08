@@ -31,7 +31,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/itsjamie/gin-cors"
-	"github.com/pkg/errors"
 	"github.com/pufferpanel/apufferi/common"
 	"github.com/pufferpanel/apufferi/http"
 	"github.com/pufferpanel/apufferi/logging"
@@ -96,8 +95,12 @@ func StartServer(c *gin.Context) {
 	item, _ := c.Get("server")
 	server := item.(programs.Program)
 
-	server.Start()
-	http.Respond(c).Send()
+	err := server.Start()
+	if err != nil {
+		http.Respond(c).Status(500).Data(err).Message("error starting server").Send()
+	} else {
+		http.Respond(c).Send()
+	}
 }
 
 func StopServer(c *gin.Context) {
@@ -185,10 +188,10 @@ func InstallServer(c *gin.Context) {
 	item, _ := c.Get("server")
 	prg := item.(programs.Program)
 
-	http.Respond(c).Send()
 	go func() {
 		prg.Install()
 	}()
+	http.Respond(c).Send()
 }
 
 func EditServer(c *gin.Context) {
@@ -196,9 +199,16 @@ func EditServer(c *gin.Context) {
 	prg := item.(programs.Program)
 
 	data := make(map[string]interface{}, 0)
-	json.NewDecoder(c.Request.Body).Decode(&data)
+	err := json.NewDecoder(c.Request.Body).Decode(&data)
+	if err != nil {
+		http.Respond(c).Status(500).Data(err).Message("error editing server").Send()
+	}
 
-	prg.Edit(data)
+	err = prg.Edit(data)
+
+	if err != nil {
+		http.Respond(c).Status(500).Data(err).Message("error editing server").Send()
+	}
 	http.Respond(c).Send()
 }
 
@@ -457,7 +467,8 @@ func GetLogs(c *gin.Context) {
 	castedTime, ok := strconv.ParseInt(time, 10, 64)
 
 	if ok != nil {
-		c.AbortWithError(400, errors.New("Time provided is not a valid UNIX time"))
+		//c.AbortWithError(400, errors.New("Time provided is not a valid UNIX time"))
+		http.Respond(c).Code(400).Message("time provided is not a valid UNIX time").Send()
 		return
 	}
 
