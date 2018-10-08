@@ -125,6 +125,9 @@ func (p *ProgramData) Start() (err error) {
 		return
 	}
 
+	//HACK: add rootDir stuff
+	data["rootDir"] = p.Environment.GetRootDirectory()
+
 	err = p.Environment.ExecuteAsync(p.RunData.Program, common.ReplaceTokensInArr(p.RunData.Arguments, data), common.ReplaceTokensInMap(p.RunData.EnvironmentVariables, data), p.afterExit)
 	if err != nil {
 		logging.Error("Error starting server", err)
