@@ -14,13 +14,14 @@
  limitations under the License.
 */
 
-package ops
+package spongeforgedl
 
 import (
 	"encoding/json"
 	"errors"
 	"github.com/pufferpanel/apufferi/common"
 	"github.com/pufferpanel/pufferd/environments"
+	"github.com/pufferpanel/pufferd/programs/operations/ops"
 	"net/http"
 	"os"
 	"path"
@@ -93,7 +94,7 @@ func (op SpongeForgeDl) Run(env environments.Environment) error {
 	versionMapping["forge"] = versionData.Dependencies.Forge
 	versionMapping["minecraft"] = versionData.Dependencies.Minecraft
 
-	err := downloadFile(common.ReplaceTokens(FORGE_URL, versionMapping), "forge-installer.jar", env)
+	err := ops.DownloadFile(common.ReplaceTokens(FORGE_URL, versionMapping), "forge-installer.jar", env)
 	if err != nil {
 		return err
 	}
@@ -103,7 +104,7 @@ func (op SpongeForgeDl) Run(env environments.Environment) error {
 		return err
 	}
 
-	err = downloadFile(versionData.Artifacts[""].Url, path.Join("mods", "spongeforge.jar"), env)
+	err = ops.DownloadFile(versionData.Artifacts[""].Url, path.Join("mods", "spongeforge.jar"), env)
 	if err != nil {
 		return err
 	}
@@ -111,10 +112,12 @@ func (op SpongeForgeDl) Run(env environments.Environment) error {
 	return nil
 }
 
-func (of SpongeForgeDlOperationFactory) Create(op CreateOperation) Operation {
+func (of SpongeForgeDlOperationFactory) Create(op ops.CreateOperation) ops.Operation {
 	releaseType := op.OperationArgs["releaseType"].(string)
 
 	releaseType = common.ReplaceTokens(releaseType, op.DataMap)
 
 	return SpongeForgeDl{ReleaseType: releaseType}
 }
+
+var Factory SpongeForgeDlOperationFactory

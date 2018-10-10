@@ -14,9 +14,10 @@
  limitations under the License.
 */
 
-package ops
+package command
 
 import (
+	"github.com/pufferpanel/pufferd/programs/operations/ops"
 	"strings"
 
 	"fmt"
@@ -49,7 +50,7 @@ func (c Command) Run(env environments.Environment) error {
 type CommandOperationFactory struct {
 }
 
-func (of CommandOperationFactory) Create(op CreateOperation) Operation {
+func (of CommandOperationFactory) Create(op ops.CreateOperation) ops.Operation {
 	commands := common.ToStringArray(op.OperationArgs["commands"])
 	env := common.ReplaceTokensInMap(op.EnvironmentVariables, op.DataMap)
 	return Command{Commands: commands, Env: env}
@@ -58,3 +59,6 @@ func (of CommandOperationFactory) Create(op CreateOperation) Operation {
 func (of CommandOperationFactory) Key() string {
 	return "command"
 }
+
+
+var Factory CommandOperationFactory

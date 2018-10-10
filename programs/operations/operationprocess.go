@@ -85,26 +85,3 @@ func (p *OperationProcess) RunNext(env environments.Environment) error {
 func (p *OperationProcess) HasNext() bool {
 	return len(p.processInstructions) != 0 && p.processInstructions[0] != nil
 }
-
-func loadCoreModules() {
-	commandFactory := ops.CommandOperationFactory{}
-	commandMapping[commandFactory.Key()] = commandFactory
-
-	downloadFactory := ops.DownloadOperationFactory{}
-	commandMapping[downloadFactory.Key()] = downloadFactory
-
-	mkdirFactory := ops.MkdirOperationFactory{}
-	commandMapping[mkdirFactory.Key()] = mkdirFactory
-
-	moveFactory := ops.MoveOperationFactory{}
-	commandMapping[moveFactory.Key()] = moveFactory
-
-	writeFileFactory := ops.WriteFileOperationFactory{}
-	commandMapping[writeFileFactory.Key()] = writeFileFactory
-
-	mojangFactory := ops.MojangDlOperationFactory{}
-	commandMapping[mojangFactory.Key()] = mojangFactory
-
-	spongeforgeDlFactory := ops.SpongeForgeDlOperationFactory{}
-	commandMapping[spongeforgeDlFactory.Key()] = spongeforgeDlFactory
-}

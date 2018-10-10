@@ -25,7 +25,7 @@ import (
 	"path"
 )
 
-func downloadFile(url, fileName string, env environments.Environment) error {
+func DownloadFile(url, fileName string, env environments.Environment) error {
 	target, err := os.Create(path.Join(env.GetRootDirectory(), fileName))
 	if err != nil {
 		return err

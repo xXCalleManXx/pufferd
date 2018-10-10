@@ -14,9 +14,10 @@
  limitations under the License.
 */
 
-package ops
+package writefile
 
 import (
+	"github.com/pufferpanel/pufferd/programs/operations/ops"
 	"io/ioutil"
 
 	"github.com/pufferpanel/apufferi/common"
@@ -40,7 +41,7 @@ func (c WriteFile) Run(env environments.Environment) error {
 type WriteFileOperationFactory struct {
 }
 
-func (of WriteFileOperationFactory) Create(op CreateOperation) Operation {
+func (of WriteFileOperationFactory) Create(op ops.CreateOperation) ops.Operation {
 	text := op.OperationArgs["text"].(string)
 	target := op.OperationArgs["target"].(string)
 	return WriteFile{TargetFile: target, Text: common.ReplaceTokens(text, op.DataMap)}
@@ -49,3 +50,6 @@ func (of WriteFileOperationFactory) Create(op CreateOperation) Operation {
 func (of WriteFileOperationFactory) Key() string {
 	return "writefile"
 }
+
+
+var Factory WriteFileOperationFactory

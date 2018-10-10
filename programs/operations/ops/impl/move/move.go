@@ -14,9 +14,10 @@
  limitations under the License.
 */
 
-package ops
+package move
 
 import (
+	"github.com/pufferpanel/pufferd/programs/operations/ops"
 	"os"
 	"path/filepath"
 
@@ -86,7 +87,7 @@ func validateMove(source string, target string) (result map[string]string, valid
 type MoveOperationFactory struct {
 }
 
-func (of MoveOperationFactory) 	Create(op CreateOperation) Operation {
+func (of MoveOperationFactory) 	Create(op ops.CreateOperation) ops.Operation {
 	source := op.OperationArgs["source"].(string)
 	target := op.OperationArgs["target"].(string)
 	return Move{SourceFile: source, TargetFile: target}
@@ -95,3 +96,5 @@ func (of MoveOperationFactory) 	Create(op CreateOperation) Operation {
 func (of MoveOperationFactory) Key() string {
 	return "move"
 }
+
+var Factory MoveOperationFactory

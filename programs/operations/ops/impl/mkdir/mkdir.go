@@ -14,9 +14,10 @@
  limitations under the License.
 */
 
-package ops
+package mkdir
 
 import (
+	"github.com/pufferpanel/pufferd/programs/operations/ops"
 	"os"
 
 	"github.com/pufferpanel/apufferi/common"
@@ -38,7 +39,7 @@ func (m *Mkdir) Run(env environments.Environment) error {
 type MkdirOperationFactory struct {
 }
 
-func (of MkdirOperationFactory) Create(op CreateOperation) Operation {
+func (of MkdirOperationFactory) Create(op ops.CreateOperation) ops.Operation {
 	target := op.OperationArgs["target"].(string)
 	return &Mkdir{TargetFile: target}
 }
@@ -46,3 +47,6 @@ func (of MkdirOperationFactory) Create(op CreateOperation) Operation {
 func (of MkdirOperationFactory) Key() string {
 	return "mkdir"
 }
+
+
+var Factory MkdirOperationFactory

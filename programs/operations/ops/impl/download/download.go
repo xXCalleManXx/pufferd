@@ -14,13 +14,14 @@
  limitations under the License.
 */
 
-package ops
+package download
 
 import (
 	"github.com/cavaliercoder/grab"
 	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/apufferi/common"
+	"github.com/pufferpanel/pufferd/programs/operations/ops"
 )
 
 type Download struct {
@@ -42,7 +43,7 @@ func (d Download) Run(env environments.Environment) error {
 type DownloadOperationFactory struct {
 }
 
-func (of DownloadOperationFactory) 	Create(op CreateOperation) Operation {
+func (of DownloadOperationFactory) 	Create(op ops.CreateOperation) ops.Operation {
 	files := common.ToStringArray(op.OperationArgs["files"])
 	return &Download{Files: files}
 }
@@ -50,3 +51,5 @@ func (of DownloadOperationFactory) 	Create(op CreateOperation) Operation {
 func (of DownloadOperationFactory) Key() string {
 	return "download"
 }
+
+var Factory DownloadOperationFactory

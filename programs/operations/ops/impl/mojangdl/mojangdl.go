@@ -14,7 +14,7 @@
  limitations under the License.
 */
 
-package ops
+package mojangdl
 
 import (
 	"encoding/json"
@@ -23,6 +23,7 @@ import (
 	"github.com/pufferpanel/apufferi/common"
 	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/pufferd/environments"
+	"github.com/pufferpanel/pufferd/programs/operations/ops"
 	"net/http"
 )
 
@@ -87,13 +88,13 @@ func downloadServerFromJson(url, target string, env environments.Environment) er
 	logging.Debugf("Version jar located, downloading from %s", serverBlock.Url)
 	env.DisplayToConsole(fmt.Sprintf("Version jar located, downloading from %s\n", serverBlock.Url))
 
-	return downloadFile(serverBlock.Url, target, env)
+	return ops.DownloadFile(serverBlock.Url, target, env)
 }
 
 type MojangDlOperationFactory struct {
 }
 
-func (of MojangDlOperationFactory) Create(op CreateOperation) Operation {
+func (of MojangDlOperationFactory) Create(op ops.CreateOperation) ops.Operation {
 	version := op.OperationArgs["version"].(string)
 	target := op.OperationArgs["target"].(string)
 
@@ -132,3 +133,5 @@ type MojangDownloadType struct {
 	Size uint64 `json:"size"`
 	Url  string `json:"url"`
 }
+
+var Factory MojangDlOperationFactory
