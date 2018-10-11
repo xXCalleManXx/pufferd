@@ -27,9 +27,6 @@ import (
 	"reflect"
 )
 
-func loadCoreModules() {
-}
-
 func loadOpModules() {
 	var directory = path.Join(config.GetStringOrDefault("dataFolder", ""), "modules", "operations")
 

@@ -20,6 +20,13 @@ import (
 	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/pufferd/programs/operations/ops"
+	"github.com/pufferpanel/pufferd/programs/operations/ops/impl/command"
+	"github.com/pufferpanel/pufferd/programs/operations/ops/impl/download"
+	"github.com/pufferpanel/pufferd/programs/operations/ops/impl/mkdir"
+	"github.com/pufferpanel/pufferd/programs/operations/ops/impl/mojangdl"
+	"github.com/pufferpanel/pufferd/programs/operations/ops/impl/move"
+	"github.com/pufferpanel/pufferd/programs/operations/ops/impl/spongeforgedl"
+	"github.com/pufferpanel/pufferd/programs/operations/ops/impl/writefile"
 )
 
 var commandMapping map[string]ops.OperationFactory
@@ -84,4 +91,27 @@ func (p *OperationProcess) RunNext(env environments.Environment) error {
 
 func (p *OperationProcess) HasNext() bool {
 	return len(p.processInstructions) != 0 && p.processInstructions[0] != nil
+}
+
+func loadCoreModules() {
+	commandFactory := command.Factory
+	commandMapping[commandFactory.Key()] = commandFactory
+
+	downloadFactory := download.Factory
+	commandMapping[downloadFactory.Key()] = downloadFactory
+
+	mkdirFactory := mkdir.Factory
+	commandMapping[mkdirFactory.Key()] = mkdirFactory
+
+	moveFactory := move.Factory
+	commandMapping[moveFactory.Key()] = moveFactory
+
+	writeFileFactory := writefile.Factory
+	commandMapping[writeFileFactory.Key()] = writeFileFactory
+
+	mojangFactory := mojangdl.Factory
+	commandMapping[mojangFactory.Key()] = mojangFactory
+
+	spongeforgeDlFactory := spongeforgedl.Factory
+	commandMapping[spongeforgeDlFactory.Key()] = spongeforgeDlFactory
 }
