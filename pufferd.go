@@ -20,7 +20,6 @@ import (
 	"flag"
 	"fmt"
 	"github.com/pufferpanel/pufferd/environments"
-	"io/ioutil"
 	"os"
 
 	"github.com/braintree/manners"
@@ -34,12 +33,10 @@ import (
 	"github.com/pufferpanel/pufferd/routing"
 	"github.com/pufferpanel/pufferd/sftp"
 	"github.com/pufferpanel/pufferd/shutdown"
-	"net/http"
 	"os/signal"
 	"path/filepath"
 	"runtime"
 	"runtime/debug"
-	"strings"
 	"syscall"
 )
 
@@ -152,9 +149,6 @@ func main() {
 		}
 	}
 
-	//check if there's an update
-	go CheckForUpdate()
-
 	programs.LoadFromFolder()
 
 	programs.InitService()
@@ -239,28 +233,6 @@ func CreateHook() {
 		runService = false
 		shutdown.CompleteShutdown()
 	}()
-}
-
-func CheckForUpdate() {
-	if config.GetBoolOrDefault("update-check", true) {
-		url := "https://dl.pufferpanel.com/pufferd/" + MAJORVERSION + "/version.txt"
-		logging.Debug("Checking for updates using " + url)
-		resp, err := http.Get(url)
-		if err != nil {
-			return
-		}
-		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return
-		}
-		onlineVersion := strings.TrimSpace(string(body))
-		if string(onlineVersion) != GITHASH {
-			logging.Infof("DL server reports a different hash than this version, an update may be available")
-			logging.Infof("Installed: %s", GITHASH)
-			logging.Infof("Online: %s", onlineVersion)
-		}
-	}
 }
 
 func recoverPanic() {
