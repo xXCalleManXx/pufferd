@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"github.com/pufferpanel/apufferi/common"
 	"github.com/pufferpanel/apufferi/logging"
+	"github.com/pufferpanel/pufferd/commons"
 	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/pufferd/programs/operations/ops"
 	"net/http"
@@ -43,8 +44,14 @@ func (op MojangDl) Run(env environments.Environment) error {
 	}
 
 	var data MojangLauncherJson
-	json.NewDecoder(response.Body).Decode(&data)
-	response.Body.Close()
+	err = json.NewDecoder(response.Body).Decode(&data)
+	if err != nil {
+		return err
+	}
+	err = response.Body.Close()
+	if err != nil {
+		return err
+	}
 
 	var targetVersion string
 	switch op.Version {
@@ -80,15 +87,21 @@ func downloadServerFromJson(url, target string, env environments.Environment) er
 	}
 
 	var data MojangVersionJson
-	json.NewDecoder(response.Body).Decode(&data)
-	response.Body.Close()
+	err = json.NewDecoder(response.Body).Decode(&data)
+	if err != nil {
+		return err
+	}
+	err = response.Body.Close()
+	if err != nil {
+		return err
+	}
 
 	serverBlock := data.Downloads["server"]
 
 	logging.Debugf("Version jar located, downloading from %s", serverBlock.Url)
 	env.DisplayToConsole(fmt.Sprintf("Version jar located, downloading from %s\n", serverBlock.Url))
 
-	return ops.DownloadFile(serverBlock.Url, target, env)
+	return commons.DownloadFile(serverBlock.Url, target, env)
 }
 
 type MojangDlOperationFactory struct {

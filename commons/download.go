@@ -14,7 +14,7 @@
  limitations under the License.
 */
 
-package ops
+package commons
 
 import (
 	"github.com/pufferpanel/apufferi/logging"

@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/pufferpanel/apufferi/common"
+	"github.com/pufferpanel/pufferd/commons"
 	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/pufferd/programs/operations/ops"
 	"net/http"
@@ -69,8 +70,14 @@ func (op SpongeForgeDl) Run(env environments.Environment) error {
 		}
 
 		var all []download
-		json.NewDecoder(response.Body).Decode(&all)
-		response.Body.Close()
+		err = json.NewDecoder(response.Body).Decode(&all)
+		if err != nil {
+			return err
+		}
+		err = response.Body.Close()
+		if err != nil {
+			return err
+		}
 
 		versionData = all[0]
 	} else {
@@ -82,8 +89,14 @@ func (op SpongeForgeDl) Run(env environments.Environment) error {
 			return err
 		}
 
-		json.NewDecoder(response.Body).Decode(&versionData)
-		response.Body.Close()
+		err = json.NewDecoder(response.Body).Decode(&versionData)
+		if err != nil {
+			return err
+		}
+		err = response.Body.Close()
+		if err != nil {
+			return err
+		}
 	}
 
 	if versionData.Artifacts == nil || len(versionData.Artifacts) == 0 {
@@ -94,7 +107,7 @@ func (op SpongeForgeDl) Run(env environments.Environment) error {
 	versionMapping["forge"] = versionData.Dependencies.Forge
 	versionMapping["minecraft"] = versionData.Dependencies.Minecraft
 
-	err := ops.DownloadFile(common.ReplaceTokens(FORGE_URL, versionMapping), "forge-installer.jar", env)
+	err := commons.DownloadFile(common.ReplaceTokens(FORGE_URL, versionMapping), "forge-installer.jar", env)
 	if err != nil {
 		return err
 	}
@@ -104,7 +117,7 @@ func (op SpongeForgeDl) Run(env environments.Environment) error {
 		return err
 	}
 
-	err = ops.DownloadFile(versionData.Artifacts[""].Url, path.Join("mods", "spongeforge.jar"), env)
+	err = commons.DownloadFile(versionData.Artifacts[""].Url, path.Join("mods", "spongeforge.jar"), env)
 	if err != nil {
 		return err
 	}
