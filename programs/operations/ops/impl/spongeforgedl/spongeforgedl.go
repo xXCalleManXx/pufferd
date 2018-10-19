@@ -28,7 +28,7 @@ import (
 	"path"
 )
 
-const DOWNLOAD_API_URL = "https://dl-api.spongepowered.org/v1/org.spongepowered/spongeforge/downloads?type=stable"
+const DOWNLOAD_API_URL = "https://dl-api.spongepowered.org/v1/org.spongepowered/spongeforge/downloads?type=stable&limit=1"
 const RECOMMENDED_API_URL = "https://dl-api.spongepowered.org/v1/org.spongepowered/spongeforge/downloads/recommended"
 const FORGE_URL = "http://files.minecraftforge.net/maven/net/minecraftforge/forge/${minecraft}-${forge}/forge-${minecraft}-${forge}-installer.jar"
 
