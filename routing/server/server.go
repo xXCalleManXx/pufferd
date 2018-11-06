@@ -151,8 +151,8 @@ func CreateServer(c *gin.Context) {
 		return
 	}
 
-	data := make(map[string]interface{}, 0)
-	err := json.NewDecoder(c.Request.Body).Decode(&data)
+	createData := programs.ProgramData{}
+	err := json.NewDecoder(c.Request.Body).Decode(&createData)
 
 	if err != nil {
 		logging.Error("Error decoding JSON body", err)
@@ -160,9 +160,11 @@ func CreateServer(c *gin.Context) {
 		return
 	}
 
-	typeServer := data["type"].(string)
+	data := createData.DataToMap()
+	environment := createData.EnvironmentData
+	typeServer := createData.Type
 
-	if !programs.Create(serverId, typeServer, data) {
+	if !programs.Create(serverId, typeServer, data, environment) {
 		errorConnection(c, nil)
 	} else {
 		data := make(map[string]interface{})
@@ -409,12 +411,9 @@ func GetConsole(c *gin.Context) {
 
 	console, _ := program.GetEnvironment().GetConsole()
 	msg := messages.ConsoleMessage{Logs: console}
-	//conn.WriteJSON(&messages.Transmission{Message: msg, Type: msg.Key()})
-	for _, v := range msg.Logs {
-		conn.WriteMessage(websocket.TextMessage, []byte(v))
-	}
+	conn.WriteJSON(&messages.Transmission{Message: msg, Type: msg.Key()})
 
-	//go listenOnSocket(conn, program)
+	go listenOnSocket(conn, program)
 
 	program.GetEnvironment().AddListener(conn)
 }
