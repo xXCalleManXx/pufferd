@@ -112,7 +112,7 @@ func LoadFromData(id string, source []byte) (program Program, err error) {
 	return
 }
 
-func Create(id string, serverType string, data map[string]interface{}, env map[string]interface{}) bool {
+func Create(id string, serverType string, data map[string]interface{}) bool {
 	if GetFromCache(id) != nil {
 		return false
 	}
@@ -123,11 +123,11 @@ func Create(id string, serverType string, data map[string]interface{}, env map[s
 		return false
 	}
 
-	templateJson := ProgramTemplate{Core: ProgramTemplateData{}}
+	templateJson := ServerJson{}
 
-	templateJson.Core.ProgramData = CreateProgram()
-	templateJson.Core.ProgramData.Identifier = id
-	templateJson.Core.ProgramData.Template = serverType
+	templateJson.ProgramData = CreateProgram()
+	templateJson.ProgramData.Identifier = id
+	templateJson.ProgramData.Template = serverType
 	err = json.Unmarshal(templateData, &templateJson)
 
 	if err != nil {
@@ -136,7 +136,7 @@ func Create(id string, serverType string, data map[string]interface{}, env map[s
 	}
 
 	if data != nil {
-		mapper := templateJson.Core.ProgramData.Data
+		mapper := templateJson.ProgramData.Data
 		if mapper == nil {
 			mapper = make(map[string]DataObject, 0)
 		}
@@ -155,10 +155,8 @@ func Create(id string, serverType string, data map[string]interface{}, env map[s
 				mapper[k] = newMap
 			}
 		}
-		templateJson.Core.ProgramData.Data = mapper
+		templateJson.ProgramData.Data = mapper
 	}
-
-	program := templateJson.Create(env)
 
 	f, err := os.Create(common.JoinPath(ServerFolder, id+".json"))
 
@@ -172,21 +170,21 @@ func Create(id string, serverType string, data map[string]interface{}, env map[s
 	encoder := json.NewEncoder(f)
 	encoder.SetEscapeHTML(false)
 	encoder.SetIndent("", "  ")
-	err = encoder.Encode(program)
+	err = encoder.Encode(templateJson)
 
 	if err != nil {
 		logging.Error("Error writing server file", err)
 		return false
 	}
 
-	newData, err := json.Marshal(program)
+	newData, err := json.Marshal(templateJson)
 
 	if err != nil {
 		logging.Error("Error regenerating file", err)
 		return false
 	}
 
-	program, _ = LoadFromData(id, newData)
+	program, _ := LoadFromData(id, newData)
 	allPrograms = append(allPrograms, program)
 	err = program.Create()
 	return err == nil

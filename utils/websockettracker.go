@@ -17,8 +17,6 @@
 package utils
 
 import (
-	"encoding/json"
-	"github.com/pufferpanel/pufferd/messages"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -49,14 +47,15 @@ func (ws *wsManager) Write(source []byte) (n int, e error) {
 
 	go func() {
 		ws.locker.Lock()
-		logs := make([]string, 1)
-		logs[0] = string(msg)
-		packet := messages.ConsoleMessage{Logs: logs}
-		data, _ := json.Marshal(&messages.Transmission{Message: packet, Type: packet.Key()})
+		//logs := make([]string, 1)
+		//logs[0] = string(msg)
+		//packet := messages.ConsoleMessage{Logs: logs}
+		//data, _ := json.Marshal(&messages.Transmission{Message: packet, Type: packet.Key()})
 
 		for i := 0; i < len(ws.sockets); i++ {
 			socket := ws.sockets[i]
-			socket.WriteMessage(websocket.TextMessage, data)
+			socket.WriteMessage(websocket.TextMessage, source)
+			//socket.WriteMessage(websocket.TextMessage, data)
 			if e != nil {
 				if i+1 == len(ws.sockets) {
 					ws.sockets = ws.sockets[:i]
