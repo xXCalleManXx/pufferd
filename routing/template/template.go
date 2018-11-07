@@ -21,16 +21,18 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/pufferpanel/apufferi/http"
-	"github.com/pufferpanel/pufferd/httphandlers"
 	"github.com/pufferpanel/pufferd/programs"
 )
 
 func RegisterRoutes(e *gin.Engine) {
 	l := e.Group("templates")
 	{
-		l.GET("", httphandlers.OAuth2Handler("node.templates", false), GetTemplates)
-		l.GET("/:id", httphandlers.OAuth2Handler("node.templates", false), GetTemplate)
-		l.GET("/:id/readme", httphandlers.OAuth2Handler("node.templates", false), GetTemplateReadme)
+		l.GET("", GetTemplates)
+		l.GET("/:id", GetTemplate)
+		l.GET("/:id/readme", GetTemplateReadme)
+		//l.GET("", httphandlers.OAuth2Handler("node.templates", false), GetTemplates)
+		//l.GET("/:id", httphandlers.OAuth2Handler("node.templates", false), GetTemplate)
+		//l.GET("/:id/readme", httphandlers.OAuth2Handler("node.templates", false), GetTemplateReadme)
 		//l.POST("/:id", httphandlers.OAuth2Handler("node.templates.edit", false), EditTemplate)
 	}
 }
