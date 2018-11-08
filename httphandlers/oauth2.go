@@ -159,7 +159,6 @@ func validateToken(accessToken string, gin *gin.Context) bool {
 	var respArr map[string]interface{}
 	json.NewDecoder(response.Body).Decode(&respArr)
 
-	logging.Develf("%+v", respArr)
 	if respArr["error"] != nil {
 		logging.Error("Error parsing response from auth server", err)
 		errMsg := make(map[string]string)
