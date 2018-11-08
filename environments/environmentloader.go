@@ -27,7 +27,7 @@ import (
 var mapping map[string]EnvironmentFactory
 
 func LoadModules() {
-	mapping := make(map[string]EnvironmentFactory)
+	mapping = make(map[string]EnvironmentFactory)
 
 	mapping["standard"] = StandardFactory{}
 
