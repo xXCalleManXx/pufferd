@@ -47,7 +47,7 @@ func Initialize() {
 
 func LoadFromFolder() {
 	err := os.Mkdir(ServerFolder, 0755)
-	if err != nil && !os.IsNotExist(err) {
+	if err != nil && !os.IsExist(err) {
 		logging.Critical("Error creating server data folder", err)
 	}
 	programFiles, err := ioutil.ReadDir(ServerFolder)
@@ -104,12 +104,15 @@ func LoadFromData(id string, source []byte) (program Program, err error) {
 
 	environmentType := common.GetStringOrDefault(data.ProgramData.EnvironmentData, "type", "standard")
 
-	data.ProgramData.Environment = environments.LoadEnvironment(environmentType, ServerFolder, id, data.ProgramData.EnvironmentData)
+	data.ProgramData.Environment, err = environments.Create(environmentType, ServerFolder, id, data.ProgramData.EnvironmentData)
+	if err != nil {
+		return
+	}
 	program = &data.ProgramData
 	return
 }
 
-func Create(id string, serverType string, data map[string]interface{}, env map[string]interface{}) bool {
+func Create(id string, serverType string, data map[string]interface{}) bool {
 	if GetFromCache(id) != nil {
 		return false
 	}
@@ -120,7 +123,7 @@ func Create(id string, serverType string, data map[string]interface{}, env map[s
 		return false
 	}
 
-	templateJson := ProgramTemplate{}
+	templateJson := ServerJson{}
 
 	templateJson.ProgramData = CreateProgram()
 	templateJson.ProgramData.Identifier = id
@@ -155,8 +158,6 @@ func Create(id string, serverType string, data map[string]interface{}, env map[s
 		templateJson.ProgramData.Data = mapper
 	}
 
-	program := templateJson.Create(env)
-
 	f, err := os.Create(common.JoinPath(ServerFolder, id+".json"))
 
 	if err != nil {
@@ -169,21 +170,21 @@ func Create(id string, serverType string, data map[string]interface{}, env map[s
 	encoder := json.NewEncoder(f)
 	encoder.SetEscapeHTML(false)
 	encoder.SetIndent("", "  ")
-	err = encoder.Encode(program)
+	err = encoder.Encode(templateJson)
 
 	if err != nil {
 		logging.Error("Error writing server file", err)
 		return false
 	}
 
-	newData, err := json.Marshal(program)
+	newData, err := json.Marshal(templateJson)
 
 	if err != nil {
 		logging.Error("Error regenerating file", err)
 		return false
 	}
 
-	program, _ = LoadFromData(id, newData)
+	program, _ := LoadFromData(id, newData)
 	allPrograms = append(allPrograms, program)
 	err = program.Create()
 	return err == nil
@@ -301,8 +302,8 @@ func GetPlugin(name string) (interface{}, error) {
 		return nil, err
 	}
 	dataSec := make(map[string]interface{})
-	dataSec["variables"] = template.Data
-	dataSec["display"] = template.Display
+	dataSec["variables"] = template.Core.Data
+	dataSec["display"] = template.Core.Display
 	return dataSec, nil
 }
 
