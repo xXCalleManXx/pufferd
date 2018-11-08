@@ -230,7 +230,7 @@ func Delete(id string) (err error) {
 
 func GetFromCache(id string) Program {
 	for _, element := range allPrograms {
-		if element.Id() == id {
+		if element != nil && element.Id() == id {
 			return element
 		}
 	}
