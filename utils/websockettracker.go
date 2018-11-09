@@ -54,7 +54,7 @@ func (ws *wsManager) Write(source []byte) (n int, e error) {
 
 		for i := 0; i < len(ws.sockets); i++ {
 			socket := ws.sockets[i]
-			socket.WriteMessage(websocket.TextMessage, source)
+			socket.WriteMessage(websocket.TextMessage, msg)
 			//socket.WriteMessage(websocket.TextMessage, data)
 			if e != nil {
 				if i+1 == len(ws.sockets) {
