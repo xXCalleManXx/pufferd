@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/pufferpanel/apufferi/common"
 	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/pufferd/commons"
 	"github.com/pufferpanel/pufferd/environments"
@@ -110,9 +109,6 @@ type MojangDlOperationFactory struct {
 func (of MojangDlOperationFactory) Create(op ops.CreateOperation) ops.Operation {
 	version := op.OperationArgs["version"].(string)
 	target := op.OperationArgs["target"].(string)
-
-	version = common.ReplaceTokens(version, op.DataMap)
-	target = common.ReplaceTokens(target, op.DataMap)
 
 	return MojangDl{Version: version, Target: target}
 }
