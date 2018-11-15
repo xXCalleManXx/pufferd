@@ -51,9 +51,12 @@ type CommandOperationFactory struct {
 }
 
 func (of CommandOperationFactory) Create(op ops.CreateOperation) ops.Operation {
-	commands := common.ToStringArray(op.OperationArgs["commands"])
+	cmds := common.ToStringArray(op.OperationArgs["commands"])
+	for k, v := range cmds {
+		cmds[k] = common.ReplaceTokens(v, op.DataMap)
+	}
 	env := common.ReplaceTokensInMap(op.EnvironmentVariables, op.DataMap)
-	return Command{Commands: commands, Env: env}
+	return Command{Commands: cmds, Env: env}
 }
 
 func (of CommandOperationFactory) Key() string {
