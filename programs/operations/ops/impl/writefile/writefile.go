@@ -34,8 +34,7 @@ func (c WriteFile) Run(env environments.Environment) error {
 	logging.Debugf("Writing data to file: %s", c.TargetFile)
 	env.DisplayToConsole("Writing some data to file: %s\n ", c.TargetFile)
 	target := common.JoinPath(env.GetRootDirectory(), c.TargetFile)
-	ioutil.WriteFile(target, []byte(c.Text), 0644)
-	return nil
+	return ioutil.WriteFile(target, []byte(c.Text), 0644)
 }
 
 type WriteFileOperationFactory struct {
@@ -44,7 +43,7 @@ type WriteFileOperationFactory struct {
 func (of WriteFileOperationFactory) Create(op ops.CreateOperation) ops.Operation {
 	text := op.OperationArgs["text"].(string)
 	target := op.OperationArgs["target"].(string)
-	return WriteFile{TargetFile: target, Text: common.ReplaceTokens(text, op.DataMap)}
+	return WriteFile{TargetFile: target, Text: text}
 }
 
 func (of WriteFileOperationFactory) Key() string {

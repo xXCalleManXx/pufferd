@@ -128,8 +128,6 @@ func (op SpongeForgeDl) Run(env environments.Environment) error {
 func (of SpongeForgeDlOperationFactory) Create(op ops.CreateOperation) ops.Operation {
 	releaseType := op.OperationArgs["releaseType"].(string)
 
-	releaseType = common.ReplaceTokens(releaseType, op.DataMap)
-
 	return SpongeForgeDl{ReleaseType: releaseType}
 }
 

@@ -17,6 +17,7 @@
 package operations
 
 import (
+	"github.com/pufferpanel/apufferi/common"
 	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/pufferd/environments"
 	"github.com/pufferpanel/pufferd/programs/operations/ops"
@@ -54,10 +55,35 @@ func GenerateProcess(directions []map[string]interface{}, environment environmen
 
 		factory := commandMapping[mapping["type"].(string)]
 
+		mapCopy := make(map[string]interface{}, 0)
+
+		//replace tokens
+		for k, v := range mapping {
+			if k != "type" {
+				continue
+			}
+
+			switch v.(type) {
+			case string: {
+				mapCopy[k] = common.ReplaceTokens(v.(string), dataMap)
+			}
+			case []string: {
+				mapCopy[k] = common.ReplaceTokensInArr(v.([]string), dataMap)
+			}
+			case map[string]string: {
+				mapCopy[k] = common.ReplaceTokensInMap(v.(map[string]string), dataMap)
+			}
+			default:
+				mapCopy[k] = v
+			}
+		}
+
+		envMap := common.ReplaceTokensInMap(env, dataMap)
+
 		opCreate := ops.CreateOperation{
-			OperationArgs:        mapping,
-			EnvironmentVariables: env,
-			DataMap:              dataMapping,
+			OperationArgs:        mapCopy,
+			EnvironmentVariables: envMap,
+			DataMap:              dataMap,
 		}
 
 		op := factory.Create(opCreate)
