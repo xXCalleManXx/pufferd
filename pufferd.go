@@ -42,7 +42,6 @@ import (
 
 var (
 	VERSION      = "nightly"
-	MAJORVERSION = "nightly"
 	GITHASH      = "unknown"
 )
 
