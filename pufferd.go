@@ -94,13 +94,19 @@ func main() {
 		return
 	}
 
-	if _, err := os.Stat(configPath); os.IsNotExist(err) && !runInstaller {
-		if _, err := os.Stat("/etc/pufferd/config.json"); err == nil {
-			logging.Info("No config passed, defaulting to /etc/pufferd/config.json")
-			configPath = "/etc/pufferd/config.json"
-		} else {
-			logging.Error("Cannot find a config file!")
-			return
+	if !runInstaller {
+		if _, err := os.Stat(configPath); os.IsNotExist(err) {
+			defaultPath := "config.json"
+			if runtime.GOOS == "linux" {
+				defaultPath = "/etc/pufferd/config.json"
+			}
+			if _, err := os.Stat(defaultPath); err == nil {
+				logging.Infof("No config passed, defaulting to %s", defaultPath)
+				configPath = "/etc/pufferd/config.json"
+			} else {
+				logging.Error("Cannot find a config file!")
+				return
+			}
 		}
 	}
 
@@ -136,7 +142,6 @@ func main() {
 		if err != nil {
 			logging.Error("Error creating template folder", err)
 		}
-
 	}
 
 	if _, err := os.Stat(programs.ServerFolder); os.IsNotExist(err) {
@@ -163,8 +168,6 @@ func main() {
 		}
 	}
 
-	defer recoverPanic()
-
 	CreateHook()
 
 	for runService {
@@ -175,6 +178,8 @@ func main() {
 }
 
 func runServices() {
+	defer recoverPanic()
+
 	r := routing.ConfigureWeb()
 
 	useHttps := false
@@ -204,6 +209,7 @@ func runServices() {
 	}
 	if err != nil {
 		logging.Error("Error starting web service", err)
+		runService = false
 	}
 }
 
