@@ -17,6 +17,7 @@
 package command
 
 import (
+	"github.com/pkg/errors"
 	"github.com/pufferpanel/pufferd/programs/operations/ops"
 	"strings"
 
@@ -38,9 +39,15 @@ func (c Command) Run(env environments.Environment) error {
 		parts := strings.Split(cmd, " ")
 		cmd := parts[0]
 		args := parts[1:]
-		_, err := env.Execute(cmd, args, c.Env, nil)
+		success := false
+		_, err := env.Execute(cmd, args, c.Env, func(graceful bool) {
+			success = graceful
+		})
 		if err != nil {
 			return err
+		}
+		if !success {
+			return errors.New("process did not execute successfully")
 		}
 	}
 
