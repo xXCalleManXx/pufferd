@@ -59,7 +59,7 @@ func GenerateProcess(directions []map[string]interface{}, environment environmen
 
 		//replace tokens
 		for k, v := range mapping {
-			if k != "type" {
+			if k == "type" {
 				continue
 			}
 
