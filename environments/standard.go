@@ -23,6 +23,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"runtime"
 	"strconv"
 	"sync"
 	"syscall"
@@ -121,7 +122,7 @@ func (s *standard) IsRunning() (isRunning bool, err error) {
 		process, pErr := os.FindProcess(s.mainProcess.Process.Pid)
 		if process == nil || pErr != nil {
 			isRunning = false
-		} else if process.Signal(syscall.Signal(0)) != nil {
+		} else if runtime.GOOS == "linux" && process.Signal(syscall.Signal(0)) != nil {
 			isRunning = false
 		}
 	}
