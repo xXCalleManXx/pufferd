@@ -22,7 +22,6 @@ import (
 	"strings"
 
 	"fmt"
-	"github.com/pufferpanel/apufferi/common"
 	"github.com/pufferpanel/apufferi/logging"
 	"github.com/pufferpanel/pufferd/environments"
 )
@@ -58,7 +57,7 @@ type CommandOperationFactory struct {
 }
 
 func (of CommandOperationFactory) Create(op ops.CreateOperation) ops.Operation {
-	cmds := common.ToStringArray(op.OperationArgs["commands"])
+	cmds := op.OperationArgs["commands"].([]string)
 	return Command{Commands: cmds, Env: op.EnvironmentVariables}
 }
 
