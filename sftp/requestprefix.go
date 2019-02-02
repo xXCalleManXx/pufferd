@@ -141,6 +141,21 @@ func (rp requestPrefix) Filelist(request *sftp.Request) (sftp.ListerAt, error) {
 			if err != nil {
 				return nil, rp.maskError(err)
 			}
+
+			//validate any symlinks are valid
+			//TODO: MOVE TO APUFFERI
+			i := 0
+			for _, v := range files {
+				if v.Mode() & os.ModeSymlink != 0{
+					if !utils.EnsureAccess(sourceName + string(os.PathSeparator) + v.Name(), rp.prefix) {
+						continue
+					}
+				}
+				files[i] = v
+				i++
+			}
+
+			files = files[:i]
 			return listerat(files), nil
 		}
 	case "Stat":
