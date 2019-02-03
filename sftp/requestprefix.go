@@ -143,19 +143,8 @@ func (rp requestPrefix) Filelist(request *sftp.Request) (sftp.ListerAt, error) {
 			}
 
 			//validate any symlinks are valid
-			//TODO: MOVE TO APUFFERI
-			i := 0
-			for _, v := range files {
-				if v.Mode() & os.ModeSymlink != 0{
-					if !utils.EnsureAccess(sourceName + string(os.PathSeparator) + v.Name(), rp.prefix) {
-						continue
-					}
-				}
-				files[i] = v
-				i++
-			}
+			files = utils.RemoveInvalidSymlinks(files, sourceName, rp.prefix)
 
-			files = files[:i]
 			return listerat(files), nil
 		}
 	case "Stat":
@@ -179,6 +168,12 @@ func (rp requestPrefix) Filelist(request *sftp.Request) (sftp.ListerAt, error) {
 			target, err := os.Readlink(sourceName)
 			if err != nil {
 				return nil, rp.maskError(err)
+			}
+
+			//determine if target is just a local link, or a full link
+			//let's just assume linux really at this point
+			if !strings.HasPrefix(target, string(os.PathSeparator)) {
+				target = rp.prefix + string(os.PathSeparator) + target
 			}
 			file, err := os.Open(target)
 			if err != nil {

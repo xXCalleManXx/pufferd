@@ -279,18 +279,7 @@ func GetFile(c *gin.Context) {
 		}
 
 		//validate any symlinks are valid
-		//TODO: MOVE TO APUFFERI
-		i := 0
-		for _, v := range files {
-			if v.Mode() & os.ModeSymlink != 0{
-				if !common.EnsureAccess(targetFile + string(os.PathSeparator) + v.Name(), server.GetEnvironment().GetRootDirectory()) {
-					continue
-				}
-			}
-			files[i] = v
-			i++
-		}
-		files = files[:i]
+		files = common.RemoveInvalidSymlinks(files, targetFile, server.GetEnvironment().GetRootDirectory())
 
 		for _, file := range files {
 			newFile := &FileDesc{
