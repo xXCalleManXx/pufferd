@@ -69,7 +69,7 @@
     "errdefs",
   ]
   pruneopts = "UT"
-  revision = "b17188be394fee769e60ea9fe00430c97942246e"
+  revision = "50e63adf30d33fc1547527a4097c796cbe4b770f"
 
 [[projects]]
   digest = "1:811c86996b1ca46729bad2724d4499014c4b9effd05ef8c71b852aad90deb0ce"
@@ -240,7 +240,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:321c6143b44872bae6aae5ce1d654a55fbc298963422709375a86719c481ddd1"
+  digest = "1:8fc8a4a16bb310c7047ad730509d89d94d3802fa6ea23761a81a4dce6a93686e"
   name = "github.com/pufferpanel/apufferi"
   packages = [
     "cache",
@@ -251,7 +251,7 @@
     "logging",
   ]
   pruneopts = "UT"
-  revision = "7c955ee233c1f27b0c43d4470a8a989dd2e1432c"
+  revision = "aae974a8c585a8d8f7571b1b623770c45b34109a"
 
 [[projects]]
   digest = "1:274f67cb6fed9588ea2521ecdac05a6d62a8c51c074c1fccc6a49a40ba80e925"
