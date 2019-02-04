@@ -175,6 +175,11 @@ func (rp requestPrefix) Filelist(request *sftp.Request) (sftp.ListerAt, error) {
 			if !strings.HasPrefix(target, string(os.PathSeparator)) {
 				target = rp.prefix + string(os.PathSeparator) + target
 			}
+
+			if !utils.EnsureAccess(target, rp.prefix) {
+				return nil, rp.maskError(errors.New("access denied"))
+			}
+
 			file, err := os.Open(target)
 			if err != nil {
 				return nil, rp.maskError(err)
