@@ -32,16 +32,16 @@ steps:
   displayName: 'Install dep'
 
 - script: |
-    dep ensure
-    go build -v .
+    dep ensure -v
+    go build -v github.com/pufferpanel/pufferd
   workingDirectory: '$(modulePath)'
   displayName: 'Linux Build'
   env:
     GOOS: linux
 
 - script: |
-    dep ensure
-    go build -v .
+    dep ensure -v
+    go build -v github.com/pufferpanel/pufferd
   workingDirectory: '$(modulePath)'
   displayName: 'Windows Build'
   env:
