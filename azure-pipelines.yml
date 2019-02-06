@@ -21,11 +21,15 @@ steps:
     mv !(gopath) '$(modulePath)'
     echo '##vso[task.prependpath]$(GOBIN)'
     echo '##vso[task.prependpath]$(GOROOT)/bin'
-    mkdir $(GOPATH)/build    
-    curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+    mkdir $(GOPATH)/build
     go version
-    dep version
   displayName: 'Set up the Go workspace'
+
+- script: |
+    curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+    dep version
+  workingDirectory: '$(modulePath)'
+  displayName: 'Download dep and run `dep ensure`'
 
 - script: |
     export GOOS=linux
