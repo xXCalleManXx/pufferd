@@ -77,12 +77,12 @@ steps:
       --after-upgrade scripts/postupgrade.sh \
       --before-remove scripts/prerm.sh \
       --deb-after-purge scripts/purge.sh \
-      ../pufferd=/usr/sbin/pufferd \
-      ../daemonTemplates=/var/lib/pufferd/
+      ../../pufferd=/usr/sbin/pufferd \
+      ../../daemonTemplates=/var/lib/pufferd/
 
     mv *.deb ../build
   displayName: 'Create packages'
-  workingDirectory: xenial
+  workingDirectory: systemd/xenial
 
 - script: |
     fpm -s dir -t deb \
@@ -93,12 +93,12 @@ steps:
       --before-install scripts/preinst.sh \
       --before-remove scripts/prerm.sh \
       --deb-after-purge scripts/purge.sh \
-      ../pufferd=/usr/sbin/pufferd \
-      ../daemonTemplates=/var/lib/pufferd/
+      ../../pufferd=/usr/sbin/pufferd \
+      ../../daemonTemplates=/var/lib/pufferd/
 
     mv *.deb ../build
   displayName: 'Create packages'
-  workingDirectory: trusty
+  workingDirectory: systemd/trusty
 
 - script: |
     fpm -s deb -t rpm \
@@ -108,11 +108,11 @@ steps:
       --before-install scripts/preinst.sh \
       --after-upgrade scripts/postupgrade.sh \
       --before-remove scripts/prerm.sh \
-      ../build/pufferd_*_amd64.deb
+      ../../build/pufferd_*_amd64.deb
 
     mv *.rpm ../build
   displayName: 'Create packages'
-  workingDirectory: rpm7
+  workingDirectory: systemd/rpm7
 
 - task: PublishPipelineArtifact@0
   inputs:
