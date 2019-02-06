@@ -62,7 +62,7 @@ steps:
   displayName: 'Get supporting files'
 
 - script: |
-    mkdir $(GOATH)/build/templates
+    mkdir $(GOPATH)/build/templates
     cd templates
     cp */*.json $(GOPATH)/build/templates
   displayName: 'Build templates'
