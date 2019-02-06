@@ -64,7 +64,7 @@ steps:
 - script: |
     mkdir daemonTemplates
     cd templates
-    cp */*.json daemonTemplates
+    cp */*.json ../daemonTemplates
   displayName: 'Build templates'
 
 - script: |
