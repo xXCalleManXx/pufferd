@@ -77,7 +77,7 @@ steps:
       --after-upgrade scripts/postupgrade.sh \
       --before-remove scripts/prerm.sh \
       --deb-after-purge scripts/purge.sh \
-      ../../pufferd=/usr/sbin/pufferd \
+      $(GOPATH)/build/pufferd=/usr/sbin/pufferd \
       ../../daemonTemplates=/var/lib/pufferd/
 
     mv *.deb ../build
@@ -93,7 +93,7 @@ steps:
       --before-install scripts/preinst.sh \
       --before-remove scripts/prerm.sh \
       --deb-after-purge scripts/purge.sh \
-      ../../pufferd=/usr/sbin/pufferd \
+      $(GOPATH)/build/pufferd=/usr/sbin/pufferd \
       ../../daemonTemplates=/var/lib/pufferd/
 
     mv *.deb ../build
@@ -108,7 +108,7 @@ steps:
       --before-install scripts/preinst.sh \
       --after-upgrade scripts/postupgrade.sh \
       --before-remove scripts/prerm.sh \
-      ../../build/pufferd_*_amd64.deb
+      $(GOPATH)/build/pufferd_*_amd64.deb
 
     mv *.rpm ../build
   displayName: 'Create packages'
