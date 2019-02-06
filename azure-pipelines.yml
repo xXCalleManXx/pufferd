@@ -3,9 +3,6 @@
 # Add steps that test, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/go
 
-trigger:
-- master
-
 pool:
   vmImage: 'Ubuntu-16.04'
 
@@ -24,35 +21,31 @@ steps:
     mv !(gopath) '$(modulePath)'
     echo '##vso[task.prependpath]$(GOBIN)'
     echo '##vso[task.prependpath]$(GOROOT)/bin'
+    mkdir $(GOPATH)/build
+    go version
+    dep version
   displayName: 'Set up the Go workspace'
 
 - script: |
-    curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+    curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh    
   workingDirectory: '$(modulePath)'
   displayName: 'Install dep'
 
 - script: |
+    export GOOS=linux
     dep ensure -v
-    go build -v github.com/pufferpanel/pufferd
+    go build -o $(GOPATH)/build/pufferd -v github.com/pufferpanel/pufferd
   workingDirectory: '$(modulePath)'
   displayName: 'Linux Build'
-  env:
-    GOOS: linux
 
 - script: |
+    export GOOS=windows
     dep ensure -v
-    go build -v github.com/pufferpanel/pufferd
+    go build -o $(GOPATH)/build/pufferd.exe -v github.com/pufferpanel/pufferd
   workingDirectory: '$(modulePath)'
   displayName: 'Windows Build'
-  env:
-    GOOS: windows
 
 - task: PublishPipelineArtifact@0
   inputs:
     artifactName: 'pufferd'
-    targetPath: 'pufferd'
-
-- task: PublishPipelineArtifact@0
-  inputs:
-    artifactName: 'pufferd.exe'
-    targetPath: 'pufferd.exe'
+    targetPath: 'build/.'
