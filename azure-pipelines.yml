@@ -13,7 +13,7 @@ variables:
   GOBIN:  '$(GOPATH)/bin' # Go binaries path
   GOROOT: '/usr/local/go1.11' # Go installation path
   GOPATH: '$(system.defaultWorkingDirectory)/gopath' # Go workspace path
-  modulePath: '$(GOPATH)/src/github.com/$(build.repository.name)' # Path to the module's code
+  modulePath: '$(GOPATH)/src/github.com/pufferpanel/pufferd' # Path to the module's code
 
 steps:
 - script: |
@@ -27,12 +27,32 @@ steps:
   displayName: 'Set up the Go workspace'
 
 - script: |
-    go version
-    go get -v -t -d ./...
-    if [ -f Gopkg.toml ]; then
-        curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-        dep ensure
-    fi
+    curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+  workingDirectory: '$(modulePath)'
+  displayName: 'Install deop'
+
+- script: |
+    dep ensure
     go build -v .
   workingDirectory: '$(modulePath)'
   displayName: 'Get dependencies, then build'
+  env:
+    GOOS: linux
+
+- script: |
+    dep ensure
+    go build -v .
+  workingDirectory: '$(modulePath)'
+  displayName: 'Get dependencies, then build'
+  env:
+    GOOS: windows
+
+- task: PublishPipelineArtifact@0
+  inputs:
+    artifactName: 'pufferd'
+    targetPath: '.'
+
+- task: PublishPipelineArtifact@0
+  inputs:
+    artifactName: 'pufferd.exe'
+    targetPath: '.'
