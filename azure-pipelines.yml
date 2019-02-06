@@ -29,13 +29,13 @@ steps:
 - script: |
     curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
   workingDirectory: '$(modulePath)'
-  displayName: 'Install deop'
+  displayName: 'Install dep'
 
 - script: |
     dep ensure
     go build -v .
   workingDirectory: '$(modulePath)'
-  displayName: 'Get dependencies, then build'
+  displayName: 'Linux Build'
   env:
     GOOS: linux
 
@@ -43,16 +43,16 @@ steps:
     dep ensure
     go build -v .
   workingDirectory: '$(modulePath)'
-  displayName: 'Get dependencies, then build'
+  displayName: 'Windows Build'
   env:
     GOOS: windows
 
 - task: PublishPipelineArtifact@0
   inputs:
     artifactName: 'pufferd'
-    targetPath: '.'
+    targetPath: 'pufferd'
 
 - task: PublishPipelineArtifact@0
   inputs:
     artifactName: 'pufferd.exe'
-    targetPath: '.'
+    targetPath: 'pufferd.exe'
