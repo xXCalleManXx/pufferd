@@ -91,7 +91,7 @@ steps:
 
 - script: |
     fpm -s deb -t rpm \
-      --name pufferd -v $(version)-$(Build.BuildNumber) \
+      --name pufferd \
       --maintainer dev@pufferpanel.com \
       --rpm-user pufferd --rpm-group pufferd \
       --before-install scripts/preinst.sh \
