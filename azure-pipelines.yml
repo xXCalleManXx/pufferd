@@ -5,7 +5,6 @@
 
 trigger: 
 - master
-- v1-dev
 
 pool:
   vmImage: 'Ubuntu-16.04'
@@ -15,6 +14,7 @@ variables:
   GOROOT: '/usr/local/go1.11' # Go installation path
   GOPATH: '$(system.defaultWorkingDirectory)/gopath' # Go workspace path
   modulePath: '$(GOPATH)/src/github.com/pufferpanel/pufferd' # Path to the module's code
+  version: 2.0.0
 
 steps:
 - script: |
@@ -38,14 +38,14 @@ steps:
 - script: |
     export GOOS=linux
     dep ensure -v
-    go build -o $(GOPATH)/build/pufferd -v github.com/pufferpanel/pufferd
+    go build -o $(GOPATH)/build/pufferd -ldflags "-X main.GITHASH=$(Build.SourceVersion) -X main.VERSION=$(version)" -v github.com/pufferpanel/pufferd
   workingDirectory: '$(modulePath)'
   displayName: 'Linux Build'
 
 - script: |
     export GOOS=windows
     dep ensure -v
-    go build -o $(GOPATH)/build/pufferd.exe -v github.com/pufferpanel/pufferd
+    go build -o $(GOPATH)/build/pufferd.exe -ldflags "-X main.GITHASH=$(Build.SourceVersion) -X main.VERSION=$(version)" -v github.com/pufferpanel/pufferd
   workingDirectory: '$(modulePath)'
   displayName: 'Windows Build'
 
@@ -73,7 +73,7 @@ steps:
 
 - script: |
     fpm -s dir -t deb \
-      --name pufferd -v 0.0.0 \
+      --name pufferd -v $(version).$(Build.BuildNumber) \
       --maintainer dev@pufferpanel.com \
       --deb-user pufferd --deb-group pufferd \
       --deb-systemd servicefiles/systemd/pufferd \
@@ -91,7 +91,7 @@ steps:
 
 - script: |
     fpm -s deb -t rpm \
-      --name pufferd -v 0.0.0 \
+      --name pufferd \
       --maintainer dev@pufferpanel.com \
       --rpm-user pufferd --rpm-group pufferd \
       --before-install scripts/preinst.sh \
@@ -106,7 +106,7 @@ steps:
 
 - script: |
     fpm -s dir -t deb \
-      --name pufferd -v 0.0.0 \
+      --name pufferd -v $(version).$(Build.BuildNumber) \
       --maintainer dev@pufferpanel.com \
       --deb-user pufferd --deb-group pufferd \
       --deb-init servicefiles/initd/pufferd \
