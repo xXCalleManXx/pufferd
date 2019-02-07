@@ -73,7 +73,7 @@ steps:
 
 - script: |
     fpm -s dir -t deb \
-      --name pufferd -v $(version)-$(Build.BuildNumber) \
+      --name pufferd -v $(version).$(Build.BuildNumber) \
       --maintainer dev@pufferpanel.com \
       --deb-user pufferd --deb-group pufferd \
       --deb-systemd servicefiles/systemd/pufferd \
@@ -106,7 +106,7 @@ steps:
 
 - script: |
     fpm -s dir -t deb \
-      --name pufferd -v $(version)-$(Build.BuildNumber) \
+      --name pufferd -v $(version).$(Build.BuildNumber) \
       --maintainer dev@pufferpanel.com \
       --deb-user pufferd --deb-group pufferd \
       --deb-init servicefiles/initd/pufferd \
