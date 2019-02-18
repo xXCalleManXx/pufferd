@@ -1,0 +1,15 @@
+version: '3.7'
+
+services:
+  app:
+    build: .
+    volumes:
+      - .:/go/src/pufferd
+      - ./pufferd-config.json:/etc/pufferd/config.json
+    working_dir: /go/src/pufferd
+    command: go run pufferd.go --run
+    ports:
+      - 5657:5657
+      - 5656:5656
+    container_name: pufferd
+    restart: always

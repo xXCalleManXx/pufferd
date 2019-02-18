@@ -46,7 +46,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:9942c9cd3ea91982dcd292853f91093f13cd1d0535a0e7bb3768829d44c08cd2"
+  digest = "1:e7a14b8ecad894c855d35b978da4284b68174465aea4f3f6dcdcb89dba0df0a1"
   name = "github.com/docker/docker"
   packages = [
     "api",
@@ -254,6 +254,40 @@
   revision = "aae974a8c585a8d8f7571b1b623770c45b34109a"
 
 [[projects]]
+  branch = "master"
+  digest = "1:d8f55955cb700bcc62017323d92c13271415f915adefbf425ac5a8776211726b"
+  name = "github.com/pufferpanel/pufferd"
+  packages = [
+    "cache",
+    "commands",
+    "commons",
+    "data",
+    "environments",
+    "errors",
+    "httphandlers",
+    "install",
+    "messages",
+    "programs",
+    "programs/operations",
+    "programs/operations/ops",
+    "programs/operations/ops/impl/command",
+    "programs/operations/ops/impl/download",
+    "programs/operations/ops/impl/mkdir",
+    "programs/operations/ops/impl/mojangdl",
+    "programs/operations/ops/impl/move",
+    "programs/operations/ops/impl/spongeforgedl",
+    "programs/operations/ops/impl/writefile",
+    "routing",
+    "routing/server",
+    "routing/template",
+    "sftp",
+    "shutdown",
+    "utils",
+  ]
+  pruneopts = "UT"
+  revision = "9c708fb47cbe35d71911c086e105acfe0b29150f"
+
+[[projects]]
   digest = "1:274f67cb6fed9588ea2521ecdac05a6d62a8c51c074c1fccc6a49a40ba80e925"
   name = "github.com/satori/go.uuid"
   packages = ["."]
@@ -370,6 +404,31 @@
     "github.com/pufferpanel/apufferi/http",
     "github.com/pufferpanel/apufferi/http/handler",
     "github.com/pufferpanel/apufferi/logging",
+    "github.com/pufferpanel/pufferd/cache",
+    "github.com/pufferpanel/pufferd/commands",
+    "github.com/pufferpanel/pufferd/commons",
+    "github.com/pufferpanel/pufferd/data",
+    "github.com/pufferpanel/pufferd/environments",
+    "github.com/pufferpanel/pufferd/errors",
+    "github.com/pufferpanel/pufferd/httphandlers",
+    "github.com/pufferpanel/pufferd/install",
+    "github.com/pufferpanel/pufferd/messages",
+    "github.com/pufferpanel/pufferd/programs",
+    "github.com/pufferpanel/pufferd/programs/operations",
+    "github.com/pufferpanel/pufferd/programs/operations/ops",
+    "github.com/pufferpanel/pufferd/programs/operations/ops/impl/command",
+    "github.com/pufferpanel/pufferd/programs/operations/ops/impl/download",
+    "github.com/pufferpanel/pufferd/programs/operations/ops/impl/mkdir",
+    "github.com/pufferpanel/pufferd/programs/operations/ops/impl/mojangdl",
+    "github.com/pufferpanel/pufferd/programs/operations/ops/impl/move",
+    "github.com/pufferpanel/pufferd/programs/operations/ops/impl/spongeforgedl",
+    "github.com/pufferpanel/pufferd/programs/operations/ops/impl/writefile",
+    "github.com/pufferpanel/pufferd/routing",
+    "github.com/pufferpanel/pufferd/routing/server",
+    "github.com/pufferpanel/pufferd/routing/template",
+    "github.com/pufferpanel/pufferd/sftp",
+    "github.com/pufferpanel/pufferd/shutdown",
+    "github.com/pufferpanel/pufferd/utils",
     "github.com/satori/go.uuid",
     "github.com/shirou/gopsutil/process",
     "golang.org/x/crypto/ssh",

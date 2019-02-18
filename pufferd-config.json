@@ -1,0 +1,13 @@
+{
+  "authServer": "https://us-central1-h4hosting-6f5c8.cloudfunctions.net/widgets/pufferd/oauth2/token/request",
+  "infoServer": "https://us-central1-h4hosting-6f5c8.cloudfunctions.net/widgets/pufferd/oauth2/token/info",
+  "authToken": "testToken",
+  "forward": "false",
+  "console-buffer": "50",
+  "web": "0.0.0.0:5656",
+  "sftp": "0.0.0.0:5657",
+  "update-check": true,
+  "serverFolder": "/var/lib/pufferd/servers",
+  "templateFolder": "/var/lib/pufferd/templates",
+  "dataFolder": "/etc/pufferd"
+}
